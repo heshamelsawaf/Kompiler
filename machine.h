@@ -9,6 +9,7 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <set>
 #define EPS 0xDE
 
 class state {
@@ -34,6 +35,9 @@ class state {
   }
 
  public:
+  state();
+  state(int state_identifier, std::string token_class, bool is_accepting);
+  state(int state_identifier, std::set<state> states);//constructs a dfa state from nfa states.
   int get_state_identifier () const;
   std::string get_token_class () const;
   bool is_accepting () const;
@@ -51,9 +55,11 @@ class machine {
   std::string machine_identifier;
   state *starting;
   std::vector<state> states;
+  std::set<char> inputs;
 
  public:
   machine (std::string _machine_identifier);
+  inline int count_states() {return states.size();}
   machine (const machine& copy);
 //  void add_new_state (int state_identifier, std::string token_class, bool is_accepting = false);
   void add_new_state (state);
@@ -62,6 +68,7 @@ class machine {
   state get_starting_state () const;
   std::string get_machine_identifier () const;
   std::vector<state> get_states () const;
+  std::set<char> get_inputs() const;
   std::vector<state> get_accepting_states () const;
 };
 
