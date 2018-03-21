@@ -120,7 +120,7 @@ machine machine_ops::single_char(char c) {
     state starting_state = state();
     starting_state.set_accepting(false);
     state ending_state = state();
-    starting_state.set_accepting(true);
+    ending_state.set_accepting(true);
 
     starting_state.add_new_transition(ending_state, c);
     m.add_new_state(starting_state);

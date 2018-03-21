@@ -29,6 +29,7 @@ class state {
     };
 
 private:
+    int hash;
     int state_identifier;
     std::string token_class;
     bool _is_accepting;
@@ -38,7 +39,11 @@ public:
 
     state();
 
+    int get_hash() const;
+
     int get_state_identifier() const;
+
+    void set_state_identifier(int);
 
     std::string get_token_class() const;
 
@@ -82,6 +87,8 @@ public:
     std::vector<state> get_states() const;
 
     std::vector<state> get_accepting_states() const;
+
+    void print_machine();
 };
 
 #endif //KOMPILER_MACHINE_H

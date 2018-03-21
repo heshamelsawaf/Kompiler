@@ -2,7 +2,10 @@
 // Created by Marwan Tammam on 3/21/18.
 //
 
+#include <iostream>
 #include "machine.h"
+
+int state_key = 1;
 
 state::transition::transition(const transition &copy) {
     this->on_input = copy.get_transition_char();
@@ -23,9 +26,11 @@ char state::transition::get_transition_char() const {
 }
 
 state::state() {
+    this->hash = state_key++;
 }
 
 state::state(const state &copy) {
+    this->hash = copy.get_hash();
     this->state_identifier = copy.get_state_identifier();
     this->token_class = copy.get_token_class();
     this->_is_accepting = copy.is_accepting();
@@ -33,14 +38,22 @@ state::state(const state &copy) {
     for (std::pair<const char, std::vector<transition> > &entry : copy.get_transitions()) {
         char c = entry.first;
         this->transitions[c] = std::vector<transition>();
-        for (transition &t : entry.second){
+        for (transition &t : entry.second) {
             this->transitions[c].push_back(transition(t));
         }
     }
 }
 
+int state::get_hash() const {
+    return this->hash;
+}
+
 int state::get_state_identifier() const {
     return this->state_identifier;
+}
+
+void state::set_state_identifier(int state_identifier_) {
+    this->state_identifier = state_identifier_;
 }
 
 std::string state::get_token_class() const {
@@ -80,7 +93,7 @@ machine::machine(const machine &copy) {
     this->machine_identifier = copy.get_machine_identifier();
     this->starting = new state(copy.get_starting_state());
 
-    for (state &s : copy.get_states()){
+    for (state &s : copy.get_states()) {
         this->states.push_back(state(s));
     }
 }
@@ -117,4 +130,19 @@ std::vector<state> machine::get_accepting_states() const {
         }
     }
     return accepting_states;
+}
+
+void machine::print_machine() {
+    std::cout << "machine identifier: " << machine_identifier << std::endl;
+    std::cout << "nodes cnt: " << states.size() << std::endl;
+
+    for (int i = 0; i < states.size(); i++) {
+        for (auto &entry : states[i].get_transitions()) {
+            for (auto &t : entry.second) {
+                std::cout << states[i].get_hash() << ' ' << t.get_end_state()->get_hash() << ' ' << entry.first
+                          << std::endl;
+            }
+        }
+    }
+    std::cout << std::endl;
 }
