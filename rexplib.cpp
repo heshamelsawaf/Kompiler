@@ -4,49 +4,86 @@
 
 #include "rexplib.h"
 
-machine machine_ops::concat(const machine &a_, const machine &b_) {
-    machine a = machine(a_);
-    machine b = machine(b_);
+machine machine_ops::concat(std::vector<const machine> &machines_) {
+    if (machines_.empty()) {
+        throw std::invalid_argument("received 0 machines to concatenate");
+    }
+    if ((int) machines_.size() == 1) {
+        return machines_[0];
+    }
 
-    for (state &s: a.get_accepting_states()) {
-        s.set_accepting(false);
-        s.add_new_transition(b.get_starting_state());
+    std::vector<machine> machines;
+    for (int i = 0; i < (int) machines.size(); i++) {
+        machines.push_back(machine(machines[i]));
     }
-    for (state &s: b.get_states()) {
-        a.add_new_state(s);
+
+    machine m = machines[0];
+    for (int i = 0; i < (int) machines.size() - 1; i++) {
+        for (state &s: machines[i].get_accepting_states()) {
+            s.set_accepting(false);
+            s.add_new_transition(machines[i + 1].get_starting_state());
+        }
     }
-    return a;
+
+    for (int i = 1; i < (int) machines.size(); i++) {
+        for (state &s : machines[i].get_states()) {
+            m.add_new_state(s);
+        }
+    }
+
+    return m;
 }
 
-machine machine_ops::oring(const machine &a_, const machine &b_) {
-    machine a = machine(a_);
-    machine b = machine(b_);
+machine machine_ops::concat(const machine &a, const machine &b) {
+    std::vector<const machine> temp = {a, b};
+    return machine_ops::concat(temp);
+}
+
+machine machine_ops::oring(std::vector<const machine> &machines_) {
+    if (machines_.empty()) {
+        throw std::invalid_argument("received 0 machines to or");
+    }
+    if ((int) machines_.size() == 1) {
+        return machines_[0];
+    }
+
+    std::vector<machine> machines;
+    for (int i = 0; i < (int) machines.size(); i++) {
+        machines.push_back(machine(machines[i]));
+    }
+
+    machine m = machines[0];
 
     state starting_state = state();
     starting_state.set_accepting(false);
-    starting_state.add_new_transition(a.get_starting_state());
-    starting_state.add_new_transition(b.get_starting_state());
+    for (int i = 0; i < (int) machines.size(); i++) {
+        starting_state.add_new_transition(machines[i].get_starting_state());
+    }
+    m.add_new_state(starting_state);
 
     state ending_state = state();
     starting_state.set_accepting(true);
-
-    for (state &s : a.get_accepting_states()) {
-        s.set_accepting(false);
-        s.add_new_transition(ending_state);
+    for (int i = 0; i < (int) machines.size(); i++) {
+        for (state &s : machines[i].get_accepting_states()) {
+            s.set_accepting(false);
+            s.add_new_transition(ending_state);
+        }
     }
-    for (state &s : b.get_accepting_states()) {
-        s.set_accepting(false);
-        s.add_new_transition(ending_state);
+    m.add_new_state(ending_state);
+
+    for (int i = 1; i < (int) machines.size(); i++) {
+        for (state &s : machines[i].get_states()) {
+            m.add_new_state(s);
+        }
     }
 
-    for (state &s: b.get_states()) {
-        a.add_new_state(s);
-    }
+    m.set_starting_state(&starting_state);
+    return m;
+}
 
-    a.add_new_state(starting_state);
-    a.add_new_state(ending_state);
-    a.set_starting_state(&starting_state);
-    return a;
+machine machine_ops::oring(const machine &a, const machine &b) {
+    std::vector<const machine> temp = {a, b};
+    return machine_ops::oring(temp);
 }
 
 machine machine_ops::star(const machine &a_) {
