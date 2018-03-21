@@ -1,5 +1,6 @@
 #include "DFA.h"
 #include "machine.h"
+#include <stack>
 #define EPS 0xDE
 
 std::set<state> epsilon_closure(state s)
@@ -11,7 +12,8 @@ std::set<state> epsilon_closure(state s)
 
     stack.push(s);
     while (!stack.empty()) {
-        state u = stack.pop();
+        state u = stack.top();
+        stack.pop();
         std::vector<transition> eps_trans = u.get_transitions_for(EPS);
         for (transition t : eps_trans) {
             state v = t.get_end_state();
@@ -28,9 +30,9 @@ std::set<state> epsilon_closure(std::set<state> state_set)
 {
     std::set<state> res = state_set;
 
-    for (auto i : state_set) {
-        state s = *i;
-        std::set eps_set = epsilon_closure(s);
+    for (state i : state_set) {
+        state s = i;
+        std::set<state> eps_set = epsilon_closure(s);
 
         res.insert(eps_set.begin(), eps_set.end());
     }
@@ -51,13 +53,13 @@ std::set<state> dfa::move(state s, char in)
     return res;
 }
 
-std::set<state> dfa::move(set<state> state_set, char in)
+std::set<state> dfa::move(std::set<state> state_set, char in)
 {
-    st::set<state> res = state_set;
+    std::set<state> res = state_set;
 
-    for (auto i : state_set) {
-        state s = *i;
-        std::set ch_set = dfa::move(s, in);
+    for (state i : state_set) {
+        state s = i;
+        std::set<state> ch_set = dfa::move(s, in);
 
         res.insert(ch_set.begin(), ch_set.end());
     }
