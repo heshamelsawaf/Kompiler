@@ -26,6 +26,12 @@ class state {
   std::string token_class;
   bool _is_accepting;
   std::map<char, std::vector<transition> > transitions;
+
+  inline bool operator < (const state& lhs, const state& rhs)
+  {
+      return lhs.state_identifier < rhs.state_identifier;
+  }
+ 
  public:
   int get_state_identifier () const;
   std::string get_token_class () const;
