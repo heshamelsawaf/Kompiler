@@ -98,7 +98,7 @@ machine* dfa::to_dfa(machine &nfa) {
             }
         }
     }
-    return nullptr;
+    return &dfa_machine;
 }
 
 bool same_partition(const machine &dfa, const state &a, const state &b) {
