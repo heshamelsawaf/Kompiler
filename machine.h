@@ -9,6 +9,7 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <set>
 
 class state {
 
@@ -26,6 +27,9 @@ class state {
   bool _is_accepting;
   std::map<char, std::vector<transition> > transitions;
  public:
+  state();
+  state(int state_identifier, std::string token_class, bool is_accepting);
+  state(int state_identifier, std::set<state> states);//constructs a dfa state from nfa states.
   int get_state_identifier () const;
   std::string get_token_class () const;
   bool is_accepting () const;
@@ -42,15 +46,18 @@ class machine {
   std::string machine_identifier;
   state *starting;
   std::vector<state> states;
+  std::set<char> inputs;
 
  public:
   machine (std::string _machine_identifier);
+  inline int count_states() {return states.size();}
   void add_new_state (int state_identifier, std::string token_class, bool is_accepting = false);
   void add_new_transition (state from, state to, char on_input = 0xDE);  // 0xDE = Epsilon
   void set_starting_state (state *_starting);
   state get_starting_state () const;
   std::string get_machine_identifier () const;
   std::vector<state> get_states () const;
+  std::set<char> get_inputs() const;
 };
 
 #endif //KOMPILER_MACHINE_H
