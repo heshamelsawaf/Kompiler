@@ -13,17 +13,6 @@
 #define EPS 0xDE
 
 class state {
- private:
-  int state_identifier;
-  std::string token_class;
-  bool _is_accepting;
-  std::map<char, std::vector<transition> > transitions;
-
-  inline bool operator < (const state& lhs, const state& rhs)
-  {
-      return lhs.state_identifier < rhs.state_identifier;
-  }
- 
  public:
   class transition {
    private:
@@ -45,6 +34,14 @@ class state {
    * Adds a new transition from this state to TO state.
    */
   void add_new_transition (state to, char on_input = EPS);  // 0xDE = Epsilon
+  bool operator < (const state& rhs) {
+      return this->state_identifier < rhs.state_identifier;
+  }
+ private:
+  int state_identifier;
+  std::string token_class;
+  bool _is_accepting;
+  std::map<char, std::vector<state::transition> > transitions;
 };
 
 class machine {
