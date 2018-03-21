@@ -7,18 +7,20 @@
 
 #include "machine.h"
 
-machine machine_concat(const machine &a_, const machine &b_);
+namespace machine_ops {
+    machine concat(const machine &a_, const machine &b_);
 
-machine machine_or(const machine &a_, const machine &b_);
+    machine oring(const machine &a_, const machine &b_);
 
-machine machine_star(const machine &a_);
+    machine star(const machine &a_);
 
-machine machine_plus(const machine &a_);
+    machine plus(const machine &a_);
 
-machine single_char(char c);
+    machine single_char(char c);
 
-machine char_range(char start, char end);
+    machine char_range(char start, char end);
 
-machine string_concat(std::string s);
+    machine string_concat(std::string s);
+}
 
 #endif //KOMPILER_REXP_LIB_H
