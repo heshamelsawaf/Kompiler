@@ -10,6 +10,7 @@
 #include <vector>
 #include <map>
 #include <set>
+#define EPS 0xDE
 
 class state {
 
@@ -33,11 +34,12 @@ class state {
   int get_state_identifier () const;
   std::string get_token_class () const;
   bool is_accepting () const;
+  void set_accepting (bool);
   std::vector<transition> get_transitions_for (char in) const;
   /*
    * Adds a new transition from this state to TO state.
    */
-  void add_new_transition (state to, char on_input = 0xDE);  // 0xDE = Epsilon
+  void add_new_transition (state to, char on_input = EPS);  // 0xDE = Epsilon
 };
 
 class machine {
@@ -51,13 +53,16 @@ class machine {
  public:
   machine (std::string _machine_identifier);
   inline int count_states() {return states.size();}
-  void add_new_state (int state_identifier, std::string token_class, bool is_accepting = false);
-  void add_new_transition (state from, state to, char on_input = 0xDE);  // 0xDE = Epsilon
+  machine (const machine& copy);
+//  void add_new_state (int state_identifier, std::string token_class, bool is_accepting = false);
+  void add_new_state (state);
+  void add_new_transition (state from, state to, char on_input = EPS);
   void set_starting_state (state *_starting);
   state get_starting_state () const;
   std::string get_machine_identifier () const;
   std::vector<state> get_states () const;
   std::set<char> get_inputs() const;
+  std::vector<state> get_accepting_states () const;
 };
 
 #endif //KOMPILER_MACHINE_H
