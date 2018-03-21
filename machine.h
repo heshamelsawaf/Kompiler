@@ -21,6 +21,7 @@ class state {
     state get_end_state () const;
     void get_transition_char () const;
   };
+
  private:
   int state_identifier;
   std::string token_class;
