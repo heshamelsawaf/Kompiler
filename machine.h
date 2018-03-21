@@ -18,7 +18,7 @@ class state {
     state *to;
     char on_input;
    public:
-    void get_end_state () const;
+    state get_end_state () const;
     void get_transition_char () const;
   };
  private:
@@ -26,6 +26,12 @@ class state {
   std::string token_class;
   bool _is_accepting;
   std::map<char, std::vector<transition> > transitions;
+
+  inline bool operator < (const state& lhs, const state& rhs)
+  {
+    return lhs.state_identifier < rhs.state_identifier;
+  }
+
  public:
   int get_state_identifier () const;
   std::string get_token_class () const;
