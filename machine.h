@@ -21,6 +21,16 @@ class state {
    public:
     state get_end_state () const;
     char get_transition_char () const;
+    bool operator == (const transition& rhs) {
+      if (this->to == nullptr)
+        return rhs.to == nullptr;
+      if (rhs.to == nullptr)
+        return false;
+      return this->to->key == rhs.to->key;
+    }
+    bool operator != (const transition& rhs) {
+      return !(*this == rhs);
+    }
   };
   state();
   state(int state_identifier, std::string token_class, bool is_accepting);
@@ -37,9 +47,16 @@ class state {
   bool operator < (const state& rhs) {
       return this->state_identifier < rhs.state_identifier;
   }
+  bool operator == (const state& rhs) {
+    return this->key == rhs.key;
+  }
+  bool operator != (const state& rhs) {
+    return !(*this == rhs);
+  }
  private:
   int state_identifier;
   std::string token_class;
+  std::string key;
   bool _is_accepting;
   std::map<char, std::vector<state::transition> > transitions;
 };

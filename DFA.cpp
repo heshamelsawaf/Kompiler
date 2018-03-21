@@ -1,6 +1,7 @@
 #include "DFA.h"
 #include "machine.h"
 #include <stack>
+#include <iostream>
 #define EPS 0xDE
 
 std::set<state> epsilon_closure(state s)
@@ -83,14 +84,94 @@ machine* dfa::to_dfa(machine &nfa) {
             std::set<state> temp = dfa::move(cur_states, input);
             cur_states = dfa::epsilon_closure(temp);
             state new_dfa_state(++count, cur_states);
-            bool found = false;
-            // TODO: Search in DFA Machine for new_dfa_state
-            if (!found) {
-                unmarked_states.push_back(new_dfa_state);
-                // TODO add new state to DFA Machine
+            state *found_state = nullptr;
+            for (state s : dfa_machine.get_states()) {
+                if (s == new_dfa_state)
+                    found_state = &s;
             }
-            dfa_machine.add_new_transition(cur, new_dfa_state, input);
+            if (found_state == nullptr) {
+                unmarked_states.push_back(new_dfa_state);
+                dfa_machine.add_new_state(new_dfa_state);
+                dfa_machine.add_new_transition(cur, new_dfa_state, input);
+            } else {
+                dfa_machine.add_new_transition(*found_state, new_dfa_state, input);
+            }
         }
     }
     return nullptr;
+}
+
+bool same_partition(const machine &dfa, const state &a, const state &b) {
+    for (char input : dfa.get_inputs()) {
+        std::vector<state::transition> a_transitions = a.get_transitions_for(input);
+        std::vector<state::transition> b_transitions = b.get_transitions_for(input);
+        if (b_transitions.size() > 1 || a_transitions.size() > 1) {
+            std::cerr << "Error: more than 1 transition over the same symbol in DFA" << std::endl;
+            return false;
+        }
+        if (b_transitions.size() != a_transitions.size())
+            return false;
+        if (a_transitions.size() == 1) {
+            if (a_transitions[0] != b_transitions[0])
+                return false;
+        }
+    }
+    return true;
+}
+
+std::set<std::set<state> > refine(const machine &dfa, const std::set<std::set<state> > &sets) {
+    std::set<std::set<state> > new_sets;
+    for (std::set<state> states : sets) {
+        std::set<state> working_set(states);
+        while (working_set.size() > 0) {
+            state s = *working_set.begin();
+            std::set<state> new_set;
+            new_set.insert(s);
+            working_set.erase(s);
+            for (state q : working_set) {
+                if (same_partition(dfa, s, q)) {
+                    new_set.insert(q);
+                }
+            }
+            new_sets.insert(new_set);
+        }
+    }
+    return new_sets;
+}
+
+machine* build_dfa(std::set<std::set<state> > sets) {
+    machine dfa("min_dfa");
+    if (sets.size() == 0)
+        return &dfa;
+    std::vector<std::set<state> > sets_vec(sets.begin(), sets.end());
+    state starting_state(0, sets_vec[0]);
+    dfa.set_starting_state(&starting_state);
+    for (int i = 1 ; i < sets_vec.size() ; i++) {
+        state cur_state(i, sets_vec[i]);
+        dfa.add_new_state(cur_state);
+    }
+    return &dfa;
+}
+
+machine* dfa::minimize_dfa(machine& dfa) {
+    std::set<std::set<state> > cur_set;
+    std::set<state> accepting;
+    std::set<state> non_accepting;
+    for (state s : dfa.get_states()) {
+        if (s.is_accepting()) {
+            accepting.insert(s);
+        } else {
+            non_accepting.insert(s);
+        }
+    }
+    cur_set.insert(accepting);
+    cur_set.insert(non_accepting);
+
+    while (true) {
+        std::set<std::set<state> > new_set = refine(dfa, cur_set);
+        if (new_set.size() == cur_set.size())
+            break;
+        cur_set = new_set;
+    }
+    return build_dfa(cur_set);
 }

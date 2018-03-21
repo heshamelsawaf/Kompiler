@@ -8,6 +8,7 @@ std::set<state> epsilon_closure(std::set<state> states);
 std::set<state> move(state states, char in);
 std::set<state> move(std::set<state> states, char in);
 machine* to_dfa(machine &nfa);
+machine* minimize_dfa(machine &dfa);
 }
 
 #endif
