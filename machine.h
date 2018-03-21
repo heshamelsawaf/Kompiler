@@ -13,15 +13,6 @@
 #define EPS 0xDE
 
 class state {
-
-  class transition {
-   private:
-    state *to;
-    char on_input;
-   public:
-    void get_end_state () const;
-    void get_transition_char () const;
-  };
  private:
   int state_identifier;
   std::string token_class;
@@ -34,6 +25,14 @@ class state {
   }
  
  public:
+  class transition {
+   private:
+    state *to;
+    char on_input;
+   public:
+    state get_end_state () const;
+    char get_transition_char () const;
+  };
   state();
   state(int state_identifier, std::string token_class, bool is_accepting);
   state(int state_identifier, std::set<state> states);//constructs a dfa state from nfa states.

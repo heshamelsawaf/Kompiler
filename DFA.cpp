@@ -14,8 +14,8 @@ std::set<state> epsilon_closure(state s)
     while (!stack.empty()) {
         state u = stack.top();
         stack.pop();
-        std::vector<transition> eps_trans = u.get_transitions_for(EPS);
-        for (transition t : eps_trans) {
+        std::vector<state::transition> eps_trans = u.get_transitions_for(EPS);
+        for (state::transition t : eps_trans) {
             state v = t.get_end_state();
             stack.push(v);
 
@@ -44,8 +44,8 @@ std::set<state> dfa::move(state s, char in)
 {
     std::set<state> res;
 
-    std::vector<transition> in_trans = s.get_transition_for(in);
-    for (transition t : in_trans) {
+    std::vector<state::transition> in_trans = s.get_transitions_for(in);
+    for (state::transition t : in_trans) {
         state u = t.get_end_state();
         res.insert(u);
     }
