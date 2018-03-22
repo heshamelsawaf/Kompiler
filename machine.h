@@ -3,85 +3,79 @@
 // Initial definion to the Machine strcture
 //
 
-#ifndef KOMPILER_MACHINE_H
-#define KOMPILER_MACHINE_H
+#ifndef KOMPILAR_MACHINE_H
+#define KOMPILAR_MACHINE_H
 
-#include <string>
-#include <vector>
 #include <map>
+#include <vector>
 #include <set>
-#define EPS 0xDE
 
-class state {
- public:
-  class transition {
-   private:
-    state *to;
-    char on_input;
-   public:
-    state get_end_state () const;
-    char get_transition_char () const;
-    bool operator == (const transition& rhs) {
-      if (this->to == nullptr)
-        return rhs.to == nullptr;
-      if (rhs.to == nullptr)
-        return false;
-      return this->to->key == rhs.to->key;
-    }
-    bool operator != (const transition& rhs) {
-      return !(*this == rhs);
-    }
-  };
-  state();
-  state(int state_identifier, std::string token_class, bool is_accepting);
-  state(int state_identifier, std::set<state> states);//constructs a dfa state from nfa states.
-  int get_state_identifier () const;
-  std::string get_token_class () const;
-  bool is_accepting () const;
-  void set_accepting (bool);
-  std::vector<transition> get_transitions_for (char in) const;
-  /*
-   * Adds a new transition from this state to TO state.
-   */
-  void add_new_transition (state to, char on_input = EPS);  // 0xDE = Epsilon
-  bool operator < (const state& rhs) {
-      return this->state_identifier < rhs.state_identifier;
-  }
-  bool operator == (const state& rhs) {
-    return this->key == rhs.key;
-  }
-  bool operator != (const state& rhs) {
-    return !(*this == rhs);
-  }
- private:
-  int state_identifier;
-  std::string token_class;
-  std::string key;
-  bool _is_accepting;
-  std::map<char, std::vector<state::transition> > transitions;
-};
+#define EPS 0xDE
 
 class machine {
 
  private:
   std::string machine_identifier;
-  state *starting;
+  std::set<int> accepting;
+  std::set<char> language;
+  int starting;
+
+  class state {
+   private:
+    std::string token_class;
+    std::string key;
+
+    class transition {
+     private:
+      int to_identifier;
+      char on_input;
+     public:
+      transition (int, char);
+      int get_to_identifier () const;
+      char get_transition_char () const;
+    };
+    std::map<char, std::vector<transition> > transitions;
+   public:
+    state (std::string _token_class, std::string key);
+    std::string get_token_class () const;
+    bool add_new_transition (int to_id, char on_input = EPS);
+    std::string get_key () const;
+
+  };
   std::vector<state> states;
-  std::set<char> inputs;
 
  public:
   machine (std::string _machine_identifier);
-  inline int count_states() {return states.size();}
-  machine (const machine& copy);
-//  void add_new_state (int state_identifier, std::string token_class, bool is_accepting = false);
-  void add_new_state (state);
-  void add_new_transition (state from, state to, char on_input = EPS);
-  void set_starting_state (state *_starting);
-  state get_starting_state () const;
+
+  int
+  add_new_state (std::string key, std::string token_class = "", bool is_starting = false, bool is_accepting = false);
+
+  bool add_new_transition (int from_id, int to_id, char on_input = EPS);
+
+  bool set_starting_state (int _starting_id);
+ 
+  int add_starting_state (std::string token_class = "", bool is_accepting = false);
+
+  int get_starting_state () const;
+
   std::string get_machine_identifier () const;
-  std::vector<state> get_states () const;
-  std::set<char> get_inputs() const;
-  std::vector<state> get_accepting_states () const;
+
+  std::set<int> get_accepting_states () const;
+
+  std::vector<int> get_transitions_for (int id) const;
+
+  std::string get_token_class (int id) const;
+
+  std::string get_key_for (int id) const;
+ 
+  std::string set_key_for (int id, std::string key);
+
+  std::set<char> get_language () const;
+ 
+  int get_states_count () const;
+
+  void print_machine ();
 };
 
-#endif //KOMPILER_MACHINE_H
+
+#endif //KOMPILAR_MACHINE_H
