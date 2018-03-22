@@ -4,10 +4,12 @@
 #include <iostream>
 #define EPS 0xDE
 
-std::set<state> epsilon_closure(state s)
+typedef int state_t;
+
+std::set<state_t> dfa::epsilon_closure(machine m, state_t s)
 {
-    std::set<state> res;
-    std::stack<state> stack;
+    std::set<state_t> res;
+    std::stack<state_t> stack;
 
     res.insert(s);
 
@@ -15,56 +17,51 @@ std::set<state> epsilon_closure(state s)
     while (!stack.empty()) {
         state u = stack.top();
         stack.pop();
-        std::vector<state::transition> eps_trans = u.get_transitions_for(EPS);
+        std::vector<state::transition> eps_trans =
+            m.get_transitions_for(s, EPS);
         for (state::transition t : eps_trans) {
-            state v = t.get_end_state();
+            state_t v = t.get_to_identifier();
             stack.push(v);
 
             res.insert(v);
         }
     }
-
     return res;
 }
 
-std::set<state> epsilon_closure(std::set<state> state_set)
+std::set<state_t> dfa::epsilon_closure(machine m,, std::set<state_t> state_set)
 {
-    std::set<state> res = state_set;
+    std::set<state_t> res = state_set;
 
-    for (state i : state_set) {
-        state s = i;
-        std::set<state> eps_set = epsilon_closure(s);
+    for (state_t s : state_set) {
+        std::set<state_t> eps_set = epsilon_closure(m, s);
 
         res.insert(eps_set.begin(), eps_set.end());
     }
-
     return res;
 }
 
-std::set<state> dfa::move(state s, char in)
+std::set<state_t> dfa::move(machine m, state_t s, char in)
 {
-    std::set<state> res;
+    std::set<state_t> res;
 
-    std::vector<state::transition> in_trans = s.get_transitions_for(in);
+    std::vector<state::transition> in_trans = m.get_transitions_for(s, in);
     for (state::transition t : in_trans) {
-        state u = t.get_end_state();
+        state_t u = t.get_to_identifier();
         res.insert(u);
     }
-
     return res;
 }
 
-std::set<state> dfa::move(std::set<state> state_set, char in)
+std::set<state_t> dfa::move(machine m, std::set<state_t> state_set, char in)
 {
-    std::set<state> res = state_set;
+    std::set<state_t> res = state_set;
 
-    for (state i : state_set) {
-        state s = i;
-        std::set<state> ch_set = dfa::move(s, in);
+    for (state_t s : state_set) {
+        std::set<state_t> ch_set = dfa::move(s, in);
 
         res.insert(ch_set.begin(), ch_set.end());
     }
-
     return res;
 }
 
