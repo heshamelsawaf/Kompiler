@@ -2,7 +2,6 @@
 #include "machine.h"
 #include <stack>
 #include <iostream>
-#define EPS 0xDE
 
 typedef int sid_t;
 
@@ -18,7 +17,7 @@ std::set<sid_t> dfa::epsilon_closure(machine m, sid_t s)
         sid_t u = stack.top();
         stack.pop();
         std::vector<sid_t> eps_trans =
-            m.get_transitions_for(u, EPS);
+            m.get_transitions(u, EPS);
         for (sid_t t : eps_trans) {
             stack.push(t);
 
@@ -44,7 +43,7 @@ std::set<sid_t> dfa::move(machine m, sid_t s, char in)
 {
     std::set<sid_t> res;
 
-    std::vector<sid_t> in_trans = m.get_transitions_for(s, in);
+    std::vector<sid_t> in_trans = m.get_transitions(s, in);
     for (sid_t t : in_trans) {
         res.insert(t);
     }
@@ -66,8 +65,7 @@ std::set<sid_t> dfa::move(machine m, std::set<sid_t> state_set, char in)
 std::string get_key(std::set<sid_t> &states) {
     std::string key = "";
     for (sid_t s : states) {
-        key += "" + s;
-        key += ",";
+        key += "" + std::to_string(s) + ",";
     }
     key.pop_back();
     return key;
@@ -95,7 +93,7 @@ machine dfa::to_dfa(machine &nfa) {
     machine dfa_machine("dfa");
     bool is_final = false;
     std::string token_class = get_token_type(cur_states, nfa, is_final);
-    sid_t starting_id = dfa_machine.add_starting_state(token_class, is_final);
+    sid_t starting_id = dfa_machine.add_new_state(token_class, true, is_final);
     unmarked_states.push_back(starting_id);
     dfa_machine.set_key_for(starting_id, get_key(cur_states));
     while (!unmarked_states.empty()) {
@@ -139,10 +137,10 @@ int find_set(std::vector<std::vector<sid_t> > sets, sid_t state) {
     return -1;
 }
 
-bool same_partition(const machine &dfa, const sid_t a, const sid_t b, std::vector<std::vector<sid_t> > sets) {
+bool same_partition(machine &dfa, sid_t a, sid_t b, std::vector<std::vector<sid_t> > sets) {
     for (char input : dfa.get_language()) {
-        std::vector<sid_t> a_transitions = dfa.get_transitions_for(a, input);
-        std::vector<sid_t> b_transitions = dfa.get_transitions_for(b, input);
+        std::vector<sid_t> a_transitions = dfa.get_transitions(a, input);
+        std::vector<sid_t> b_transitions = dfa.get_transitions(b, input);
         if (b_transitions.size() > 1 || a_transitions.size() > 1) {
             std::cerr << "Error: more than 1 transition over the same symbol in DFA" << std::endl;
             return false;
@@ -150,7 +148,7 @@ bool same_partition(const machine &dfa, const sid_t a, const sid_t b, std::vecto
         if (b_transitions.size() != a_transitions.size())
             return false;
         if (a_transitions.size() == 1) {
-            
+
             if (find_set(sets, a_transitions[0]) != find_set(sets, b_transitions[0]))
                 return false;
         }
@@ -158,7 +156,7 @@ bool same_partition(const machine &dfa, const sid_t a, const sid_t b, std::vecto
     return true;
 }
 
-void refine(const machine &dfa, const std::vector<std::vector<sid_t> > sets, std::vector<std::vector<sid_t> > new_sets) {
+void refine(machine &dfa, const std::vector<std::vector<sid_t> > sets, std::vector<std::vector<sid_t> > new_sets) {
     for (std::vector<sid_t> working_set : sets) {
         while (working_set.size() > 0) {
             sid_t s = working_set.front();
@@ -182,13 +180,13 @@ machine build_dfa(machine &org_dfa, std::vector<std::vector<sid_t> > sets, sid_t
     int starting_set = find_set(sets, starting_state);
     bool is_final = false;
     std::string token_type = get_token_type(sets[starting_set], org_dfa, is_final);
-    dfa.add_starting_state(token_type, is_final);
+    dfa.add_new_state(token_type, true, is_final);
 
     for (int i = 0 ; i < sets.size() ; i++) {
         if (i != starting_set) {
             token_type = get_token_type(sets[i], org_dfa, is_final);
             dfa.add_new_state(token_type, is_final);
-        }    
+        }
     }
     return dfa;
 }

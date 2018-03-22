@@ -8,75 +8,105 @@
 
 #include <map>
 #include <vector>
+#include <string>
 #include <set>
+#define EPS 0x01
 
-#define EPS 0xDE
+typedef int sid_t;
 
 class machine {
 
- private:
-  std::string machine_identifier;
-  std::set<int> accepting;
-  std::set<char> language;
-  int starting;
+    class state {
 
-  class state {
-   private:
-    std::string token_class;
-    std::string key;
+        class transition {
+        private:
+            sid_t to_identifier;
+            char on_input;
+        public:
+            transition(sid_t, char);
 
-    class transition {
-     private:
-      int to_identifier;
-      char on_input;
-     public:
-      transition (int, char);
-      int get_to_identifier () const;
-      char get_transition_char () const;
+            sid_t get_to_identifier() const;
+
+            char get_transition_char() const;
+        };
+
+    private:
+        std::map<char, std::vector<transition> > transitions;
+        std::string token_class;
+        std::string key;
+    public:
+        state();
+
+        state(std::string _token_class);
+
+        state(std::string _token_class, std::string _key);
+
+        std::string get_token_class() const;
+
+        bool add_new_transition(sid_t to_id, char on_input = EPS);
+
+        void set_key(std::string key);
+
+        std::string get_key() const;
+
+        std::vector<sid_t> get_transitions_for(char input);
+
     };
-    std::map<char, std::vector<transition> > transitions;
-   public:
-    state (std::string _token_class, std::string key);
-    std::string get_token_class () const;
-    bool add_new_transition (int to_id, char on_input = EPS);
-    std::string get_key () const;
 
-  };
-  std::vector<state> states;
+private:
+    std::string machine_identifier;
+    std::vector<state> states;
+    std::set<sid_t> accepting;
+    std::set<char> language;
+    sid_t starting;
 
- public:
-  machine (std::string _machine_identifier);
+public:
+    machine(std::string _machine_identifier);
 
-  int
-  add_new_state (std::string token_class = "", bool is_starting = false, bool is_accepting = false);
+    sid_t add_new_state(std::string key, std::string token_class = "",
+                      bool is_starting = false, bool is_accepting = false);
 
-  bool add_new_transition (int from_id, int to_id, char on_input = EPS);
+    sid_t add_new_state(bool is_starting = false, bool is_accepting = false);
 
-  bool set_starting_state (int _starting_id);
- 
-  bool is_accepting(int id) const;
+    sid_t add_new_state(std::string token_class = "", bool is_starting = false,
+                        bool is_accepting = false);
 
-  int add_starting_state (std::string token_class = "", bool is_accepting = false);
+    bool add_new_transition(sid_t from_id, sid_t to_id, char on_input = EPS);
 
-  int get_starting_state () const;
+    bool set_starting_state(sid_t _starting_id);
 
-  std::string get_machine_identifier () const;
+    sid_t add_starting_state(std::string key, std::string token_class = "",
+                             bool is_accepting = false);
 
-  std::set<int> get_accepting_states () const;
+    sid_t get_starting_state() const;
 
-  std::vector<int> get_transitions_for (int id, char input) const;
+    sid_t merge(machine other);
 
-  std::string get_token_class (int id) const;
+    std::string get_machine_identifier() const;
 
-  std::string get_key_for (int id) const;
- 
-  std::string set_key_for (int id, std::string key);
+    std::set<sid_t> get_accepting_states() const;
 
-  std::set<char> get_language () const;
- 
-  int get_states_count () const;
+    std::vector<sid_t> get_transitions(sid_t id, char input);
 
-  void print_machine ();
+    std::string get_token_class(sid_t id) const;
+
+    std::string get_key_for(sid_t id) const;
+
+    void set_key_for(sid_t id, std::string new_key);
+
+    std::set<char> get_language() const;
+
+    sid_t get_states_count() const;
+
+    bool set_accepting(sid_t id);
+
+    bool is_accepting(sid_t id);
+
+    bool is_starting(sid_t id);
+
+    void clear_accepting_states();
+
+    void print_machine();
 };
 
 
