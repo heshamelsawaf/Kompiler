@@ -48,12 +48,14 @@ class machine {
   machine (std::string _machine_identifier);
 
   int
-  add_new_state (std::string key, std::string token_class = "", bool is_starting = false, bool is_accepting = false);
+  add_new_state (std::string token_class = "", bool is_starting = false, bool is_accepting = false);
 
   bool add_new_transition (int from_id, int to_id, char on_input = EPS);
 
   bool set_starting_state (int _starting_id);
  
+  bool is_accepting(int id) const;
+
   int add_starting_state (std::string token_class = "", bool is_accepting = false);
 
   int get_starting_state () const;

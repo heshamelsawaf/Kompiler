@@ -4,12 +4,12 @@
 #include <iostream>
 #define EPS 0xDE
 
-typedef int state_t;
+typedef int sid_t;
 
-std::set<state_t> dfa::epsilon_closure(machine m, state_t s)
+std::set<sid_t> dfa::epsilon_closure(machine m, sid_t s)
 {
-    std::set<state_t> res;
-    std::stack<state_t> stack;
+    std::set<sid_t> res;
+    std::stack<sid_t> stack;
 
     res.insert(s);
 
@@ -20,7 +20,7 @@ std::set<state_t> dfa::epsilon_closure(machine m, state_t s)
         std::vector<state::transition> eps_trans =
             m.get_transitions_for(s, EPS);
         for (state::transition t : eps_trans) {
-            state_t v = t.get_to_identifier();
+            sid_t v = t.get_to_identifier();
             stack.push(v);
 
             res.insert(v);
@@ -29,36 +29,36 @@ std::set<state_t> dfa::epsilon_closure(machine m, state_t s)
     return res;
 }
 
-std::set<state_t> dfa::epsilon_closure(machine m,, std::set<state_t> state_set)
+std::set<sid_t> dfa::epsilon_closure(machine m,, std::set<sid_t> state_set)
 {
-    std::set<state_t> res = state_set;
+    std::set<sid_t> res = state_set;
 
-    for (state_t s : state_set) {
-        std::set<state_t> eps_set = epsilon_closure(m, s);
+    for (sid_t s : state_set) {
+        std::set<sid_t> eps_set = epsilon_closure(m, s);
 
         res.insert(eps_set.begin(), eps_set.end());
     }
     return res;
 }
 
-std::set<state_t> dfa::move(machine m, state_t s, char in)
+std::set<sid_t> dfa::move(machine m, sid_t s, char in)
 {
-    std::set<state_t> res;
+    std::set<sid_t> res;
 
     std::vector<state::transition> in_trans = m.get_transitions_for(s, in);
     for (state::transition t : in_trans) {
-        state_t u = t.get_to_identifier();
+        sid_t u = t.get_to_identifier();
         res.insert(u);
     }
     return res;
 }
 
-std::set<state_t> dfa::move(machine m, std::set<state_t> state_set, char in)
+std::set<sid_t> dfa::move(machine m, std::set<sid_t> state_set, char in)
 {
-    std::set<state_t> res = state_set;
+    std::set<sid_t> res = state_set;
 
-    for (state_t s : state_set) {
-        std::set<state_t> ch_set = dfa::move(s, in);
+    for (sid_t s : state_set) {
+        std::set<sid_t> ch_set = dfa::move(s, in);
 
         res.insert(ch_set.begin(), ch_set.end());
     }
@@ -75,24 +75,23 @@ std::string get_token_type(std::set<int> &s, machine &nfa, bool &is_final) {
 }
 
 machine* dfa::to_dfa(machine &nfa) {
-    std::vector<int> unmarked_states;
-    std::set<int> cur_states = epsilon_closure(nfa.get_starting_state());
-    std::set<int> dfa_states;
-    int count = 0;
+    std::vector<sid_t> unmarked_states;
+    std::set<sid_t> cur_states = epsilon_closure(nfa.get_starting_state());
+    std::set<sid_t> dfa_states;
     machine dfa_machine("dfa");
-    int starting_id = dfa_machine.add_starting_state();
+    sid_t starting_id = dfa_machine.add_starting_state();
     unmarked_states.push_back(starting_id);
     dfa_machine.set_key_for(starting_id, "" + starting_id);
     while (!unmarked_states.empty()) {
-        int cur = unmarked_states.back();
+        sid_t cur = unmarked_states.back();
         unmarked_states.pop_back();
-        for (char input : nfa.get_inputs()) {
-            std::set<int> temp = dfa::move(cur_states, input);
+        for (char input : nfa.get_language()) {
+            std::set<sid_t> temp = dfa::move(cur_states, input);
             cur_states = dfa::epsilon_closure(temp);
             int found_state = -1;
             std::string new_key = get_key(cur_states);
 
-            for (int s = 0 ; s < dfa_machine.get_states_count() ; s++) {
+            for (sid_t s = 0 ; s < dfa_machine.get_states_count() ; s++) {
                 if (dfa_machine.get_key_for(s) == new_key)
                     found_state = s;
             }
@@ -100,7 +99,7 @@ machine* dfa::to_dfa(machine &nfa) {
             if (found_state == -1) {
                 bool is_final = false;
                 std::string token_type = get_token_type(cur_states, nfa, is_final);
-                int new_dfa_state = dfa_machine.add_new_state(token_type, is_final);
+                sid_t new_dfa_state = dfa_machine.add_new_state(token_type, is_final);
                 unmarked_states.push_back(new_dfa_state);
                 dfa_machine.add_new_transition(cur, new_dfa_state, input);
             } else {
@@ -129,27 +128,25 @@ bool same_partition(const machine &dfa, const state &a, const state &b) {
     return true;
 }
 
-std::set<std::set<state> > refine(const machine &dfa, const std::set<std::set<state> > &sets) {
-    std::set<std::set<state> > new_sets;
-    for (std::set<state> states : sets) {
-        std::set<state> working_set(states);
+void refine(const machine &dfa, const std::vector<std::vector<sid_t> > &sets, std::vector<std::vector<sid_t> > new_sets) {
+    for (std::vector<sid_t> states : sets) {
+        std::vector<sid_t> working_set(states);
         while (working_set.size() > 0) {
-            state s = *working_set.begin();
-            std::set<state> new_set;
-            new_set.insert(s);
-            working_set.erase(s);
-            for (state q : working_set) {
+            sid_t s = working_set.front();
+            working_set.erase(working_set.begin());
+            std::vector<sid_t> new_set;
+            new_set.push_back(s);
+            for (sid_t q : working_set) {
                 if (same_partition(dfa, s, q)) {
-                    new_set.insert(q);
+                    new_set.push_back(q);
                 }
             }
-            new_sets.insert(new_set);
+            new_sets.push_back(new_set);
         }
     }
-    return new_sets;
 }
 
-machine* build_dfa(std::set<std::set<state> > sets) {
+machine* build_dfa(std::vector<std::vector<sid_t> > sets) {
     machine dfa("min_dfa");
     if (sets.size() == 0)
         return &dfa;
@@ -164,21 +161,22 @@ machine* build_dfa(std::set<std::set<state> > sets) {
 }
 
 machine* dfa::minimize_dfa(machine& dfa) {
-    std::set<std::set<state> > cur_set;
-    std::set<state> accepting;
-    std::set<state> non_accepting;
-    for (state s : dfa.get_states()) {
-        if (s.is_accepting()) {
-            accepting.insert(s);
+    std::vector<std::vector<sid_t> > cur_set;
+    std::vector<sid_t> accepting;
+    std::vector<sid_t> non_accepting;
+    for (sid_t s = 0 ; s < dfa.get_states_count() ; s++) {
+        if (dfa.is_accepting(s)) {
+            accepting.push_back(s);
         } else {
-            non_accepting.insert(s);
+            non_accepting.push_back(s);
         }
     }
-    cur_set.insert(accepting);
-    cur_set.insert(non_accepting);
+    cur_set.push_back(accepting);
+    cur_set.push_back(non_accepting);
 
     while (true) {
-        std::set<std::set<state> > new_set = refine(dfa, cur_set);
+        std::vector<std::vector<sid_t> > new_set;
+        refine(dfa, cur_set, new_set);
         if (new_set.size() == cur_set.size())
             break;
         cur_set = new_set;
