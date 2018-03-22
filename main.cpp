@@ -6,23 +6,22 @@
 #include <string>
 #include "machine.h"
 #include "rexplib.h"
+#include "rexparser.h"
 
 using namespace std;
 
-int main() {
-    machine m = machine_ops::single_char('a');
+int main ()
+{
+//    machine m = machine_ops::single_char('a');
+  //  m.get_starting_state ().get_transitions ();
 //    machine p = machine_ops::single_char('b');
-//    machine z = machine_ops::concat(m, p);
 //    machine z = machine_ops::oring(m, p);
-//    vector<machine> v = {m, p, m};
-//    z = machine_ops::concat(v);
-    machine z = machine_ops::star(m);
-
-//    m.merge(p);
 //    m.print_machine();
 //    p.print_machine();
-    z.print_machine();
+//    z.print_machine ();
+  rexparser rx;
 
+  rx.rules2nfa ("h: hello").print_machine ();
 
     return 0;
 }
