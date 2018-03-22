@@ -3,73 +3,111 @@
 // Initial definion to the Machine strcture
 //
 
-#ifndef KOMPILER_MACHINE_H
-#define KOMPILER_MACHINE_H
+#ifndef KOMPILAR_MACHINE_H
+#define KOMPILAR_MACHINE_H
 
-#include <string>
-#include <vector>
 #include <map>
+#include <vector>
+#include <string>
 #include <set>
-#define EPS 0xDE
+#define EPS 0x01
 
-class state {
-
-  class transition {
-   private:
-    state *to;
-    char on_input;
-   public:
-    state get_end_state () const;
-    void get_transition_char () const;
-  };
-
- private:
-  int state_identifier;
-  std::string token_class;
-  bool _is_accepting;
-  std::map<char, std::vector<transition> > transitions;
-
-  inline bool operator < (const state& lhs, const state& rhs)
-  {
-    return lhs.state_identifier < rhs.state_identifier;
-  }
-
- public:
-  state();
-  state(int state_identifier, std::string token_class, bool is_accepting);
-  state(int state_identifier, std::set<state> states);//constructs a dfa state from nfa states.
-  int get_state_identifier () const;
-  std::string get_token_class () const;
-  bool is_accepting () const;
-  void set_accepting (bool);
-  std::vector<transition> get_transitions_for (char in) const;
-  /*
-   * Adds a new transition from this state to TO state.
-   */
-  void add_new_transition (state to, char on_input = EPS);  // 0xDE = Epsilon
-};
+typedef int sid_t;
 
 class machine {
 
- private:
-  std::string machine_identifier;
-  state *starting;
-  std::vector<state> states;
-  std::set<char> inputs;
+    class state {
 
- public:
-  machine (std::string _machine_identifier);
-  inline int count_states() {return states.size();}
-  machine (const machine& copy);
-//  void add_new_state (int state_identifier, std::string token_class, bool is_accepting = false);
-  void add_new_state (state);
-  void add_new_transition (state from, state to, char on_input = EPS);
-  void set_starting_state (state *_starting);
-  state get_starting_state () const;
-  std::string get_machine_identifier () const;
-  std::vector<state> get_states () const;
-  std::set<char> get_inputs() const;
-  std::vector<state> get_accepting_states () const;
+        class transition {
+        private:
+            sid_t to_identifier;
+            char on_input;
+        public:
+            transition(sid_t, char);
+
+            sid_t get_to_identifier() const;
+
+            char get_transition_char() const;
+        };
+
+    private:
+        std::map<char, std::vector<transition> > transitions;
+        std::string token_class;
+        std::string key;
+    public:
+        state();
+
+        state(std::string _token_class);
+
+        state(std::string _token_class, std::string _key);
+
+        std::string get_token_class() const;
+
+        bool add_new_transition(sid_t to_id, char on_input = EPS);
+
+        void set_key(std::string key);
+
+        std::string get_key() const;
+
+        std::vector<sid_t> get_transitions_for(char input);
+
+    };
+
+private:
+    std::string machine_identifier;
+    std::vector<state> states;
+    std::set<sid_t> accepting;
+    std::set<char> language;
+    sid_t starting;
+
+public:
+    machine(std::string _machine_identifier);
+
+    sid_t add_new_state(std::string key, std::string token_class = "",
+                      bool is_starting = false, bool is_accepting = false);
+
+    sid_t add_new_state(bool is_starting = false, bool is_accepting = false);
+
+    sid_t add_new_state(std::string token_class = "", bool is_starting = false,
+                        bool is_accepting = false);
+
+    bool add_new_transition(sid_t from_id, sid_t to_id, char on_input = EPS);
+
+    bool set_starting_state(sid_t _starting_id);
+
+    sid_t add_starting_state(std::string key, std::string token_class = "",
+                             bool is_accepting = false);
+
+    sid_t get_starting_state() const;
+
+    sid_t merge(machine other);
+
+    std::string get_machine_identifier() const;
+
+    std::set<sid_t> get_accepting_states() const;
+
+    std::vector<sid_t> get_transitions(sid_t id, char input);
+
+    std::string get_token_class(sid_t id) const;
+
+    std::string get_key_for(sid_t id) const;
+
+    void set_key_for(sid_t id, std::string new_key);
+
+    std::set<char> get_language() const;
+
+    sid_t get_states_count() const;
+
+    bool set_accepting(sid_t id);
+
+    bool is_accepting(sid_t id);
+
+    bool is_starting(sid_t id);
+
+    void clear_accepting_states();
+
+    void print_machine();
 };
 
-#endif //KOMPILER_MACHINE_H
+
+#endif //KOMPILAR_MACHINE_H
