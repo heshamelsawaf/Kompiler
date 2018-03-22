@@ -65,33 +65,46 @@ std::set<state_t> dfa::move(machine m, std::set<state_t> state_set, char in)
     return res;
 }
 
+std::string get_key(std::set<int> &s) {
+    return "";
+}
+
+std::string get_token_type(std::set<int> &s, machine &nfa, bool &is_final) {
+
+    return "";
+}
+
 machine* dfa::to_dfa(machine &nfa) {
-    std::vector<state> unmarked_states;
-    std::set<state> cur_states = epsilon_closure(nfa.get_starting_state);
-    std::set<state> dfa_states;
+    std::vector<int> unmarked_states;
+    std::set<int> cur_states = epsilon_closure(nfa.get_starting_state());
+    std::set<int> dfa_states;
     int count = 0;
-    state dfa_start_state(count, cur_states);
     machine dfa_machine("dfa");
-    dfa_machine.set_starting_state(&dfa_start_state);
-    unmarked_states.push_back(dfa_start_state);
+    int starting_id = dfa_machine.add_starting_state();
+    unmarked_states.push_back(starting_id);
+    dfa_machine.set_key_for(starting_id, "" + starting_id);
     while (!unmarked_states.empty()) {
-        state cur = unmarked_states.back();
+        int cur = unmarked_states.back();
         unmarked_states.pop_back();
         for (char input : nfa.get_inputs()) {
-            std::set<state> temp = dfa::move(cur_states, input);
+            std::set<int> temp = dfa::move(cur_states, input);
             cur_states = dfa::epsilon_closure(temp);
-            state new_dfa_state(++count, cur_states);
-            state *found_state = nullptr;
-            for (state s : dfa_machine.get_states()) {
-                if (s == new_dfa_state)
-                    found_state = &s;
+            int found_state = -1;
+            std::string new_key = get_key(cur_states);
+
+            for (int s = 0 ; s < dfa_machine.get_states_count() ; s++) {
+                if (dfa_machine.get_key_for(s) == new_key)
+                    found_state = s;
             }
-            if (found_state == nullptr) {
+
+            if (found_state == -1) {
+                bool is_final = false;
+                std::string token_type = get_token_type(cur_states, nfa, is_final);
+                int new_dfa_state = dfa_machine.add_new_state(token_type, is_final);
                 unmarked_states.push_back(new_dfa_state);
-                dfa_machine.add_new_state(new_dfa_state);
                 dfa_machine.add_new_transition(cur, new_dfa_state, input);
             } else {
-                dfa_machine.add_new_transition(*found_state, new_dfa_state, input);
+                dfa_machine.add_new_transition(cur, found_state, input);
             }
         }
     }
