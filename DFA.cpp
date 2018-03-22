@@ -155,9 +155,8 @@ bool same_partition(const machine &dfa, const sid_t a, const sid_t b, std::vecto
     return true;
 }
 
-void refine(const machine &dfa, const std::vector<std::vector<sid_t> > &sets, std::vector<std::vector<sid_t> > new_sets) {
-    for (std::vector<sid_t> states : sets) {
-        std::vector<sid_t> working_set(states);
+void refine(const machine &dfa, const std::vector<std::vector<sid_t> > sets, std::vector<std::vector<sid_t> > new_sets) {
+    for (std::vector<sid_t> working_set : sets) {
         while (working_set.size() > 0) {
             sid_t s = working_set.front();
             working_set.erase(working_set.begin());
@@ -176,7 +175,7 @@ void refine(const machine &dfa, const std::vector<std::vector<sid_t> > &sets, st
 machine build_dfa(machine &org_dfa, std::vector<std::vector<sid_t> > sets, sid_t starting_state) {
     machine dfa("min_dfa");
     if (sets.size() == 0)
-        return &dfa;
+        return dfa;
     int starting_set = find_set(sets, starting_state);
     bool is_final = false;
     std::string token_type = get_token_type(sets[starting_set], org_dfa, is_final);
