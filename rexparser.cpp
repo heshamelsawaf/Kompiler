@@ -143,6 +143,8 @@ machine rexparser::handler_regular (const std::string line)
               push_to_stack (holder, st_regex, line_machines);
               holder = "";
             }
+          if (isspace (current))
+            continue;
         }
       if (current == '(')
         {

@@ -21,7 +21,7 @@ int main ()
 //    z.print_machine ();
   rexparser rx;
 
-  rx.rules2nfa ("h: hello").print_machine ();
+  rx.rules2nfa ("id: aa* | bb*").print_machine ();
 
   return 0;
 }

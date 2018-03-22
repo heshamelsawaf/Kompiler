@@ -176,7 +176,7 @@ void machine::print_machine() {
         for (auto c : language) {
             vector<int> v = get_transitions(i, c);
             for (auto to : v) {
-                cout << i << ' ' << to << ' ' << c << endl;
+                cout << i << ' ' << to << ' ' << c << ' ' <<is_accepting (i) << ' ' << is_accepting (c)<< endl;
             }
         }
     }
