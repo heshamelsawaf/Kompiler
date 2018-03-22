@@ -65,8 +65,10 @@ std::set<sid_t> dfa::move(machine m, std::set<sid_t> state_set, char in)
 
 std::string get_key(std::set<sid_t> &states) {
     std::string key = "";
-    for (sid_t s : states)
-        key += s + ",";
+    for (sid_t s : states) {
+        key += "" + s;
+        key += ",";
+    }
     key.pop_back();
     return key;
 }
