@@ -207,9 +207,9 @@ void machine::print_machine() {
             for (auto to : v) {
                 cout << i << " -- " << to << ' ';
                 if (c == EPS)
-                    cout << "[label=ε];";
+                    cout << "[label=\"ε\"];";
                 else
-                    cout << "[label=" << c << "];";
+                    cout << "[label=\"" << c << "\"];";
                 cout << endl;
             }
         }
