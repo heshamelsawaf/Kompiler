@@ -134,6 +134,7 @@ int find_set(std::vector<std::vector<sid_t> > sets, sid_t state) {
                 return i;
         }
     }
+    return -1;
 }
 
 bool same_partition(const machine &dfa, const sid_t a, const sid_t b, std::vector<std::vector<sid_t> > sets) {
