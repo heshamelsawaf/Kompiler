@@ -64,7 +64,7 @@ class machine {
 
   std::set<int> get_accepting_states () const;
 
-  std::vector<int> get_transitions_for (int id) const;
+  std::vector<int> get_transitions_for (int id, char input) const;
 
   std::string get_token_class (int id) const;
 
