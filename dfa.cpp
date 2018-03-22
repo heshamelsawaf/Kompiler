@@ -1,4 +1,4 @@
-#include "DFA.h"
+#include "dfa.h"
 #include "machine.h"
 #include <stack>
 #include <iostream>

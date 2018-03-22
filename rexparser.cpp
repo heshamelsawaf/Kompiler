@@ -105,6 +105,7 @@ void rexparser::process_line (const std::string line)
 
   return;
 }
+
 void
 rexparser::push_to_stack (std::string s, std::stack<machine_stacks> &stk, std::map<std::string, machine> &_machines)
 {
@@ -125,6 +126,7 @@ rexparser::push_to_stack (std::string s, std::stack<machine_stacks> &stk, std::m
     }
   stk.push (ms);
 }
+
 machine rexparser::handler_regular (const std::string line)
 {
   std::stack<machine_stacks> st_regex;
@@ -273,6 +275,7 @@ machine rexparser::handler_regular (const std::string line)
     }
   return machine_ops::oring (or_machines);
 }
+
 machine rexparser::get_hashed_machine (std::string key, std::map<std::string, machine> &_machines)
 {
   if (machines.count (key))
@@ -282,6 +285,7 @@ machine rexparser::get_hashed_machine (std::string key, std::map<std::string, ma
   _machines.insert (std::make_pair (key, machine_ops::string_concat (key)));
   return _machines.find (key)->second;
 }
+
 bool rexparser::isseparator (char c)
 {
   return isspace (c) || c == '|' || c == '(' || c == ')';
