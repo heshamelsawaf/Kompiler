@@ -18,7 +18,7 @@ std::set<sid_t> dfa::epsilon_closure(machine m, sid_t s)
         sid_t u = stack.top();
         stack.pop();
         std::vector<sid_t> eps_trans =
-            m.get_transitions_for(s, EPS);
+            m.get_transitions_for(u, EPS);
         for (sid_t t : eps_trans) {
             stack.push(t);
 
@@ -63,28 +63,39 @@ std::set<sid_t> dfa::move(machine m, std::set<sid_t> state_set, char in)
     return res;
 }
 
-std::string get_key(std::set<sid_t> &s) {
+std::string get_key(std::set<sid_t> &states) {
+    std::string key = "";
+    for (sid_t s : states)
+        key += s + ",";
+    key.pop_back();
+    return key;
+}
+
+std::string get_token_type(std::set<sid_t> &states, machine &fa, bool &is_final) {
+    for (sid_t s : states) {
+        if (fa.is_accepting(s)) {
+            is_final = true;
+            return fa.get_token_class(s);
+        }
+    }
     return "";
 }
 
-std::string get_token_type(std::set<sid_t> &s, machine &fa, bool &is_final) {
-
-    return "";
+std::string get_token_type(std::vector<sid_t> &states_vec, machine &fa, bool &is_final) {
+    std::set<sid_t> states(states_vec.begin(), states_vec.end());
+    return get_token_type(states, fa, is_final);
 }
 
-std::string get_token_type(std::vector<sid_t> &s, machine &fa, bool &is_final) {
-
-    return "";
-}
-
-machine* dfa::to_dfa(machine &nfa) {
+machine dfa::to_dfa(machine &nfa) {
     std::vector<sid_t> unmarked_states;
     std::set<sid_t> cur_states = epsilon_closure(nfa, nfa.get_starting_state());
     std::set<sid_t> dfa_states;
     machine dfa_machine("dfa");
-    sid_t starting_id = dfa_machine.add_starting_state();
+    bool is_final = false;
+    std::string token_class = get_token_type(cur_states, nfa, is_final);
+    sid_t starting_id = dfa_machine.add_starting_state(token_class, is_final);
     unmarked_states.push_back(starting_id);
-    dfa_machine.set_key_for(starting_id, "" + starting_id);
+    dfa_machine.set_key_for(starting_id, get_key(cur_states));
     while (!unmarked_states.empty()) {
         sid_t cur = unmarked_states.back();
         unmarked_states.pop_back();
@@ -105,6 +116,7 @@ machine* dfa::to_dfa(machine &nfa) {
                 bool is_final = false;
                 std::string token_type = get_token_type(cur_states, nfa, is_final);
                 sid_t new_dfa_state = dfa_machine.add_new_state(token_type, is_final);
+                dfa_machine.set_key_for(new_dfa_state, new_key);
                 unmarked_states.push_back(new_dfa_state);
                 dfa_machine.add_new_transition(cur, new_dfa_state, input);
             } else {
@@ -112,7 +124,7 @@ machine* dfa::to_dfa(machine &nfa) {
             }
         }
     }
-    return &dfa_machine;
+    return dfa_machine;
 }
 
 int find_set(std::vector<std::vector<sid_t> > sets, sid_t state) {
@@ -161,7 +173,7 @@ void refine(const machine &dfa, const std::vector<std::vector<sid_t> > &sets, st
     }
 }
 
-machine* build_dfa(machine &org_dfa, std::vector<std::vector<sid_t> > sets, sid_t starting_state) {
+machine build_dfa(machine &org_dfa, std::vector<std::vector<sid_t> > sets, sid_t starting_state) {
     machine dfa("min_dfa");
     if (sets.size() == 0)
         return &dfa;
@@ -176,10 +188,10 @@ machine* build_dfa(machine &org_dfa, std::vector<std::vector<sid_t> > sets, sid_
             dfa.add_new_state(token_type, is_final);
         }    
     }
-    return &dfa;
+    return dfa;
 }
 
-machine* dfa::minimize_dfa(machine& dfa) {
+machine dfa::minimize_dfa(machine& dfa) {
     std::vector<std::vector<sid_t> > cur_set;
     std::vector<sid_t> accepting;
     std::vector<sid_t> non_accepting;
