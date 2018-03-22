@@ -200,10 +200,15 @@ void machine::print_machine() {
     cout << "Machine ID: " << machine_identifier << endl;
     cout << "States Cnt: " << get_states_count() << endl;
     for (int i = 1; i <= states.size(); i++) {
-        for (auto c : language) {
+        for (char c : language) {
             vector<int> v = get_transitions(i, c);
             for (auto to : v) {
-                cout << i << ' ' << to << ' ' << c << endl;
+                cout << i << ' ' << to << ' ';
+                if (c == EPS)
+                    cout << "ε";
+                else
+                    cout << c;
+                cout << endl;
             }
         }
     }
