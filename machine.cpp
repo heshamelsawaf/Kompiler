@@ -54,6 +54,7 @@ bool machine::state::add_new_transition(int to_id, char on_input) {
 machine::machine(std::string _machine_identifier) {
     machine_identifier = _machine_identifier;
     language.insert(EPS);
+    starting = -1;
 }
 
 int machine::add_new_state(bool is_starting, bool is_accepting) {
@@ -127,6 +128,43 @@ std::set<char> machine::get_language() const {
 
 int machine::get_states_count() const {
     return (int) states.size();
+}
+
+bool machine::is_starting(int id) {
+    return starting == id;
+}
+
+bool machine::is_accepting(int id) {
+    return accepting.count(id) != 0;
+}
+
+void machine::clear_accepting_states() {
+    accepting.clear();
+}
+
+bool machine::set_accepting(int id) {
+    if (id - 1 >= get_states_count()) {
+        return false;
+    }
+    accepting.insert(id);
+    return true;
+}
+
+int machine::merge(machine other) {
+    int starting_other = other.get_starting_state();
+    int old_cnt = get_states_count();
+    for (int i = 1; i <= other.get_states_count(); i++) {
+        add_new_state(other.get_key_for(i), other.get_token_class(i), false, other.is_accepting(i));
+    }
+    for (int i = 1; i <= other.get_states_count(); i++) {
+        for (char c : other.get_language()) {
+            std::vector<int> t = other.get_transitions(i, c);
+            for (int id : t) {
+                add_new_transition(i + old_cnt, id + old_cnt, c);
+            }
+        }
+    }
+    return starting_other + old_cnt;
 }
 
 void machine::print_machine() {

@@ -72,6 +72,8 @@ public:
 
     int get_starting_state() const;
 
+    int merge(machine other);
+
     std::string get_machine_identifier() const;
 
     std::set<int> get_accepting_states() const;
@@ -85,6 +87,14 @@ public:
     std::set<char> get_language() const;
 
     int get_states_count() const;
+
+    bool set_accepting(int id);
+
+    bool is_accepting(int id);
+
+    bool is_starting(int id);
+
+    void clear_accepting_states();
 
     void print_machine();
 };

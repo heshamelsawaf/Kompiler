@@ -8,11 +8,11 @@
 #include "machine.h"
 
 namespace machine_ops {
-    machine concat(std::vector<const machine> &);
+    machine concat(std::vector<machine> &);
 
     machine concat(const machine &, const machine &);
 
-    machine oring(std::vector<const machine> &);
+    machine oring(std::vector<machine> &);
 
     machine oring(const machine &, const machine &);
 
