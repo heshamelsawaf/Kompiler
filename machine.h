@@ -3,92 +3,91 @@
 // Initial definion to the Machine strcture
 //
 
-#ifndef KOMPILER_MACHINE_H
-#define KOMPILER_MACHINE_H
+#ifndef KOMPILAR_MACHINE_H
+#define KOMPILAR_MACHINE_H
 
-#include <string>
-#include <vector>
 #include <map>
+#include <vector>
+#include <set>
+#include <string>
 
-#define EPS 0xDE
-
-class state {
-
-    class transition {
-    private:
-        state *to;
-        char on_input;
-    public:
-        transition(const transition &);
-
-        transition(state *to, char on_input);
-
-        state *get_end_state() const;
-
-        char get_transition_char() const;
-    };
-
-private:
-    int hash;
-    int state_identifier;
-    std::string token_class;
-    bool _is_accepting;
-    std::map<char, std::vector<transition> > transitions;
-public:
-    state(const state &copy);
-
-    state();
-
-    int get_hash() const;
-
-    int get_state_identifier() const;
-
-    void set_state_identifier(int);
-
-    std::string get_token_class() const;
-
-    bool is_accepting() const;
-
-    void set_accepting(bool);
-
-    std::vector<transition> get_transitions_for(char in);
-
-    std::map<char, std::vector<state::transition> > get_transitions() const;
-
-    /*
-     * Adds a new transition from this state to TO state.
-     */
-    void add_new_transition(state to, char on_input = EPS);  // 0xDE = Epsilon
-};
+#define EPS 0x01
 
 class machine {
 
+    class state {
+
+        class transition {
+        private:
+            int to_identifier;
+            char on_input;
+        public:
+            transition(int, char);
+
+            int get_to_identifier() const;
+
+            char get_transition_char() const;
+        };
+
+    private:
+        std::map<char, std::vector<transition> > transitions;
+        std::string token_class;
+        std::string key;
+    public:
+        state();
+
+        state(std::string _token_class, std::string _key);
+
+        std::string get_token_class() const;
+
+        bool add_new_transition(int to_id, char on_input = EPS);
+
+        std::string get_key() const;
+
+        std::vector<int> get_transitions_for(char input);
+
+    };
+
 private:
     std::string machine_identifier;
-    state *starting;
     std::vector<state> states;
+    std::set<int> accepting;
+    std::set<char> language;
+    int starting;
 
 public:
     machine(std::string _machine_identifier);
 
-    machine(const machine &copy);
+    int
+    add_new_state(std::string key, std::string token_class = "", bool is_starting = false, bool is_accepting = false);
 
-//  void add_new_state (int state_identifier, std::string token_class, bool is_accepting = false);
-    void add_new_state(state);
+    int
+    add_new_state(bool is_starting = false, bool is_accepting = false);
 
-    void add_new_transition(state from, state to, char on_input = EPS);
+    bool add_new_transition(int from_id, int to_id, char on_input = EPS);
 
-    void set_starting_state(state *_starting);
+    bool set_starting_state(int _starting_id);
 
-    state get_starting_state() const;
+    int add_starting_state(std::string key, std::string token_class = "", bool is_accepting = false);
+
+    int get_starting_state() const;
 
     std::string get_machine_identifier() const;
 
-    std::vector<state> get_states() const;
+    std::set<int> get_accepting_states() const;
 
-    std::vector<state> get_accepting_states() const;
+    std::vector<int> get_transitions(int id, char input);
+
+    std::string get_token_class(int id) const;
+
+    std::string get_key_for(int id) const;
+
+    std::set<char> get_language() const;
+
+    int get_states_count() const;
 
     void print_machine();
 };
 
-#endif //KOMPILER_MACHINE_H
+
+#endif //KOMPILAR_MACHINE_H

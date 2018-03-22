@@ -5,144 +5,144 @@
 #include <iostream>
 #include "machine.h"
 
-int state_key = 1;
-
-state::transition::transition(const transition &copy) {
-    this->on_input = copy.get_transition_char();
-    this->to = new state(*copy.get_end_state());
+machine::state::transition::transition(int to, char input) {
+    to_identifier = to;
+    on_input = input;
 }
 
-state::transition::transition(state *to, char on_input) {
-    this->to = to;
-    this->on_input = on_input;
+int machine::state::transition::get_to_identifier() const {
+    return to_identifier;
 }
 
-state *state::transition::get_end_state() const {
-    return this->to;
+char machine::state::transition::get_transition_char() const {
+    return on_input;
 }
 
-char state::transition::get_transition_char() const {
-    return this->on_input;
+machine::state::state() {
 }
 
-state::state() {
-    this->hash = state_key++;
+machine::state::state(std::string _token_class, std::string _key) {
+    token_class = _token_class;
+    key = _key;
 }
 
-state::state(const state &copy) {
-    this->hash = copy.get_hash();
-    this->state_identifier = copy.get_state_identifier();
-    this->token_class = copy.get_token_class();
-    this->_is_accepting = copy.is_accepting();
+std::string machine::state::get_token_class() const {
+    return token_class;
+}
 
-    for (std::pair<const char, std::vector<transition> > &entry : copy.get_transitions()) {
-        char c = entry.first;
-        this->transitions[c] = std::vector<transition>();
-        for (transition &t : entry.second) {
-            this->transitions[c].push_back(transition(t));
-        }
+std::string machine::state::get_key() const {
+    return key;
+}
+
+std::vector<int> machine::state::get_transitions_for(char input) {
+    std::vector<int> t;
+    for (machine::state::transition &trans : transitions[input]) {
+        t.push_back(trans.get_to_identifier());
     }
+    return t;
 }
 
-int state::get_hash() const {
-    return this->hash;
-}
-
-int state::get_state_identifier() const {
-    return this->state_identifier;
-}
-
-void state::set_state_identifier(int state_identifier_) {
-    this->state_identifier = state_identifier_;
-}
-
-std::string state::get_token_class() const {
-    return this->token_class;
-}
-
-bool state::is_accepting() const {
-    return this->_is_accepting;
-}
-
-void state::set_accepting(bool is_accepting) {
-    this->_is_accepting = is_accepting;
-}
-
-std::vector<state::transition> state::get_transitions_for(char in) {
-    return this->transitions[in];
-}
-
-std::map<char, std::vector<state::transition> > state::get_transitions() const {
-    return this->transitions;
-}
-
-void state::add_new_transition(state to, char on_input) {
-    if (this->transitions.count(on_input) == 0) {
-        this->transitions[on_input] = std::vector<transition>();
+bool machine::state::add_new_transition(int to_id, char on_input) {
+    if (transitions.count(on_input) == 0) {
+        transitions[on_input] = std::vector<machine::state::transition>();
     }
-    this->transitions[on_input].push_back(transition(&to, on_input));
+    transitions[on_input].push_back(machine::state::transition(to_id, on_input));
+    return true;
 }
 
 
 machine::machine(std::string _machine_identifier) {
-    this->machine_identifier = _machine_identifier;
-    this->states = std::vector<state>();
+    machine_identifier = _machine_identifier;
+    language.insert(EPS);
 }
 
-machine::machine(const machine &copy) {
-    this->machine_identifier = copy.get_machine_identifier();
-    this->starting = new state(copy.get_starting_state());
-
-    for (state &s : copy.get_states()) {
-        this->states.push_back(state(s));
+int machine::add_new_state(bool is_starting, bool is_accepting) {
+    states.push_back(machine::state());
+    if (is_accepting) {
+        accepting.insert((int) states.size());
     }
+    if (is_starting) {
+        starting = (int) states.size();
+    }
+    return (int) states.size();
 }
 
-void machine::add_new_state(state s) {
-    this->states.push_back(s);
+int machine::add_new_state(std::string key, std::string token_class, bool is_starting, bool is_accepting) {
+    states.push_back(machine::state(token_class, key));
+    if (is_accepting) {
+        accepting.insert((int) states.size());
+    }
+    if (is_starting) {
+        starting = (int) states.size();
+    }
+    return (int) states.size();
 }
 
-void machine::add_new_transition(state from, state to, char on_input) {
-    from.add_new_transition(to, on_input);
+bool machine::add_new_transition(int from_id, int to_id, char on_input) {
+    if (from_id - 1 >= get_states_count())
+        return false;
+    states[from_id - 1].add_new_transition(to_id, on_input);
+    language.insert(on_input);
+    return true;
 }
 
-void machine::set_starting_state(state *_starting) {
-    this->starting = _starting;
+bool machine::set_starting_state(int _starting_id) {
+    if (_starting_id - 1 >= get_states_count())
+        return false;
+    starting = _starting_id;
+    return true;
 }
 
-state machine::get_starting_state() const {
-    return *(this->starting);
+int machine::add_starting_state(std::string key, std::string token_class, bool is_accepting) {
+    return machine::add_new_state(key, token_class, true, is_accepting);
+}
+
+int machine::get_starting_state() const {
+    return starting;
 }
 
 std::string machine::get_machine_identifier() const {
-    return this->machine_identifier;
+    return machine_identifier;
 }
 
-std::vector<state> machine::get_states() const {
-    return this->states;
+std::set<int> machine::get_accepting_states() const {
+    return accepting;
 }
 
-std::vector<state> machine::get_accepting_states() const {
-    std::vector<state> accepting_states;
-    for (const state &s : this->states) {
-        if (s.is_accepting()) {
-            accepting_states.push_back(s);
-        }
-    }
-    return accepting_states;
+std::vector<int> machine::get_transitions(int id, char input) {
+    return states[id - 1].get_transitions_for(input);
+}
+
+std::string machine::get_token_class(int id) const {
+    return states[id - 1].get_token_class();
+}
+
+std::string machine::get_key_for(int id) const {
+    return states[id - 1].get_key();
+}
+
+std::set<char> machine::get_language() const {
+    return language;
+}
+
+int machine::get_states_count() const {
+    return (int) states.size();
 }
 
 void machine::print_machine() {
-    std::cout << "machine identifier: " << machine_identifier << std::endl;
-    std::cout << "nodes cnt: " << states.size() << std::endl;
+    using namespace std;
 
-    for (int i = 0; i < states.size(); i++) {
-        for (auto &entry : states[i].get_transitions()) {
-            for (auto &t : entry.second) {
-                std::cout << states[i].get_hash() << ' ' << t.get_end_state()->get_hash() << ' ' << entry.first
-                          << std::endl;
+    cout << "Machine ID: " << machine_identifier << endl;
+    cout << "States Cnt: " << get_states_count() << endl;
+    for (int i = 1; i <= states.size(); i++) {
+        for (auto c : language) {
+            vector<int> v = get_transitions(i, c);
+            for (auto to : v) {
+                cout << i << ' ' << to << ' ' << c << endl;
             }
         }
     }
-    std::cout << std::endl;
+    cout << endl;
+
 }
+
