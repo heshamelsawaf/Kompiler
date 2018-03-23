@@ -1,22 +1,51 @@
 #include "lexer.h"
+#include "machine.h"
 #include <sstream>
+#include "rexparser.h"
+#include "dfa.h"
 
-lexer::token next_token(const std::string &str,
-                        transition_table ttab, int &ptr) {
-    if (ptr == NULL || ptr >= str.size())
+lexer::transition_table lex_analyze(std::ifstream &ifs, bool verbose) {
+    auto s = [&ifs]{
+      std::ostringstream ss;
+      ss << ifs.rdbuf();
+      return ss.str();
+    }();
+
+    if (s.empty())
         return NULL;
 
-    std::ostringstream ss;
-    ttab.reset();
+    rexparser rx;
 
-    while (isspace(str[ptr] && ptr < str.size())
-        ptr++;
+    machine nfa = rx.rules2nfa(s);
+    machne  dfa = dfa::to_dfa(nfa);
+    machine min_dfa = dfa::minimize_dfa(dfa);
 
-    while (!isspace(str[ptr] && ptr < str.size()) {
-        ss << str[ptr];
-        ttab.move(str[ptr]);
-        ptr++;
+    return transition_table(min_dfa);
+}
+
+lexer::token next_token(std::ifstream &ifs, transition_table &ttab) {
+    if (ifs.eof() || !ifs.is_open())
+        return NULL;
+
+    char c;
+    if (!ifs >> s)
+        return NULL;
+
+
+}
+
+std::vector<lexer::token> tokenize(std::ifstream &ifs, transition_table &ttab) {
+    std::vector<lexer::token> v;
+    std::unordered_map<int, int> active_states;
+    char c;
+
+    if (ifs.eof() || !ifs.is_open()) {
+        perror("Error reading from file.")
+        return v;
     }
 
-    return lexer::token(ss.str(), get_token_class());
+    while (ifs.get(s)) {
+
+    }
+
 }
