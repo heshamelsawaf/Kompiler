@@ -1,6 +1,6 @@
-OBJS = dfa.o machine.o rexplib.o rexparser.o main.o
+OBJS = dfa.o machine.o rexplib.o rexparser.o lexer.o parser.o main.o 
 CC = g++
-CFLAGS  = -O2 --std=c++11 -Wall
+CFLAGS  =  --std=c++11 -Wall
 DFLAGS = -ggdb
 TARGET = Kompiler
 
@@ -15,7 +15,7 @@ debug: $(OBJS)
 	$(CC) $(CFLAGS) $(DFLAGS) $(OBJS) -o $(TARGET)
 	echo Target $(TARGET) compiled successfully
 
-main.o: main.cpp machine.h rexplib.h rexparser.h dfa.h
+main.o: main.cpp lexer.h parser.h rexparser.h dfa.h
 	$(CC) $(CFLAGS) -c main.cpp
 
 dfa.o: dfa.cpp dfa.h machine.h
@@ -29,6 +29,12 @@ rexparser.o: rexparser.cpp rexparser.h rexplib.h machine.h
 
 rexplib.o: rexplib.cpp rexplib.h machine.h
 	$(CC) $(CFLAGS) -c rexplib.cpp
+
+lexer.o: lexer.cpp lexer.h machine.h rexparser.h dfa.h trantable.h
+	$(CC) $(CFLAGS) -c lexer.cpp
+
+parser.o: parser.cpp parser.h lexer.h
+	$(CC) $(CFLAGS) -c parser.cpp
 
 clean:
 	rm $(OBJS) $(TARGET)

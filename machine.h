@@ -63,6 +63,8 @@ private:
     sid_t starting;
 
 public:
+    machine();
+
     machine(std::string _machine_identifier);
 
     sid_t add_new_state(std::string key, std::string token_class = "",
