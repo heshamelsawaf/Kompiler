@@ -94,12 +94,13 @@ int machine::add_new_state(std::string token_class, bool is_starting, bool is_ac
     if (is_accepting) {
         accepting.insert((int) states.size());
     }
+    int id = (int) states.size();
     if (is_starting) {
-        starting = (int) states.size();
+        starting = id;
     }
-    s.set_key(std::to_string((int) states.size()));
+    s.set_key("" + id);
 
-    return (int) states.size();
+    return id;
 }
 
 bool machine::add_new_transition(int from_id, int to_id, char on_input) {
