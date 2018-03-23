@@ -4,9 +4,13 @@
 #include <fstream>
 #include "lexer.h"
 
-namespace parser {
-    std::vector<lexer::token> parse_input(std::ifstream &ifs,
-                        lexer::transition_table ttab);
-}
+class parser {
+private:
+    std::ifstream ifs;
+    lexer lex;
+public:
+    parser(const std::ifstream &_ifs, lexer &_lex);
+    std::vector<lexer::token> parse();
+};
 
 #endif //KOMPILAR_PARSER_H

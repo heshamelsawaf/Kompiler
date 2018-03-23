@@ -11,48 +11,26 @@
 
 using namespace std;
 
-int test();
-
 int main (int argc, char** argv)
 {
+  ifstream specs_ifs;
+  ifstream src_ifs;
 
-  //test();
-
-  ifstream inFile;
-  // rexparser rx;
-
-  if (argc < 2) {
-    perror("Huh ?");
+  if (argc < 3) {
+    perror("Invalid number of arguments");
     exit(1);
   }
 
-  inFile.open (argv[1]);
+  specs_ifs.open(argv[1]);
+  src_ifs.open(argv[2]);
 
-  if (!inFile) {
-    perror("Can't read file mate");
+  if (!specs_ifs || !src_ifs) {
+    perror("Unable to read file");
     exit(1);
   }
 
-  char s;
-  while (inFile.get(s))
-    cout << s << endl;
-  // auto s = [&inFile]{
-  //   std::ostringstream ss;
-  //   ss << inFile.rdbuf();
-  //   return ss.str();
-  // }();
-  //
-  // machine nfa = rx.rules2nfa(s);
-  //machine nfa = rx.rules2nfa("letter: a+");
-  // for (int s = 1 ; s <= nfa.get_states_count() ; s++) {
-  //   cout << s << ": " << nfa.get_token_class(s) << std::endl;
-  // }
-  // nfa.print_machine();
-  // machine dfa = dfa::to_dfa(nfa);
-  // dfa.print_machine();
-  // machine min_dfa = dfa::minimize_dfa(dfa);
-//  min_dfa.print_machine();
-  //rx.rules2nfa ("id: a b*").print_machine ();
+  lexer lex(*specs_ifs);
+  lex.lex_analyze();
 
   return 0;
 }
