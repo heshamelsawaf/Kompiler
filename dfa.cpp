@@ -90,7 +90,11 @@ void get_states(std::string key, std::set<sid_t> &res) {
 
 std::string get_token_type(std::set<sid_t> &states, machine &fa, bool &is_final) {
     for (sid_t s : states) {
-        if (fa.is_accepting(s)) {
+        // if (fa.is_accepting(s)) {
+        //     is_final = true;
+        //     return fa.get_token_class(s);
+        // }
+        if (fa.get_token_class(s) != "") {
             is_final = true;
             return fa.get_token_class(s);
         }
@@ -121,6 +125,7 @@ machine dfa::to_dfa(machine &nfa) {
     // std::cout << "Count: " << nfa.get_states_count() << "Inputs: " << nfa.get_language().size() << std::endl;
     // std::cout << get_key(cur_states) << std::endl;
     // return dfa_machine;
+    int t = 0;
     while (!unmarked_states.empty()) {
         sid_t cur = unmarked_states.back();
         unmarked_states.pop_back();
@@ -158,6 +163,7 @@ machine dfa::to_dfa(machine &nfa) {
                 states_vec.push_back(eps);
                 dfa_machine.add_new_transition(cur, new_dfa_state, input);
                 keys[new_key] = new_dfa_state;
+                // std::cout << (++t) << ": " <<  new_key << std::endl;
             } else {
                 dfa_machine.add_new_transition(cur, found_state, input);
             }
@@ -192,6 +198,9 @@ bool same_partition(machine &dfa, sid_t a, sid_t b, std::vector<int> &state_part
         std::vector<sid_t> b_transitions = dfa.get_transitions(b, input);
         if (b_transitions.size() > 1 || a_transitions.size() > 1) {
             std::cerr << "Error: more than 1 transition over the same symbol in DFA" << std::endl;
+            return false;
+        }
+        if (a_transitions.size() != b_transitions.size()) {
             return false;
         }
         if (a_transitions.size() == 1 && b_transitions.size() == 1) {
@@ -291,15 +300,17 @@ machine dfa::minimize_dfa(machine& dfa) {
     }
     
     // std::cout << "248:" << std::endl;
-    // print_partitions(cur_set);
+    // print_partitions(state_partitions);
+    // std::cout << "----------------------\n";
     while (true) {
         std::vector<std::vector<sid_t> > new_set;
         refine(dfa, cur_set, new_set, state_partitions);
+        // print_partitions(state_partitions);
+    // std::cout << "----------------------\n";
         if (new_set.size() == cur_set.size())
             break;
         cur_set = new_set;
         // std::cout << "267: \n";
     }
-    // print_partitions(cur_set);
     return build_dfa(dfa, cur_set, state_partitions, starting_state);
 }
