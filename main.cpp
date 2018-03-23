@@ -51,11 +51,11 @@ int main (int argc, char** argv)
   //   std::cout << s << ": " << dfa.get_token_class(s) << std::endl;
   // }
   machine min_dfa = dfa::minimize_dfa(dfa);
-  // for (int s = 1 ; s <= min_dfa.get_states_count() ; s++) {
-  //   std::cout << (min_dfa.is_accepting(s) ? "Accepting: " : "Not Accepting: ");
-  //   std::cout << s << ": " << min_dfa.get_token_class(s) << std::endl;
-  // }
-  min_dfa.print_machine();
+  for (int s = 1 ; s <= min_dfa.get_states_count() ; s++) {
+    std::cout << (min_dfa.is_accepting(s) ? "Accepting: " : "Not Accepting: ");
+    std::cout << s << ": " << min_dfa.get_token_class(s) << std::endl;
+  }
+  // min_dfa.print_machine();
   //rx.rules2nfa ("id: a b*").print_machine ();
 
   return 0;

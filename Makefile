@@ -1,6 +1,6 @@
 OBJS = dfa.o machine.o rexplib.o rexparser.o main.o
 CC = g++
-CFLAGS  = --std=c++11 -Wall
+CFLAGS  = -O2 --std=c++11 -Wall
 DFLAGS = -ggdb
 TARGET = Kompiler
 
