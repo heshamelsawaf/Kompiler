@@ -1,5 +1,4 @@
 #include "dfa.h"
-#include "machine.h"
 #include <stack>
 #include <iostream>
 #include <unordered_map>

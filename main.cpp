@@ -16,8 +16,8 @@ int main ()
 
   rexparser rx;
 
-  machine nfa = rx.rules2nfa ("letter = a-z | A-Z\ndigit = 0-9\nid: letter (letter|digit)*");
-  // machine nfa = rx.rules2nfa("letter: a*");
+  // machine nfa = rx.rules2nfa ("letter = a-z | A-Z\ndigit = 0-9\nid: letter (letter|digit)*");
+  machine nfa = rx.rules2nfa("letter: a+");
   // for (int s = 1 ; s <= nfa.get_states_count() ; s++) {
   //   cout << s << ": " << nfa.get_token_class(s) << std::endl;
   // }
