@@ -80,24 +80,16 @@ void rexparser::process_line (const std::string line)
     {
       handler_reserved (trim_copy (line.substr (1, line.size () - 2)));
     }
-  else if (std::find (line.begin (), line.end (), '=') != line.end ())
+  else if (line.find_first_of ("=:") != std::string::npos)
     {
-      size_t index = line.find_first_of ("=");
+      size_t index = line.find_first_of ("=:");
       std::string machine_identifier = trim_copy (line.substr (0, index));
-      machine definition = handler_regular (trim_copy (line.substr (index + 1)));
-      definition.set_token_class (machine_identifier);
-      definition.set_machine_identifier (machine_identifier);
-      machines.insert (std::make_pair (machine_identifier, definition));
-    }
-  else if (std::find (line.begin (), line.end (), ':') != line.end ())
-    {
-      size_t index = line.find_first_of (":");
-      std::string machine_identifier = trim_copy (line.substr (0, index));
-      machine expression = handler_regular (trim_copy (line.substr (index + 1)));
-      expression.set_token_class (machine_identifier);
-      expression.set_machine_identifier (machine_identifier);
-      machines.insert (std::make_pair (machine_identifier, expression));
-      regex.push_back (expression);
+      machine m = handler_regular (trim_copy (line.substr (index + 1)));
+      m.set_token_class (machine_identifier);
+      m.set_machine_identifier (machine_identifier);
+      machines.insert (std::make_pair (machine_identifier, m));
+      if (line.at (index) == ':')
+        regex.push_back (m);
     }
   else
     {
