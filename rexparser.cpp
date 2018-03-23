@@ -242,6 +242,9 @@ machine rexparser::handler_regular (const std::string line)
               //TODO:: Handle errors gracefully
             }
           index++;
+          if (line.at(index) == 'L')
+            holder += EPS;
+          else
           holder += line.at (index);
         }
       else
