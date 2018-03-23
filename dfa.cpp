@@ -2,6 +2,7 @@
 #include "machine.h"
 #include <stack>
 #include <iostream>
+#include <unordered_map>
 
 typedef int sid_t;
 
@@ -117,17 +118,15 @@ machine dfa::to_dfa(machine &nfa) {
     unmarked_states.push_back(starting_id);
     // std::cout << "100-Start " << get_key(cur_states) << std::endl; 
     dfa_machine.set_key_for(starting_id, get_key(cur_states));
-    bool print = true;
+    std::cout << "Count: " << nfa.get_states_count() << "Inputs: " << nfa.get_language().size() << std::endl;
+    std::cout << get_key(cur_states) << std::endl;
+    return dfa_machine;
     while (!unmarked_states.empty()) {
         sid_t cur = unmarked_states.back();
         unmarked_states.pop_back();
         cur_states = states_vec.back();
         // std::cout << get_key(cur_states) << std::endl;
         states_vec.pop_back();
-        if (print) {
-            // std::cout << "111-Start loop " << get_key(cur_states) << std::endl;
-            print = false;
-        }
         for (char input : nfa.get_language()) {
             if (input == EPS)
                 continue;
@@ -229,14 +228,19 @@ machine build_dfa(machine &org_dfa, std::vector<std::vector<sid_t> > sets, sid_t
 
 machine dfa::minimize_dfa(machine& dfa) {
     std::vector<std::vector<sid_t> > cur_set;
-    std::vector<sid_t> accepting;
-    std::vector<sid_t> non_accepting;
     sid_t starting_state = dfa.get_starting_state();
+    std::unordered_map<string, int> tokenIdx;
+    int count = 0;
+
     for (sid_t s = 1 ; s <= dfa.get_states_count() ; s++) {
-        if (dfa.is_accepting(s)) {
-            accepting.push_back(s);
+        std::string token_type = dfa.get_token_class(s);
+        if (tokenIdx.find(token_type) == tokenIdx.end()) {
+            tokenIdx[token_type] = count++;
+            std::vector<sid_t> temp;
+            temp.push_back(s);
+            cur_set.push_back(temp);
         } else {
-            non_accepting.push_back(s);
+            cur_set[tokenIdx[token_type]].push_back(s);
         }
     }
     cur_set.push_back(accepting);

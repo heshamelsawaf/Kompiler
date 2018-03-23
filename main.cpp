@@ -17,10 +17,10 @@ int main ()
   rexparser rx;
 
   // machine nfa = rx.rules2nfa ("letter = a-z | A-Z\ndigit = 0-9\nid: letter (letter|digit)*");
-  machine nfa = rx.rules2nfa("letter: a|b\nid: letter+");
+  machine nfa = rx.rules2nfa("letter: (a|b)+");
   // nfa.print_machine();
   machine dfa = dfa::to_dfa(nfa);
-  dfa.print_machine();
+  // dfa.print_machine();
   // machine min_dfa = dfa::minimize_dfa(dfa);
   // min_dfa.print_machine();
   //rx.rules2nfa ("id: a b*").print_machine ();
