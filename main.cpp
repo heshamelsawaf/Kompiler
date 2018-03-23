@@ -3,9 +3,9 @@
 //
 
 #include <iostream>
+#include <string>
 #include <fstream>
 #include <sstream>
-#include <string>
 #include "machine.h"
 #include "rexplib.h"
 #include "rexparser.h"
@@ -13,9 +13,12 @@
 
 using namespace std;
 
+int test();
 
 int main (int argc, char** argv)
 {
+
+  //test();
 
   ifstream inFile;
   rexparser rx;
@@ -58,4 +61,17 @@ int main (int argc, char** argv)
   return 0;
 }
 
-
+int test () {
+  rexparser rx;
+  machine nfa = rx.rules2nfa("letter: a+");
+  for (int s = 1 ; s <= nfa.get_states_count() ; s++) {
+    cout << s << ": " << nfa.get_token_class(s) << std::endl;
+  }
+  cout << nfa << endl;
+  machine dfa = dfa::to_dfa(nfa);
+  cout << dfa << endl;
+  machine min_dfa = dfa::minimize_dfa(dfa);
+  cout << min_dfa << endl;
+  rx.rules2nfa ("id: a b*").print_machine ();
+  return 0;
+}
