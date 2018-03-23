@@ -9,6 +9,9 @@
 #include "rexplib.h"
 #include <iostream>
 
+
+std::string replace_escape (std::string s);
+
 // trim from start (in place)
 static inline void ltrim (std::string &s)
 {
@@ -301,10 +304,23 @@ void rexparser::handler_reserved (const std::string line)
       getline (iss, SingleLine, ' ');
       SingleLine = trim_copy (SingleLine);
       machine m = handler_regular (SingleLine);
+      SingleLine = replace_escape (SingleLine);
       m.set_token_class (SingleLine);
       m.set_machine_identifier (SingleLine);
       machines.insert (std::make_pair (SingleLine, m));
       regex.insert (regex.begin (), m);
     }
 
+}
+
+std::string replace_escape (std::string s){
+  std::string r = "";
+
+  for (size_t i = 0; i < s.size (); i++){
+      if (i != s.size () - 1 && s.at (i) == '\\')
+        r += s.at (++i);
+      else
+        r += s.at (i);
+    }
+  return r;
 }
