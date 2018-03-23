@@ -87,7 +87,8 @@ void rexparser::process_line (const std::string line)
       machine m = handler_regular (trim_copy (line.substr (index + 1)));
       m.set_machine_identifier (machine_identifier);
       machines.insert (std::make_pair (machine_identifier, m));
-      if (line.at (index) == ':'){
+      if (line.at (index) == ':')
+        {
           m.set_token_class (machine_identifier);
           regex.push_back (m);
         }
@@ -156,8 +157,7 @@ machine rexparser::handler_regular (const std::string line)
 
           if (!matching_parentheses || st_regex.top ().is_operator)
             {
-              //ERROR
-              //TODO:: Handle errors gracefully
+              throw std::invalid_argument ("Closing parenthesis location mismatched\n(" + line + ")");
             }
           matching_parentheses--;
           std::vector<std::string> possible_result;
@@ -195,8 +195,7 @@ machine rexparser::handler_regular (const std::string line)
           ms.identifier = "|", ms.is_operator = true;
           if (!st_regex.empty () && st_regex.top ().is_operator)
             {
-              //ERROR
-              //TODO:: Handle errors gracefully
+              throw std::invalid_argument ("'|'-OR Can not be applied to operators\n(" + line + ")");
             }
           st_regex.push (ms);
         }
@@ -204,8 +203,7 @@ machine rexparser::handler_regular (const std::string line)
         {
           if ((index + 1 == line.size ()) || holder.size () != 1)
             {
-              //ERROR
-              //TODO:: Handle errors gracefully
+              throw std::invalid_argument ("error encounterd in range operator(-)\n(" + line + ")");
             }
           index++;
           std::string identifier = holder + "-" + line.at (index);
@@ -219,8 +217,8 @@ machine rexparser::handler_regular (const std::string line)
         {
           if (holder.empty ())
             {
-              //ERROR
-              //TODO:: Handle errors gracefully
+              throw std::invalid_argument (
+                "[*+] operators must be preceded directly by a valid definition\n(" + line + ")");
             }
           std::string identifier = holder + current;
           if (current == '*')
@@ -238,14 +236,13 @@ machine rexparser::handler_regular (const std::string line)
         {
           if (index + 1 == line.size ())
             {
-              //ERROR
-              //TODO:: Handle errors gracefully
+              throw std::invalid_argument ("Invalid escape character at the end of the line\n(" + line + ")");
             }
           index++;
-          if (line.at(index) == 'L')
+          if (line.at (index) == 'L')
             holder += EPS;
           else
-          holder += line.at (index);
+            holder += line.at (index);
         }
       else
         {
