@@ -303,7 +303,7 @@ void rexparser::handler_reserved (const std::string line)
       m.set_token_class (SingleLine);
       m.set_machine_identifier (SingleLine);
       machines.insert (std::make_pair (SingleLine, m));
-      regex.push_back (m);
+      regex.insert (regex.begin (), m);
     }
 
 }
