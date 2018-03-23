@@ -278,10 +278,6 @@ machine dfa::minimize_dfa(machine& dfa) {
         std::string token_type = dfa.get_token_class(s);
         // std::cout << s << ": " << token_type << std::endl;
         // TODO: remove this;
-        if (!dfa.is_accepting(s)) {
-            dfa.set_token_class(s, "notacc");
-            token_type = "notacc";
-        }
         if (tokenIdx.find(token_type) == tokenIdx.end()) {
             state_partitions[s - 1] = count;
             tokenIdx[token_type] = count++;
