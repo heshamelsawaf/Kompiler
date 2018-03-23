@@ -47,6 +47,8 @@ class machine {
 
         void set_key(std::string key);
 
+        void set_token_class(std::string token_class);
+
         std::string get_key() const;
 
         std::vector<sid_t> get_transitions_for(char input);
@@ -94,11 +96,14 @@ public:
 
     void set_key_for(sid_t id, std::string new_key);
 
+
     std::set<char> get_language() const;
 
     sid_t get_states_count() const;
 
     bool set_accepting(sid_t id);
+    
+    bool set_token_class(sid_t id, std::string new_token_class);
 
     bool is_accepting(sid_t id);
 

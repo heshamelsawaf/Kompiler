@@ -238,7 +238,26 @@ machine build_dfa(machine &org_dfa, std::vector<std::vector<sid_t> > sets, sid_t
     for (int i = 0 ; i < sets.size() ; i++) {
         if (i != starting_set) {
             token_type = get_token_type(sets[i], org_dfa, is_final);
-            dfa.add_new_state(token_type, is_final);
+            dfa.add_new_state(token_type, false, is_final);
+        }
+    }
+
+    
+    for (int i = 0 ; i < sets.size() ; i++) {
+        std::vector<sid_t> set = sets[i];
+        for (char input : org_dfa.get_language()) {
+            for (sid_t state : set) {
+                std::vector<sid_t> transitions = org_dfa.get_transitions(state, input);
+                if (transitions.empty())
+                    continue;
+                int to = find_set(sets, transitions[0]);
+                if (to == -1) {
+                    std::cerr << "Internal Error: target can't be -1" << std::endl;
+                    return dfa;
+                }
+                dfa.add_new_transition(i + 1, to + 1, input);
+                break;
+            }
         }
     }
     return dfa;
@@ -253,6 +272,11 @@ machine dfa::minimize_dfa(machine& dfa) {
     for (sid_t s = 1 ; s <= dfa.get_states_count() ; s++) {
         std::string token_type = dfa.get_token_class(s);
         // std::cout << s << ": " << token_type << std::endl;
+        // TODO: remove this;
+        if (!dfa.is_accepting(s)) {
+            dfa.set_token_class(s, "notacc");
+            token_type = "notacc";
+        }
         if (tokenIdx.find(token_type) == tokenIdx.end()) {
             tokenIdx[token_type] = count++;
             std::vector<sid_t> temp;
@@ -273,6 +297,6 @@ machine dfa::minimize_dfa(machine& dfa) {
         // std::cout << "267: \n";
         // print_partitions(cur_set);
     }
-    print_partitions(cur_set);
+    // print_partitions(cur_set);
     return build_dfa(dfa, cur_set, starting_state);
 }

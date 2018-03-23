@@ -43,6 +43,10 @@ void machine::state::set_key(std::string _key) {
     key = _key;
 }
 
+void machine::state::set_token_class(std::string new_token_class) {
+    token_class = new_token_class;
+}
+
 std::vector<int> machine::state::get_transitions_for(char input) {
     std::vector<int> t;
     for (machine::state::transition &trans : transitions[input]) {
@@ -148,6 +152,13 @@ std::string machine::get_key_for(int id) const {
 
 void machine::set_key_for(sid_t id, std::string new_key) {
     states[id - 1].set_key(new_key);
+}
+
+bool machine::set_token_class(sid_t id, std::string new_token_class) {
+    if (id < 1 && id > states.size())
+        return false;
+    states[id - 1].set_token_class(new_token_class);    
+    return true;
 }
 
 std::set<char> machine::get_language() const {

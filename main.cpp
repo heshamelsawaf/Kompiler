@@ -16,8 +16,8 @@ int main ()
 
   rexparser rx;
 
-  // machine nfa = rx.rules2nfa ("letter = a-z | A-Z\ndigit = 0-9\nid: letter (letter|digit)*");
-  machine nfa = rx.rules2nfa("letter: a+");
+  machine nfa = rx.rules2nfa ("letter = a-z | A-Z\ndigit = 0-9\nid: letter (letter|digit)*");
+  // machine nfa = rx.rules2nfa("letter: a*");
   // for (int s = 1 ; s <= nfa.get_states_count() ; s++) {
   //   cout << s << ": " << nfa.get_token_class(s) << std::endl;
   // }
@@ -25,7 +25,7 @@ int main ()
   machine dfa = dfa::to_dfa(nfa);
   // dfa.print_machine();
   machine min_dfa = dfa::minimize_dfa(dfa);
-  // min_dfa.print_machine();
+  min_dfa.print_machine();
   //rx.rules2nfa ("id: a b*").print_machine ();
 
   return 0;
