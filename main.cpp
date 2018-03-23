@@ -19,6 +19,7 @@ int main (int argc, char** argv)
   ifstream inFile;
   rexparser rx;
 
+<<<<<<< HEAD
   if (argc < 2){
       perror ("Huh ?");
       exit (1);

@@ -115,6 +115,7 @@ machine dfa::to_dfa(machine &nfa) {
     std::string token_class = get_token_type(cur_states, nfa, is_final);
     sid_t starting_id = dfa_machine.add_new_state(token_class, true, is_final);
     unmarked_states.push_back(starting_id);
+    std::unordered_map<std::string, sid_t> keys;
     // std::cout << "100-Start " << get_key(cur_states) << std::endl; 
     dfa_machine.set_key_for(starting_id, get_key(cur_states));
     // std::cout << "Count: " << nfa.get_states_count() << "Inputs: " << nfa.get_language().size() << std::endl;
@@ -139,12 +140,15 @@ machine dfa::to_dfa(machine &nfa) {
             // std::cout << "121-Move Size: " << temp.size() << "Eps Size" << eps.size() << std::endl;
             int found_state = -1;
             std::string new_key = get_key(eps);
-            for (sid_t s = 1 ; s <= dfa_machine.get_states_count() ; s++) {
-                if (dfa_machine.get_key_for(s) == new_key) {
-                    found_state = s;
-                    break;
-                }
+            if (keys.find(new_key) != keys.end()) {
+                found_state = keys[new_key];
             }
+            // for (sid_t s = 1 ; s <= dfa_machine.get_states_count() ; s++) {
+            //     if (dfa_machine.get_key_for(s) == new_key) {
+            //         found_state = s;
+            //         break;
+            //     }
+            // }
 
             if (found_state == -1) {
                 bool is_final = false;
@@ -153,6 +157,7 @@ machine dfa::to_dfa(machine &nfa) {
                 unmarked_states.push_back(new_dfa_state);
                 states_vec.push_back(eps);
                 dfa_machine.add_new_transition(cur, new_dfa_state, input);
+                keys[new_key] = new_dfa_state;
             } else {
                 dfa_machine.add_new_transition(cur, found_state, input);
             }
@@ -170,19 +175,18 @@ void print_partitions(std::vector<std::vector<sid_t> > cur_set) {
     }
 }
 
-int find_set(std::vector<std::vector<sid_t> > sets, sid_t state) {
-    // std::cout << "FIND\n";
-    // std::cout << state << ' ' << sets.size() << std::endl;
-    for (int i = 0 ; i < sets.size() ; i++) {
-        for (sid_t s : sets[i]) {
-            if (s == state)
-                return i;
-        }
+void print_partitions(std::vector<int> state_partitions) {
+    for (int i = 0 ; i < state_partitions.size() ; i++) {
+        std::cout << (i+1) << ": " << state_partitions[i] << std::endl;
     }
-    return -1;
 }
 
-bool same_partition(machine &dfa, sid_t a, sid_t b, std::vector<std::vector<sid_t> > sets) {
+inline int find_set(std::vector<int> &state_partitions, sid_t state) {
+    // print_partitions(state_partitions);
+    return state_partitions[state - 1];
+}
+
+bool same_partition(machine &dfa, sid_t a, sid_t b, std::vector<int> &state_partitions) {
     for (char input : dfa.get_language()) {
         std::vector<sid_t> a_transitions = dfa.get_transitions(a, input);
         std::vector<sid_t> b_transitions = dfa.get_transitions(b, input);
@@ -191,28 +195,29 @@ bool same_partition(machine &dfa, sid_t a, sid_t b, std::vector<std::vector<sid_
             return false;
         }
         if (a_transitions.size() == 1 && b_transitions.size() == 1) {
-
-            if (find_set(sets, a_transitions[0]) != find_set(sets, b_transitions[0]))
+            if (find_set(state_partitions, a_transitions[0]) != find_set(state_partitions, b_transitions[0]))
                 return false;
         }
     }
     return true;
 }
 
-void refine(machine &dfa, const std::vector<std::vector<sid_t> > sets, std::vector<std::vector<sid_t> > &new_sets) {
-    static int _t = 0;
-    _t++;
+void refine(machine &dfa, const std::vector<std::vector<sid_t> > sets,
+ std::vector<std::vector<sid_t> > &new_sets, std::vector<int> &state_partitions) {
+    int count = 0;
+    std::vector<int> prev_partitions(state_partitions);
     for (std::vector<sid_t> working_set : sets) {
-        while (working_set.size() > 0) {
+        while (!working_set.empty()) {
             sid_t s = working_set.front();
-            working_set.erase(working_set.begin());
             std::vector<sid_t> new_set;
             new_set.push_back(s);
-            
+            state_partitions[s - 1] = count;
             std::vector<sid_t> new_working_set;
-            for (sid_t q : working_set) {
-                if (same_partition(dfa, s, q, sets)) {
+            for (int i = 1 ; i < working_set.size() ; i++) {
+                sid_t q = working_set[i];
+                if (same_partition(dfa, s, q, prev_partitions)) {
                     new_set.push_back(q);
+                    state_partitions[q - 1] = count;
                 } else {
                     new_working_set.push_back(q);
                 }
@@ -220,16 +225,17 @@ void refine(machine &dfa, const std::vector<std::vector<sid_t> > sets, std::vect
             working_set = new_working_set;
             // std::cout << "REF" << _t << ": " << new_set.size() << std::endl;
             new_sets.push_back(new_set);
+            count++;
         }
     }
 }
 
-
-machine build_dfa(machine &org_dfa, std::vector<std::vector<sid_t> > sets, sid_t starting_state) {
+machine build_dfa(machine &org_dfa, std::vector<std::vector<sid_t> > sets,
+ std::vector<int> &state_partitions, sid_t starting_state) {
     machine dfa("min_dfa");
     if (sets.size() == 0)
         return dfa;
-    int starting_set = find_set(sets, starting_state);
+    int starting_set = find_set(state_partitions, starting_state);
     bool is_final = false;
     std::string token_type = get_token_type(sets[starting_set], org_dfa, is_final);
     dfa.add_new_state(token_type, true, is_final);
@@ -240,8 +246,8 @@ machine build_dfa(machine &org_dfa, std::vector<std::vector<sid_t> > sets, sid_t
             dfa.add_new_state(token_type, false, is_final);
         }
     }
-
     
+
     for (int i = 0 ; i < sets.size() ; i++) {
         std::vector<sid_t> set = sets[i];
         for (char input : org_dfa.get_language()) {
@@ -249,7 +255,7 @@ machine build_dfa(machine &org_dfa, std::vector<std::vector<sid_t> > sets, sid_t
                 std::vector<sid_t> transitions = org_dfa.get_transitions(state, input);
                 if (transitions.empty())
                     continue;
-                int to = find_set(sets, transitions[0]);
+                int to = find_set(state_partitions, transitions[0]);
                 if (to == -1) {
                     std::cerr << "Internal Error: target can't be -1" << std::endl;
                     return dfa;
@@ -267,7 +273,7 @@ machine dfa::minimize_dfa(machine& dfa) {
     sid_t starting_state = dfa.get_starting_state();
     std::unordered_map<std::string, int> tokenIdx;
     int count = 0;
-
+    std::vector<int> state_partitions(dfa.get_states_count()); 
     for (sid_t s = 1 ; s <= dfa.get_states_count() ; s++) {
         std::string token_type = dfa.get_token_class(s);
         // std::cout << s << ": " << token_type << std::endl;
@@ -277,25 +283,27 @@ machine dfa::minimize_dfa(machine& dfa) {
             token_type = "notacc";
         }
         if (tokenIdx.find(token_type) == tokenIdx.end()) {
+            state_partitions[s - 1] = count;
             tokenIdx[token_type] = count++;
             std::vector<sid_t> temp;
             temp.push_back(s);
             cur_set.push_back(temp);
         } else {
             cur_set[tokenIdx[token_type]].push_back(s);
+            state_partitions[s - 1] = tokenIdx[token_type];
         }
     }
+    
     // std::cout << "248:" << std::endl;
     // print_partitions(cur_set);
     while (true) {
         std::vector<std::vector<sid_t> > new_set;
-        refine(dfa, cur_set, new_set);
+        refine(dfa, cur_set, new_set, state_partitions);
         if (new_set.size() == cur_set.size())
             break;
         cur_set = new_set;
         // std::cout << "267: \n";
-        // print_partitions(cur_set);
     }
     // print_partitions(cur_set);
-    return build_dfa(dfa, cur_set, starting_state);
+    return build_dfa(dfa, cur_set, state_partitions, starting_state);
 }
