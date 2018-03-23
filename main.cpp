@@ -70,6 +70,12 @@ int main (int argc, char** argv)
   machine min_dfa = dfa::minimize_dfa(dfa);
 
   lexer lex(min_dfa);
+  parser prs(&src_ifs, lex);
+
+  std::vector<lexer::token> v = prs.parse();
+
+  for (lexer::token tok : v)
+    std::cout << "str: " << tok.get_str() << " --- class: " << tok.get_class() << endl;
   // lex.lex_analyze();
   return 0;
 }

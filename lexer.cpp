@@ -3,6 +3,7 @@
 #include "rexparser.h"
 #include "dfa.h"
 #include <sstream>
+#include <iostream>
 
 lexer::lexer(machine &mac) : ttab(mac) {
     
@@ -17,14 +18,14 @@ lexer::token lexer::next_token(std::ifstream &ifs) {
     std::ostringstream accum_ss;
     std::ostringstream token_ss;
     std::string token_class = "error";
-
+    
     if (ifs.eof() || !ifs.is_open())
-        return lexer::token("", token_class);
+        return lexer::token("", "EOFSPECIALTOKENVIPONLY");
 
     char c = ifs.peek();
     if (c == EOF)
-        return lexer::token("", token_class);
-
+        return lexer::token("", "EOFSPECIALTOKENVIPONLY");
+    
     while (isspace((char) ifs.peek()))
         ifs >> c;
 
