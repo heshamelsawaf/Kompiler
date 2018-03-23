@@ -116,6 +116,10 @@ public:
     void clear_accepting_states();
 
     void print_machine();
+
+    friend std::ostream &operator <<(std::ostream &os, machine &m);
+
+    friend std::istream &operator >>(std::istream &is, machine &m);
 };
 
 

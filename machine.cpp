@@ -4,6 +4,7 @@
 
 #include <iostream>
 #include "machine.h"
+#include "thirdparty/json.hpp"
 
 machine::state::transition::transition(int to, char input) {
     to_identifier = to;
@@ -214,6 +215,54 @@ int machine::merge(machine other) {
         }
     }
     return starting_other + old_cnt;
+}
+
+std::ostream &operator <<(std::ostream &os, machine &m) {
+    using json = nlohmann::json;
+    json j;
+    j["size"] = m.get_states_count();
+    j["starting"] = m.get_starting_state();
+    j["accepting"] = m.get_accepting_states();
+
+    json trans = json::array();
+
+    for (int i = 1; i <= m.get_states_count(); i++) {
+        for (char c : m.get_language()) {
+            std::vector<int> v = m.get_transitions(i, c);
+            for (int t : v)
+                trans.push_back({i, t, (char) c});
+        }
+    }
+    j["transitions"] = trans;
+
+    os << j;
+    return os;
+}
+
+std::istream &operator >>(std::istream &is, machine &m) {
+    using json = nlohmann::json;
+    std::string str;
+    is >> str;
+    json j = json::parse(str);
+
+    int count = j["size"];
+    int starting = j["starting"];
+
+    for (int i = 0; i < count; i++)
+        m.add_new_state(false, false);
+    m.set_starting_state(starting);
+
+    for (int s : j["accepting"])
+        m.set_accepting(s);
+
+    for (json j_trans : j["transitions"]) {
+        int u = j_trans[0];
+        int v = j_trans[1];
+        char c = (int) j_trans[2];
+
+        m.add_new_transition(u, v, c);
+    }
+    return is;
 }
 
 void machine::print_machine() {
