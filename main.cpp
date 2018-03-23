@@ -15,7 +15,8 @@ int main ()
 
   rexparser rx;
 
-  rx.rules2nfa ("id: aa* | bb*").print_machine ();
+  // rx.rules2nfa ("letter = a-z | A-Z\ndigit = 0-9\nid: letter (letter|digit)*").print_machine ();
+  rx.rules2nfa ("id: a|b").print_machine ();
 
-    return 0;
+  return 0;
 }

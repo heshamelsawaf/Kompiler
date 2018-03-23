@@ -145,6 +145,9 @@ machine rexparser::handler_regular (const std::string line)
               push_to_stack (holder, st_regex, line_machines);
               holder = "";
             }
+
+          if (isspace (current))
+            continue;
         }
       if (current == '(')
         {
@@ -184,10 +187,11 @@ machine rexparser::handler_regular (const std::string line)
                 new_machine_identifier += "|";
             }
 
-          machine_stacks ms;
-          ms.identifier = new_machine_identifier, ms.is_operator = false;
-          push_to_stack (new_machine_identifier, st_regex, line_machines);
-          // line_machines.insert (std::make_pair (new_machine_identifier, @))  vector2machine method gets called here(@)
+          if (!or_machines.empty ())
+            {
+              line_machines.insert (std::make_pair (new_machine_identifier, machine_ops::oring (or_machines)));
+              holder = new_machine_identifier;
+            }
         }
       else if (current == '|')
         {

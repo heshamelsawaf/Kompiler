@@ -195,25 +195,35 @@ int machine::merge(machine other) {
 }
 
 void machine::print_machine() {
-    using namespace std;
+  using namespace std;
 
-    // cout << "Machine ID: " << machine_identifier << endl;
-    // cout << "States Cnt: " << get_states_count() << endl;
+  // cout << "Machine ID: " << machine_identifier << endl;
+  // cout << "States Cnt: " << get_states_count() << endl;
 
-    cout << "graph {\n";
-    for (int i = 1; i <= states.size(); i++) {
-        for (char c : language) {
-            vector<int> v = get_transitions(i, c);
-            for (auto to : v) {
-                cout << i << " -- " << to << ' ';
-                if (c == EPS)
-                    cout << "[label=\"ε\"];";
-                else
-                    cout << "[label=\"" << c << "\"];";
-                cout << endl;
+  cout << "digraph {\n";
+
+  cout << "node [shape = doublecircle]; ";
+  for (int i : get_accepting_states())
+    cout << i << " ";
+  cout << ";\n";
+
+  cout << "node [shape = point ]; qi;\n";
+  cout << "node [shape = circle]; \n";
+
+  cout << "qi -> " << get_starting_state() << ";\n";
+  for (int i = 1; i <= states.size(); i++) {
+      for (char c : language) {
+          vector<int> v = get_transitions(i, c);
+          for (auto to : v) {
+              cout << i << " -> " << to << ' ';
+              if (c == EPS)
+                cout << "[label=\"ε\"];";
+              else
+                cout << "[label=\"" << c << "\"];";
+              cout << endl;
             }
         }
     }
-    cout << endl << "}";
+  cout << endl << "}";
 
 }

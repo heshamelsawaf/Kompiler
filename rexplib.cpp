@@ -55,6 +55,9 @@ machine machine_ops::oring(std::vector<machine> &machines) {
         if (a == ending) continue;
         m.add_new_transition(a, ending);
     }
+
+    m.clear_accepting_states ();
+    m.set_accepting (ending);
     return m;
 }
 
