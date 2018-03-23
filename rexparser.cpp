@@ -123,6 +123,7 @@ rexparser::push_to_stack (std::string s, std::stack<machine_stacks> &stk, std::m
       machine m = machine_ops::concat (get_hashed_machine (bottom
                                                              .identifier, _machines), get_hashed_machine (s, _machines));
       ms.identifier = bottom.identifier + s;
+      _machines.insert (std::make_pair (ms.identifier, m));
     }
   stk.push (ms);
 }
