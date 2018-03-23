@@ -85,11 +85,12 @@ void rexparser::process_line (const std::string line)
       size_t index = line.find_first_of ("=:");
       std::string machine_identifier = trim_copy (line.substr (0, index));
       machine m = handler_regular (trim_copy (line.substr (index + 1)));
-      m.set_token_class (machine_identifier);
       m.set_machine_identifier (machine_identifier);
       machines.insert (std::make_pair (machine_identifier, m));
-      if (line.at (index) == ':')
-        regex.push_back (m);
+      if (line.at (index) == ':'){
+          m.set_token_class (machine_identifier);
+          regex.push_back (m);
+        }
     }
   else
     {
