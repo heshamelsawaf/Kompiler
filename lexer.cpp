@@ -44,11 +44,13 @@ lexer::token next_token(std::ifstream &ifs) {
         ifs >> c;
 
     while (ifs.peek()) {
-        accum_ss << ifs.get(c);
-
         sid_t st = ttab.move(c);
-        if (st == -1)    // reached a deadend state
+        if (st == -1) {    // reached a deadend state
+            ttab.reset();
             break;
+        }
+
+        accum_ss << ifs.get(c);
 
         else if (ttab.is_accepting()) {
             // append accum_ss to token_ss, clear accum_ss afterwards
