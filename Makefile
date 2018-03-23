@@ -1,4 +1,4 @@
-OBJS = dfa.o  machine.o  main.o  rexparser.o  rexplib.o
+OBJS = dfa.o machine.o rexplib.o rexparser.o main.o
 CC = g++
 CFLAGS  = --std=c++11 -Wall
 DFLAGS = -ggdb
