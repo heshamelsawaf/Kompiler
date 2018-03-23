@@ -102,7 +102,9 @@ public:
     sid_t get_states_count() const;
 
     bool set_accepting(sid_t id);
-    
+
+    bool set_token_class(sid_t id, std::string new_token_class);
+
     bool set_token_class(std::string new_token_class);
 
     void set_machine_identifier (std::string identifier);

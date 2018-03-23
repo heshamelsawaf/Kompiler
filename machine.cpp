@@ -158,6 +158,13 @@ void machine::set_key_for(sid_t id, std::string new_key) {
     states[id - 1].set_key(new_key);
 }
 
+bool machine::set_token_class(sid_t id, std::string new_token_class) {
+  if (id < 1 && id > states.size())
+    return false;
+  states[id - 1].set_token_class(new_token_class);
+  return true;
+}
+
 bool machine::set_token_class(std::string new_token_class) {
     for (auto i = accepting.begin (); i != accepting.end (); i++)
       states[(*i)-1].set_token_class (new_token_class);
