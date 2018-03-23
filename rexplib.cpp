@@ -101,11 +101,11 @@ machine machine_ops::single_char(char c) {
 }
 
 machine machine_ops::char_range(char start, char end) {
-    std::vector<machine> m;
-    for (char c = start; c <= end; c++) {
-        m.push_back(single_char(c));
+    machine m = machine_ops::single_char(start);
+    for (char c = (char) (start + 1); c <= end; c++){
+        m.add_new_transition(m.get_starting_state(), *(m.get_accepting_states().begin()), c);
     }
-    return machine_ops::oring(m);
+    return m;
 }
 
 machine machine_ops::string_concat(std::string s) {
