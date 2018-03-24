@@ -41,9 +41,8 @@ public:
     }
 
     std::ostream &operator <<(std::ostream &os) {
-        std::ostringstream _os;
-        _os << m;
-        return _os;
+        os << m;
+        return os;
     }
 };
 

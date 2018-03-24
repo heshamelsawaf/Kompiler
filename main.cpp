@@ -18,17 +18,22 @@ int main (int argc, char** argv)
   ifstream specs_ifs;
   ifstream src_ifs;
   ofstream ttab_ofs;
+  ofstream ttok_ofs;
 
-  if (argc < 4) {
-    perror("Invalid number of arguments");
+  if (argc < 5) {
+    perror("Invalid number of arguments!\n \
+            USAGE: ./Kompiler <specs_file> <input_file> \
+             <transition_table_output> <token_list_output>");
+
     exit(1);
   }
 
   specs_ifs.open(argv[1]);
   src_ifs.open(argv[2]);
   ttab_ofs.open(argv[3]);
+  ttok_ofs.open(argv[4]);
 
-  if (!specs_ifs || !src_ifs || !ttab_ofs) {
+  if (!specs_ifs || !src_ifs || !ttab_ofs || !ttok_ofs) {
     perror("Unable to read file");
     exit(1);
   }
@@ -55,12 +60,15 @@ int main (int argc, char** argv)
 
   std::vector<lexer::token> v = prs.parse();
 
-  for (lexer::token tok : v)
-    std::cout << "str: " << tok.get_str() << " --- class: " << tok.get_class() << endl;
+  for (lexer::token tok : v) {
+    ttok_ofs << tok << endl;
+    cout << tok << endl;
+  }
 
     specs_ifs.close();
     src_ifs.close();
     ttab_ofs.close();
+    ttok_ofs.close();
 
   return 0;
 }

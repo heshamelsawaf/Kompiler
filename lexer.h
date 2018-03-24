@@ -24,6 +24,8 @@ public:
             std::string get_class() {
                 return t_class;
             }
+
+            friend std::ostream &operator <<(std::ostream &os, token &tok);
         };
 
 private:

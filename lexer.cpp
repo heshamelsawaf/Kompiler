@@ -9,11 +9,6 @@ lexer::lexer(machine &mac) : ttab(mac) {
     
 }
 
-// void lexer::lex_analyze() {
-//     ttab = transition_table(mac);
-// }
-
-
 lexer::token lexer::next_token(std::ifstream &ifs) {
     std::ostringstream accum_ss;
     std::ostringstream token_ss;
@@ -51,8 +46,13 @@ lexer::token lexer::next_token(std::ifstream &ifs) {
             token_class = ttab.get_token_class();
         }
     }
-    
+
     ttab.reset();
     return lexer::token(token_class.empty() ? accum_ss.str() : token_ss.str(),
             token_class);
+}
+
+std::ostream &operator <<(std::ostream &os, lexer::token &tok) {
+    os << std::setw(4) << tok.get_str() << "\t" << tok.get_class();
+    return os;
 }
