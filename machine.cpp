@@ -230,11 +230,11 @@ std::ostream &operator <<(std::ostream &os, machine &m) {
         for (char c : m.get_language()) {
             std::vector<int> v = m.get_transitions(i, c);
             for (int t : v)
-                trans.push_back({std::string(1, c), i, t});
+                trans.push_back({(int) c == EPS ? std::string(1, EPS) : std::string(1, c), i, t});
         }
     }
     j["transitions"] = trans;
-
+    std::cout << std::endl;
     os << j;
     return os;
 }
@@ -256,9 +256,10 @@ std::istream &operator >>(std::istream &is, machine &m) {
         m.set_accepting(s);
 
     for (json j_trans : j["transitions"]) {
-        int u = j_trans[0];
-        int v = j_trans[1];
-        char c = (int) j_trans[2][0];
+        std::string s = j_trans[0];
+        char c = s == "eps" ? EPS : s[0];
+        int u = j_trans[1];
+        int v = j_trans[2];
 
         m.add_new_transition(u, v, c);
     }
@@ -268,11 +269,7 @@ std::istream &operator >>(std::istream &is, machine &m) {
 void machine::print_machine() {
   using namespace std;
 
-  // cout << "Machine ID: " << machine_identifier << endl;
-  // cout << "States Cnt: " << get_states_count() << endl;
-
   cout << "digraph {\n";
-
   cout << "node [shape = doublecircle]; ";
   for (int i : get_accepting_states())
     cout << i << " ";
