@@ -9,8 +9,8 @@ lexer::lexer(machine &mac) : ttab(mac) {
 }
 
 lexer::token lexer::next_token(std::istream &ifs) {
-    std::stringstream accum_ss;
-    std::stringstream token_ss;
+    std::ostringstream accum_ss;
+    std::ostringstream token_ss;
     std::string token_class = "error";
     
     if (!ifs || ifs.eof())
