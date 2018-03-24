@@ -1,7 +1,7 @@
 #ifndef KOMPILAR_PARSER_H
 #define KOMPILAR_PARSER_H
 
-#include <iostream>
+#include <istream>
 #include "lexer.h"
 
 class parser {
