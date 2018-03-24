@@ -48,7 +48,6 @@ lexer::token lexer::next_token(std::istream &ifs) {
         }
     }
 
-    std::cout << token_ss.str() << ' ' << token_class << std::endl;
     ttab.reset();
     return lexer::token(token_class.empty() ? accum_ss.str() : token_ss.str(),
             token_class);
