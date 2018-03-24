@@ -6,10 +6,10 @@
 
 class parser {
 private:
-    std::ifstream *ifs;
+    std::istream *ifs;
     lexer lex;
 public:
-    parser(std::ifstream *_ifs, lexer &_lex);
+    parser(std::istream *_is, lexer &_lex);
     std::vector<lexer::token> parse();
 };
 

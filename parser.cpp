@@ -1,6 +1,6 @@
 #include "parser.h"
 
-parser::parser(std::ifstream *_ifs, lexer &_lex) : lex{_lex} {
+parser::parser(std::istream *_ifs, lexer &_lex) : lex{_lex} {
     ifs = _ifs;
 }
 

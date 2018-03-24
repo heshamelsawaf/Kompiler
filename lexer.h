@@ -35,7 +35,7 @@ private:
 public:
     lexer(machine &mac);
     // void lex_analyze();
-    token next_token(std::ifstream &ifs);
+    token next_token(std::istream &ifs);
 };
 
 #endif //KOMPILAR_PARSER_H

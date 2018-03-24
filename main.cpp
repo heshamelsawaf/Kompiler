@@ -24,8 +24,8 @@ int main (int argc, char** argv)
     perror("Invalid number of arguments!\n \
             USAGE: ./Kompiler <specs_file> <input_file> \
              <transition_table_output> <token_list_output>");
-
-    exit(1);
+    errno = EINVAL;
+    exit(-1);
   }
 
   specs_ifs.open(argv[1]);
@@ -35,7 +35,7 @@ int main (int argc, char** argv)
 
   if (!specs_ifs || !src_ifs || !ttab_ofs || !ttok_ofs) {
     perror("Unable to read file");
-    exit(1);
+    exit(-1);
   }
 
   auto s = [&specs_ifs] {
@@ -47,7 +47,7 @@ int main (int argc, char** argv)
     if (s.empty())
         return 0;
 
-    rexparser rx;
+  rexparser rx;
 
   machine nfa = rx.rules2nfa(s);
   machine dfa = dfa::to_dfa(nfa);
@@ -65,10 +65,10 @@ int main (int argc, char** argv)
     cout << tok << endl;
   }
 
-    specs_ifs.close();
-    src_ifs.close();
-    ttab_ofs.close();
-    ttok_ofs.close();
+  specs_ifs.close();
+  src_ifs.close();
+  ttab_ofs.close();
+  ttok_ofs.close();
 
   return 0;
 }
