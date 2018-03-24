@@ -5,7 +5,6 @@
 #include <vector>
 #include <string>
 #include "thirdparty/json.hpp"
-
 class transition_table {
 private:
     machine m;

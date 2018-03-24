@@ -3,24 +3,25 @@
 #include "rexparser.h"
 #include "dfa.h"
 #include <sstream>
-#include <iostream>
 
 lexer::lexer(machine &mac) : ttab(mac) {
     
 }
 
 lexer::token lexer::next_token(std::istream &ifs) {
-    std::ostringstream accum_ss;
-    std::ostringstream token_ss;
+    std::stringstream accum_ss;
+    std::stringstream token_ss;
     std::string token_class = "error";
     
     if (!ifs || ifs.eof())
         return lexer::token("", "eof");
-
+    std::string str;
     char c = ifs.peek();
     if (c == EOF)
         return lexer::token("", "eof");
     
+    
+
     while (isspace((char) ifs.peek()))
         ifs.get(c);
 
@@ -37,9 +38,9 @@ lexer::token lexer::next_token(std::istream &ifs) {
         
         ifs.get(c);
         accum_ss << c;
-
         if (ttab.is_accepting()) {
             // append accum_ss to token_ss, clear accum_ss afterwards
+            
             token_ss << accum_ss.str() ;
             accum_ss.str(""); accum_ss.clear();
 
@@ -47,6 +48,7 @@ lexer::token lexer::next_token(std::istream &ifs) {
         }
     }
 
+    std::cout << token_ss.str() << ' ' << token_class << std::endl;
     ttab.reset();
     return lexer::token(token_class.empty() ? accum_ss.str() : token_ss.str(),
             token_class);

@@ -1,7 +1,7 @@
 #ifndef KOMPILAR_LEXER_H
 #define KOMPILAR_LEXER_H
 
-#include <fstream>
+#include <iostream>
 #include "machine.h"
 #include "trantable.h"
 

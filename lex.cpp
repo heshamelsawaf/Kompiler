@@ -58,6 +58,7 @@ int lex(std::istream &ttab_in, std::istream &src_in, std::ostream &symtab_out) {
         }
         machine m("");
         read_ttab(ttab_in, m);
+
         lexer lex(m);
         parser prs(&src_in, lex);
 
