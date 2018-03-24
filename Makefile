@@ -32,7 +32,7 @@ debug: $(OBJS)
 lex.o: lex.cpp machine.h lexer.h parser.h trantable.h
 	$(CC) $(CFLAGS) -c lex.cpp
 
-lexgen.o: lexgen.cpp machine.h dfa.h rexparser.h
+lexgen.o: lexgen.cpp machine.h dfa.h rexparser.h 
 	$(CC) $(CFLAGS) -c lexgen.cpp
  
 main.o: main.cpp machine.h trantable.h lexer.h parser.h rexparser.h dfa.h
