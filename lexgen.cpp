@@ -11,9 +11,9 @@ int main(int argc, char** argv) {
     std::ifstream specs_ifs;
     std::ofstream ttab_ofs;
     int retval = 0;
-    std::string usage = "USAGE:\n\t-./lexgen <specs_file> <transition_table_output>\n\
-\t-./lexgen <specs_file>\toutputs to stdout\n\
-\t-./lexgen\treads from stdin and outputs to stdout";
+    std::string usage = "USAGE:\n\n-./lexgen <specs_file> <transition_table_output>\n\n\
+-./lexgen <specs_file>\n\toutputs to stdout\n\n\
+-./lexgen\n\treads from stdin and outputs to stdout\n";
     if (argc == 1) {
         retval = lexgen(std::cin, std::cout);
     } else if (argc == 2) {

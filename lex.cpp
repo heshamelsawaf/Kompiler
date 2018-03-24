@@ -13,11 +13,11 @@ int main(int argc, char** argv) {
     std::ifstream src_ifs;
     std::ofstream symtab_ofs;
     int retval = 0;
-    std::string usage = "USAGE:\n\t-./lex <transition_table_input_file> <src_input_file>\
-<symbol_table_output_file>\n\
-\t-./lex <transition_table_input_file> <src_input_file>\toutputs symbol table to stdout\n\
-\t-./lex <transition_table_input_file>\treads src from stdin and outputs symbol table to stdout\n\
-\t-./lexgen\treads transition table from ttab.in, src from stdin and outputs symbol table to stdout";
+    std::string usage = "USAGE:\n\n-./lex <transition_table_input_file> <src_input_file>\
+<symbol_table_output_file>\n\n\
+-./lex <transition_table_input_file> <src_input_file>\n\toutputs symbol table to stdout\n\n\
+-./lex <transition_table_input_file>\n\treads src from stdin and outputs symbol table to stdout\n\n\
+-./lexgen\n\treads transition table from ttab.in, src from stdin and outputs symbol table to stdout\n";
     if (argc == 1) {
         ttab_ifs.open("ttab.in");
         retval = lex(ttab_ifs, std::cin, std::cout);
