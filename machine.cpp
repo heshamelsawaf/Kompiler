@@ -225,15 +225,19 @@ std::ostream &operator <<(std::ostream &os, machine &m) {
     j["accepting"] = m.get_accepting_states();
 
     json trans = json::array();
+    json tok   = json::array();
+    
 
     for (int i = 1; i <= m.get_states_count(); i++) {
         for (char c : m.get_language()) {
             std::vector<int> v = m.get_transitions(i, c);
             for (int t : v)
-                trans.push_back({(int) c == EPS ? std::string(1, EPS) : std::string(1, c), i, t});
+                trans.push_back({std::string(1, c), i, t});
         }
+        tok.push_back(m.get_token_class(i));
     }
     j["transitions"] = trans;
+    j["tokens"] = tok;
     std::cout << std::endl;
     os << j;
     return os;
@@ -244,11 +248,12 @@ std::istream &operator >>(std::istream &is, machine &m) {
     std::string str;
     is >> str;
     json j = json::parse(str);
+    int i = 0;
 
     int count = j["size"];
     int starting = j["starting"];
 
-    for (int i = 0; i < count; i++)
+    for (i = 0; i < count; i++)
         m.add_new_state(false, false);
     m.set_starting_state(starting);
 
@@ -257,11 +262,15 @@ std::istream &operator >>(std::istream &is, machine &m) {
 
     for (json j_trans : j["transitions"]) {
         std::string s = j_trans[0];
-        char c = s == "eps" ? EPS : s[0];
+        char c = s[0];
         int u = j_trans[1];
         int v = j_trans[2];
 
         m.add_new_transition(u, v, c);
+    }
+    i = 0;
+    for (std::string j_tok : j["tokens"]) {
+        m.set_token_class(++i, j_tok);
     }
     return is;
 }
