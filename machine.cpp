@@ -230,7 +230,7 @@ std::ostream &operator <<(std::ostream &os, machine &m) {
         for (char c : m.get_language()) {
             std::vector<int> v = m.get_transitions(i, c);
             for (int t : v)
-                trans.push_back({i, t, (char) c});
+                trans.push_back({std::string(1, c), i, t});
         }
     }
     j["transitions"] = trans;
@@ -258,7 +258,7 @@ std::istream &operator >>(std::istream &is, machine &m) {
     for (json j_trans : j["transitions"]) {
         int u = j_trans[0];
         int v = j_trans[1];
-        char c = (int) j_trans[2];
+        char c = (int) j_trans[2][0];
 
         m.add_new_transition(u, v, c);
     }

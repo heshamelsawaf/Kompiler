@@ -11,6 +11,6 @@ std::vector<lexer::token> parser::parse() {
     do {
         tok = lex.next_token(*ifs);
         v.push_back(tok);
-    } while (tok.get_class() != "EOFSPECIALTOKENVIPONLY");
+    } while (tok.get_class() != "eof");
     return v;
 }

@@ -4,6 +4,7 @@
 #include "machine.h"
 #include <vector>
 #include <string>
+#include "thirdparty/json.hpp"
 
 class transition_table {
 private:
@@ -22,7 +23,7 @@ public:
         std::vector<sid_t> transition = m.get_transitions(cur_state, in);
         if (transition.empty())
             return -1;
-        cur_state = m.get_transitions(cur_state, in)[0];
+        cur_state = transition[0];
         return cur_state;
     }
 
@@ -37,6 +38,12 @@ public:
     sid_t reset() {
         cur_state = m.get_starting_state();
         return cur_state;
+    }
+
+    std::ostream &operator <<(std::ostream &os) {
+        std::ostringstream _os;
+        _os << m;
+        return _os;
     }
 };
 
