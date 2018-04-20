@@ -26,6 +26,10 @@ public:
         return cur_state;
     }
 
+    bool has_starting_transition(char c) {
+        return !m.get_transitions(m.get_starting_state(), c).empty();
+    }
+    
     bool is_accepting() {
         return m.is_accepting(cur_state);
     }
