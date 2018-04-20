@@ -15,10 +15,10 @@ bool build_first_util(cfg &grmr) {
             cfg::symbol *t = *prod.get_symbols().begin();
             if (!t->is_terminal())
                 for (std::string a: t->get_first())
-                    done ^= prod.add_first(a);
+                    done |= prod.add_first(a);
         }
     }
-    
+
     return done;
 }
 
