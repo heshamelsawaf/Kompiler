@@ -12,8 +12,10 @@
 
 class cfg {
 
-    class symbol {
+public:
 
+    class symbol {
+    public:
         class production {
 
             std::list<symbol *> symbols;
@@ -24,13 +26,6 @@ class cfg {
             std::list<symbol *> get_symbols(void) const;
         };
 
-        bool terminal;
-        std::string key;
-        std::list<production> productions;
-        std::unordered_set<std::string> first;
-        std::unordered_set<std::string> follow;
-
-    public:
         symbol(std::string _key, bool _terminal = false);
 
         bool is_terminal(void) const;
@@ -51,12 +46,16 @@ class cfg {
 
         std::unordered_set<std::string> get_follow() const;
 
+    private:
+        bool terminal;
+        std::string key;
+        std::list<production> productions;
+        std::unordered_set<std::string> first;
+        std::unordered_set<std::string> follow;
+
+
     };
 
-    std::unordered_map<std::string, symbol> symbols;
-    std::string grammar;
-
-public:
     cfg(std::string _grammar);
 
     /* Adds and returns the symbol c by _key if it does not exist.
@@ -70,6 +69,13 @@ public:
      * */
     bool add_production(std::string lhs, std::list<std::string> &rhs);
 
+    symbol *get_symbol(std::string _key);
+
+    std::list<std::string> get_symbols();
+
+private:
+    std::unordered_map<std::string, symbol> symbols;
+    std::string grammar;
 
 };
 
