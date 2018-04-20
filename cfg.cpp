@@ -1,20 +1,41 @@
 #include "cfg.h"
+#define EPS "eps"
 
-bool build_first_util(cfg &grmr) {
+/* Utility function to find each production A->B where B
+ * is non-terminal and perform: FIRST(A) = FIRST(A) U FIRST(B).
+ * @return true if a change has occured, false otherwise */
+bool build_first_util(cfg *grmr) {
     bool done = false;
 
-    for (std::string sym_key : grmr.get_symbols()) {
-        cfg::symbol *s = grmr.get_symbol(sym_key);
+    for (std::string sym_key : grmr->get_symbols()) {
+        cfg::symbol *s = grmr->get_symbol(sym_key);
 
         if (s->is_terminal())
             continue;
         
         for (cfg::symbol::production prod : s->get_productions()) {
             /* For each production S->T where T is non-terminal,
-             * Add FIRST(T) to FIRST(S) */
+             * Add FIRST(T) to FIRST(S), do not add eps if it is
+             * in FIRST(T) */
             cfg::symbol *t = *prod.get_symbols().begin();
             if (!t->is_terminal())
-                for (std::string a: t->get_first())
+                for (std::string a : t->get_first())
+                    if (a != EPS)
+                        done |= prod.add_first(a);
+
+            /* For production S -> X1 X2 X3... Xk, if eps is in
+             * FIRST(X1..k), then eps is in FIRST(S) */
+            while (t != *prod.get_symbols().end())
+                if(!t->contains_first(EPS))
+                    break;
+            
+            /* If reached end of production, then eps is in
+             * FIRST(S), else if it reached Xi, then FIRST(Xi) 
+             * is in FIRST(S) */
+            if (t == *prod.get_symbols().end())
+                done |= prod.add_first(EPS);
+            else
+                for (std::string a : t->get_first())
                     done |= prod.add_first(a);
         }
     }
@@ -22,10 +43,12 @@ bool build_first_util(cfg &grmr) {
     return done;
 }
 
-void build_first(cfg &grmr) {
-    /* initialize FIRST sets for symbols */
-    for (std::string sym_key : grmr.get_symbols()) {
-        cfg::symbol *s = grmr.get_symbol(sym_key);
+/* Build first set for each and every production
+ * in cfg grammar */
+void build_first(cfg *grmr) {
+    /* Initialize FIRST sets for non-terminals */
+    for (std::string sym_key : grmr->get_symbols()) {
+        cfg::symbol *s = grmr->get_symbol(sym_key);
         
         /* If symbol S is terminal, then FIRST(S) = { S } */
         if (s->is_terminal())
@@ -35,7 +58,11 @@ void build_first(cfg &grmr) {
            beginning of its productions (including EPS) to its first set */
         for (cfg::symbol::production prod : s->get_productions()) {
             cfg::symbol *t = *prod.get_symbols().begin();
-            if (t->is_terminal())
+
+            /* If S -> a(X) is a production where a is terminal,
+             * add a to FIRST(S) */
+            /* If S -> eps is a production then add eps to FIRST(S) */
+            if (t->is_terminal() || t->is_eps())
                 prod.add_first(t->get_key());
         }
     }
@@ -46,14 +73,14 @@ void build_first(cfg &grmr) {
     while (build_first_util(grmr));
 }
 
-void build_follow(cfg &grmr) {
-
+void build_follow(cfg *grmr) {
+    
 }
 
 void cfg::build() {
     /* TODO: either make `build_first()`,
      * `build_follow()` non-static member functions
      * or separate them outside cfg.cpp */
-    build_first(*this);
-    build_follow(*this);
+    build_first(this);
+    build_follow(this);
 }
