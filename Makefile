@@ -1,16 +1,18 @@
-OBJS = dfa.o machine.o rexplib.o rexparser.o lexer.o parser.o main.o 
+GOOGLE_TEST_LIB = gtest
+GOOGLE_TEST_INCLUDE = /usr/local/include
+OBJS = dfa.o machine.o rexplib.o rexparser.o lexer.o parser.o cfg.o main.o 
 LEXOBJS = machine.o lexer.o parser.o lex.o
 LEXGENOBJS = machine.o dfa.o rexplib.o rexparser.o lexgen.o
+PARSEOBJS = cfg.o parsergen.o
 CC = g++
-CFLAGS  = -O2 --std=c++11 -Wall
+CFLAGS  = -O2 --std=c++11 -Wall -I $(GOOGLE_TEST_LIB)
 DFLAGS = -ggdb
 TARGET = Kompiler
 LEXANALYZER = lex
 LEXGEN = lexgen
-
+PARSERGEN = parsergen 
 
 all: $(TARGET)
-
 
 $(TARGET): $(OBJS)
 	$(CC) $(CFLAGS) $(OBJS) -o $(TARGET)
@@ -24,6 +26,9 @@ $(LEXGEN): $(LEXGENOBJS)
 	$(CC) $(CFLAGS) $(LEXGENOBJS) -o $(LEXGEN)
 	echo Target $(LEXGEN) compiled successfully
 
+$(PARSEGEN): $(PARSEOBJS)
+	$(CC) $(CFLAGS) $(PARSEOBJS) -o $(PARSEGEN)
+	echo Target $(PARSEGEN) compiled successfully
 
 debug: $(OBJS)
 	$(CC) $(CFLAGS) $(DFLAGS) $(OBJS) -o $(TARGET)
@@ -56,5 +61,11 @@ lexer.o: lexer.cpp lexer.h machine.h rexparser.h dfa.h trantable.h
 parser.o: parser.cpp parser.h lexer.h
 	$(CC) $(CFLAGS) -c parser.cpp
 
+cfg.o: cfg.cpp cfg.h
+	$(CC) $(CFLAGS) -c cfg.cpp
+
+parsergen.o: parsergen.cpp
+	$(CC) $(CFLAGS) -c parsergen.cpp
+
 clean:
-	rm $(OBJS) $(TARGET) lex.o lexgen.o $(LEXANALYZER) $(LEXGEN)
+	rm $(OBJS) $(TARGET) lex.o lexgen.o parsergen.o $(LEXANALYZER) $(LEXGEN) $(PARSEGEN)
