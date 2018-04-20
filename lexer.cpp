@@ -17,13 +17,12 @@ lexer::token lexer::next_token(std::istream &ifs) {
         return lexer::token("", "eof");
     std::string str;
     char c = ifs.peek();
-    if (c == EOF)
-        return lexer::token("", "eof");
-    
-    
 
     while (isspace((char) ifs.peek()))
         ifs.get(c);
+
+    if (ifs.eof())
+        return lexer::token("", "eof");
 
     // Recognize when starting state is also a final state
     if (ttab.is_accepting())
@@ -47,8 +46,11 @@ lexer::token lexer::next_token(std::istream &ifs) {
             token_class = ttab.get_token_class();
         }
     }
+    if (token_class == "error") {
+        ifs.get(c);
+        token_ss << c;
+    }
 
-    std::cout << token_ss.str() << ' ' << token_class << std::endl;
     ttab.reset();
     return lexer::token(token_class.empty() ? accum_ss.str() : token_ss.str(),
             token_class);
