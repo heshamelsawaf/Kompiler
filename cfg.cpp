@@ -80,19 +80,6 @@ void build_first(cfg *grmr) {
      * a subset of FIRST(A), add all of FIRST(A) to FIRST(S),
      * repeat until no additional changes can be made */
     while (build_first_util(grmr));
-
-    //########## LOGGING ##########
-    std::cout << ">>Initialized first sets successfully!" << std::endl;
-    for (std::string s_key : grmr->get_symbols()) {
-        cfg::symbol *s = grmr->get_symbol(s_key);        
-        if (s->is_terminal())
-            continue;
-        std::cout << "FIRST(" << s_key << ") = {";
-        for (std::string a : s->get_first())
-            std::cout << (a == EPS ? "ε" : a) << " ";
-        std::cout << "}" << std::endl;
-    }
-    //########## LOGGING ##########
 }
 
 void build_follow(cfg *grmr) {
@@ -120,7 +107,7 @@ std::string add_aux_sym(cfg *grmr, std::string _sym_str) {
     return new_sym_str;
 }
 
-int leftFactor(cfg *grmr, std::string _sym_str) {
+int left_factor(cfg *grmr, std::string _sym_str) {
     int new_symbols_cnt = 0;
     cfg::symbol *sym = grmr->get_symbol(_sym_str);
     if (grmr == nullptr || sym == nullptr || sym->get_productions().empty()) {
@@ -190,13 +177,13 @@ int leftFactor(cfg *grmr, std::string _sym_str) {
     return new_symbols_cnt;
 }
 
-bool leftFactor(cfg *grmr) {
+bool left_factor(cfg *grmr) {
     std::vector<std::string> symbols = grmr->get_symbols();
     int len = symbols.size();
     bool modified = false;
     for (int i = 0 ; i < len ; i++) {
         if (!grmr->get_symbol(symbols[i])->is_terminal()) {
-            int new_syms_cnt = leftFactor(grmr, symbols[i]);
+            int new_syms_cnt = left_factor(grmr, symbols[i]);
             len += new_syms_cnt;
             if (new_syms_cnt > 0)
                 modified = true;
@@ -300,8 +287,8 @@ bool remove_left_recursion(cfg *grmr) {
     return modified;
 }
 
-bool cfg::toLL1() {
-    bool factored = leftFactor(this);
+bool cfg::to_ll1() {
+    bool factored = left_factor(this);
     bool removed_recursion = remove_left_recursion(this);
     return factored || removed_recursion;
 }
@@ -426,7 +413,7 @@ std::unordered_set<std::string> cfg::symbol::get_follow() const{
     return follow;
 }
 
-std::vector<cfg::symbol::production> & cfg::symbol::get_productions(){
+std::vector<cfg::symbol::production> &cfg::symbol::get_productions(){
     return productions;
 }
 

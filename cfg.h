@@ -121,7 +121,7 @@ public:
     /* Tries to convert the cfg to LL(1)
     *  returns true if the cfg was converted successfully
     *  returns false if the cfg was already LL(1) */
-    bool toLL1();
+    bool to_ll1();
 
     /* Builds CFG by computing first and follow sets for
      * each non-terminal, which are later used to build

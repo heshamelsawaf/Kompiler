@@ -1,10 +1,10 @@
 GOOGLE_TEST_LIB = gtest
 GOOGLE_TEST_INCLUDE = /usr/local/include
-OBJS = dfa.o machine.o rexplib.o rexparser.o lexer.o parser.o cfg.o main.o parsetable.o test/test_first.o
+OBJS = dfa.o machine.o rexplib.o rexparser.o lexer.o parser.o cfg.o main.o parsetable.o test/test_first.o test/test_ll1.o
 LEXOBJS = machine.o lexer.o parser.o lex.o
 LEXGENOBJS = machine.o dfa.o rexplib.o rexparser.o lexgen.o
 PARSEROBJS = cfg.o parsergen.o parsetable.o
-TESTOBJS = cfg.o test/test_first.o test/test_main.o
+TESTOBJS = cfg.o test/test_first.o test/test_ll1.o test/test_main.o
 CC = g++
 CFLAGS  = -O2 --std=c++11 -Wall -I $(GOOGLE_TEST_LIB)
 DFLAGS = -ggdb
@@ -84,6 +84,10 @@ test/test_main.o: test/test_main.cpp
 test/test_first.o: test/test_first.cpp cfg.h
 	$(CC) $(CFLAGS) $(LDFLAGS) -c test/test_first.cpp
 	mv test_first.o test
+
+test/test_ll1.o: test/test_ll1.cpp cfg.h
+	$(CC) $(CFLAGS) $(LDFLAGS) -c test/test_ll1.cpp
+	mv test_ll1.o test
 
 clean:
 	rm $(OBJS) $(TARGET) *.o $(LEXANALYZER) $(LEXGEN) $(PARSERGEN)
