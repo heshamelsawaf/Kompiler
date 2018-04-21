@@ -57,6 +57,8 @@ public:
         bool contains_first(std::string _key) const;
 
         bool contains_follow(std::string _key) const;
+        
+        bool is_eps() const;
 
         std::unordered_set<std::string> get_first() const;
 
