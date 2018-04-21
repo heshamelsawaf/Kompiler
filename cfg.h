@@ -36,9 +36,9 @@ public:
 
         public:
             /* Default Constructor */
-            production();
+            production(std::string _lhs);
             /* Construct production from list of symbols and rhs */
-            production(std::string lhs, std::vector<symbol *> symbols);
+            production(std::string _lhs, std::vector<symbol *> &_symbols);
             /* Appends symbol to production */
             void add_symbol(symbol *sym);
             
@@ -66,7 +66,7 @@ public:
 
         void add_production(production _production);
 
-        void add_production(std::vector<symbol *> rhs);
+        void add_production(std::vector<symbol *> &rhs);
 
         void clear_productions();
 
