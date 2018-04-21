@@ -87,6 +87,15 @@ int find_prefix(cfg::symbol::production &a, cfg::symbol::production &b) {
     return i;
 }
 
+std::string add_aux_sym(cfg *grmr, std::string _sym_str) {
+    std::string new_sym_str = _sym_str;
+    do {
+        new_sym_str += "`";
+    } while (grmr->get_symbol(new_sym_str) != nullptr);
+    grmr->add_symbol(new_sym_str, false);
+    return new_sym_str;
+}
+
 int leftFactor(cfg *grmr, std::string _sym_str) {
     int new_symbols_cnt = 0;
     cfg::symbol *sym = grmr->get_symbol(_sym_str);
@@ -114,15 +123,11 @@ int leftFactor(cfg *grmr, std::string _sym_str) {
             }        
         }
         if (prefix > 0) {
-            std::string new_sym_str = _sym_str;
             removed.insert(i);
             removed.insert(common_prods.begin(), common_prods.end());
             // Add new symbol.
             new_symbols_cnt++;
-            do {
-                new_sym_str += "`";
-            } while (grmr->get_symbol(new_sym_str) != nullptr);
-            grmr->add_symbol(new_sym_str, false);
+            std::string new_sym_str = add_aux_sym(grmr, _sym_str);        
             for (int prod : common_prods) {
                 std::vector<cfg::symbol *> production_symbols = prods[prod].get_symbols();
                 std::vector<cfg::symbol *> rhs(production_symbols.begin() + prefix, production_symbols.end());
@@ -134,7 +139,10 @@ int leftFactor(cfg *grmr, std::string _sym_str) {
             // Add new production refering to symbol.
             std::vector<cfg::symbol *> rhs(prods[i].get_symbols().begin(),
                                          prods[i].get_symbols().begin() + prefix);
-            rhs.push_back(grmr->get_symbol(new_sym_str));          
+            rhs.push_back(grmr->get_symbol(new_sym_str));
+            // TODO: this should not be on the stack.
+            cfg::symbol::production new_production(_sym_str, rhs);
+            prods.push_back(new_production);   
         }
     }
     if (new_symbols_cnt > 0) {
@@ -163,10 +171,97 @@ bool leftFactor(cfg *grmr) {
     return modified;
 }
 
-bool cfg::toLL1() {
+bool remove_immediate_left_recursion(cfg *grmr, std::string _sym_str) {
+    cfg::symbol *sym = grmr->get_symbol(_sym_str);
+    std::unordered_set<int> recursive_prods;
+    std::vector<cfg::symbol::production> prods = sym->get_productions();
+    for (int i = 0 ; i < prods.size() ; i++) {
+        if (!prods[i].get_symbols.empty() && prods[i].get_symbols()[0] == sym)
+            recursive_prods.insert(i);
+    }
+    if (recursive_prods.empty())
+        return false;
+    std::string new_sym_str = add_aux_sym(grmr, _sym_str);
+    sym->clear_productions();
+    for (int i  = 0 ; i < prods.size() ; i++) {
+        std::vector<cfg::symbol *> prod_symbols = prods[i].get_symbols();
+        if (recursive_prods.find(i) == recursive_prods.end()) {
+            prod_symbols.push_back(grmr->get_symbol(new_sym_str));
+            grmr->add_production(_sym_str, prod_symbols);
+        } else {
+            std::vector<cfg::symbol *> new_prod_rhs(prod_symbols.begin() + 1, prod_symbols.end());
+            new_prod_rhs.push_back(grmr->get_symbol(new_sym_str));
+            grmr->add_production(new_sym_str, new_prod_rhs);
+        }
+    }
+    std::vector<cfg::symbol *> eps_rhs;
+    eps_rhs.push_back(grmr->get_symbol(EPS));
+    grmr->add_production(new_sym_str, eps_rhs);
+    return true;
+}
+bool remove_left_recursion(cfg *grmr, std::string _sym_a_str, std::string _sym_b_str) {
     bool modified = false;
-    modified = modified || leftFactor(this);
+    std::vector<cfg::symbol::production> new_prods;
+    
+    cfg::symbol *sym_a = grmr->get_symbol(_sym_a_str);
+    cfg::symbol *sym_b = grmr->get_symbol(_sym_b_str);
+
+    std::vector<cfg::symbol::production> prods_a = sym_a->get_productions();
+    std::vector<cfg::symbol::production> prods_b = sym_b->get_productions();
+    
+    for (int i = 0 ; i < prods_a.size() ; i++) {
+        if (!prods_a[i].get_symbols.empty() && prods_a[i].get_symbols()[0] == sym_b) {
+            std::vector<cfg::symbol *> syms_a = prods_a[i].get_symbols();
+            modified = true;
+
+            for (int j = 0 ; j < prods_b.size() ; j++) {
+                std::vector<cfg::symbol *> new_prod_rhs(prods_b[j].get_symbols().begin(),
+                                                        prods_b[j].get_symbols().end());
+                new_prod_rhs.insert(new_prod_rhs.end(), syms_a.begin() + 1, syms_a.end());
+                // TODO: remove this from the stack.
+                cfg::symbol::production new_production(_sym_a_str, new_prod_rhs);
+                new_prods.push_back(new_production);   
+            }
+        } else {
+            new_prods.push_back(prods_a[i]);
+        }
+    }
+    if (!modified)
+        return false;
+    sym_a->clear_productions();
+    for (int i = 0 ; i < new_prods.size() ; i++) {
+        sym_a->add_production(new_prods[i]);
+    }
+    return true;
+}
+bool remove_left_recursion(cfg *grmr) {
+    bool modified = false;
+    if (grmr == nullptr)
+        return false;
+    std::vector<std::string> symbols = grmr->get_symbols();
+    int len = symbols.size();
+    for (int i = 0 ; i < len ; i++) {
+        if (!grmr->get_symbol(symbols[i])->is_terminal())
+            continue;
+        for (int j = 0 ; j < i - 1 ; j++) {
+            if (!grmr->get_symbol(symbols[j])->is_terminal())
+                continue;
+            modified = modified || remove_left_recursion(grmr, symbols[i], symbols[j]);
+        }
+        bool contains_immediate_recursion = false;
+        // Remove immediate left recursion of any length.
+        do {
+            contains_immediate_recursion = remove_immediate_left_recursion(grmr, symbols[i]);
+            modified = modified || contains_immediate_recursion;
+        } while (contains_immediate_recursion);
+    }
     return modified;
+}
+
+bool cfg::toLL1() {
+    bool factored = leftFactor(this);
+    bool removed_recursion = remove_left_recursion(this);
+    return factored || removed_recursion;
 }
 
 void cfg::build() {
