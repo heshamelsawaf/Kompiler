@@ -90,7 +90,7 @@ int find_prefix(cfg::symbol::production &a, cfg::symbol::production &b) {
 std::string add_aux_sym(cfg *grmr, std::string _sym_str) {
     if (grmr == nullptr)
         return "error";
-    std::string new_sym_str = _sym_str;
+    std::string new_sym_str = std::move(_sym_str);
     do {
         new_sym_str += "`";
     } while (grmr->get_symbol(new_sym_str) != nullptr);
@@ -312,11 +312,11 @@ std::ostream &operator<<(std::ostream& stream, cfg &grmr) {
 }
 
 
-cfg::symbol::production::production(std::string _lhs) : lhs(_lhs) {
+cfg::symbol::production::production(std::string _lhs) : lhs(std::move(_lhs)) {
 
 }
 
-cfg::symbol::production::production(std::string _lhs, std::vector<cfg::symbol *> &_symbols) : lhs(_lhs),
+cfg::symbol::production::production(std::string _lhs, std::vector<cfg::symbol *> &_symbols) : lhs(std::move(_lhs)),
                                                                                               symbols(_symbols) {
 
 }
@@ -325,11 +325,11 @@ void cfg::symbol::production::add_symbol(symbol *sym){
     symbols.push_back(sym);
 }
 
-std::vector<cfg::symbol *> cfg::symbol::production::get_symbols(void) const {
+std::vector<cfg::symbol *> cfg::symbol::production::get_symbols() const {
     return symbols;
 }
 
-std::unordered_set<std::string> cfg::symbol::production::get_first(void) const {
+std::unordered_set<std::string> cfg::symbol::production::get_first() const {
     return first;
 }
 
@@ -342,18 +342,18 @@ cfg::symbol::symbol(){
     // TODO
 }
 
-cfg::symbol::symbol(std::string _key, bool _terminal) : key(_key), terminal(_terminal) {
+cfg::symbol::symbol(std::string _key, bool _terminal) : key(std::move(_key)), terminal(_terminal) {
 }
 
-bool cfg::symbol::is_terminal(void) const{
+bool cfg::symbol::is_terminal() const {
     return terminal;
 }
 
-bool cfg::symbol::is_eps(void) const{
+bool cfg::symbol::is_eps() const {
     return key == EPS;
 }
 
-std::string cfg::symbol::get_key(void) const{
+std::string cfg::symbol::get_key() const {
     return key;
 }
 
@@ -396,7 +396,7 @@ std::vector<cfg::symbol::production> cfg::symbol::get_productions(){
     return productions;
 }
 
-cfg::cfg(std::string _grammar) : grammar(_grammar) {
+cfg::cfg(std::string _grammar) : grammar(std::move(_grammar)) {
 
 }
 
@@ -414,7 +414,7 @@ bool cfg::add_production(std::string lhs, std::vector<std::string> &rhs){
 
     symbol &sym = symbols[lhs];
     symbol::production p(lhs);
-    for (std::string s : rhs) {
+    for (std::string &s : rhs) {
         if (!symbols.count(s))
             return false;
         p.add_symbol(&symbols[s]);
@@ -444,8 +444,4 @@ std::vector<std::string> cfg::get_symbols(){
         syms.push_back(entry.first);
     }
     return syms;
-}
-
-int main() {
-    return 0;
 }
