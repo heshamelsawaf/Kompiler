@@ -190,7 +190,8 @@ bool remove_immediate_left_recursion(cfg *grmr, std::string _sym_str) {
     std::unordered_set<int> recursive_prods;
     std::vector<cfg::symbol::production> prods = sym->get_productions();
     for (int i = 0 ; i < prods.size() ; i++) {
-        if (!prods[i].get_symbols.empty() && prods[i].get_symbols()[0] == sym)
+        std::vector<cfg::symbol *> prod_symbols = prods[i].get_symbols();
+        if (!prod_symbols.empty() && prod_symbols[0] == sym)
             recursive_prods.insert(i);
     }
     if (recursive_prods.empty())
@@ -231,8 +232,8 @@ bool remove_left_recursion(cfg *grmr, std::string _sym_a_str, std::string _sym_b
     std::vector<cfg::symbol::production> prods_b = sym_b->get_productions();
     
     for (int i = 0 ; i < prods_a.size() ; i++) {
-        if (!prods_a[i].get_symbols.empty() && prods_a[i].get_symbols()[0] == sym_b) {
-            std::vector<cfg::symbol *> syms_a = prods_a[i].get_symbols();
+        std::vector<cfg::symbol *> syms_a = prods_a[i].get_symbols();
+        if (!syms_a.empty() && syms_a[0] == sym_b) {
             modified = true;
 
             for (int j = 0 ; j < prods_b.size() ; j++) {
