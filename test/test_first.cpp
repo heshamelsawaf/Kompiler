@@ -52,5 +52,25 @@ TEST(FIRST, FIRST1) {
 
     g.build();
 
+    EXPECT_EQ(2, (int) E->get_first().size());
+    EXPECT_TRUE(E->get_first().find("id") != E->get_first().end());
+    EXPECT_TRUE(E->get_first().find("(") != E->get_first().end());
+
+    EXPECT_EQ(2, (int) T->get_first().size());
+    EXPECT_TRUE(T->get_first().find("id") != T->get_first().end());
+    EXPECT_TRUE(T->get_first().find("(") != T->get_first().end());
+    
+    EXPECT_EQ(2, (int) F->get_first().size());
+    EXPECT_TRUE(F->get_first().find("id") != F->get_first().end());
+    EXPECT_TRUE(F->get_first().find("(") != F->get_first().end());
+
+    EXPECT_EQ(2, (int) X->get_first().size());
+    EXPECT_TRUE(X->get_first().find(EPS) != X->get_first().end());
+    EXPECT_TRUE(X->get_first().find("+") != X->get_first().end());
+
+    EXPECT_EQ(2, (int) Y->get_first().size());
+    EXPECT_TRUE(Y->get_first().find(EPS) != Y->get_first().end());
+    EXPECT_TRUE(Y->get_first().find("*") != Y->get_first().end());
+    
     cout << g << endl;
 }

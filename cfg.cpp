@@ -14,7 +14,7 @@ bool build_first_util(cfg *grmr) {
         if (s->is_terminal())
             continue;
 
-        for (cfg::symbol::production prod : s->get_productions()) {
+        for (cfg::symbol::production &prod : s->get_productions()) {
             /* For each production S->T where T is non-terminal,
              * Add FIRST(T) to FIRST(S), do not add eps if it is
              * in FIRST(T) */
@@ -65,7 +65,7 @@ void build_first(cfg *grmr) {
 
         /* If symbol S is non-terminal, add all terminals in the
          * beginning of its productions (including EPS) to its first set */
-        for (cfg::symbol::production prod : s->get_productions()) {
+        for (cfg::symbol::production &prod : s->get_productions()) {
             cfg::symbol *t = *prod.get_symbols().begin();
 
             /* If S -> a(X) is a production where a is terminal,
@@ -80,6 +80,19 @@ void build_first(cfg *grmr) {
      * a subset of FIRST(A), add all of FIRST(A) to FIRST(S),
      * repeat until no additional changes can be made */
     while (build_first_util(grmr));
+
+    //########## LOGGING ##########
+    std::cout << ">>Initialized first sets successfully!" << std::endl;
+    for (std::string s_key : grmr->get_symbols()) {
+        cfg::symbol *s = grmr->get_symbol(s_key);        
+        if (s->is_terminal())
+            continue;
+        std::cout << "FIRST(" << s_key << ") = {";
+        for (std::string a : s->get_first())
+            std::cout << (a == EPS ? "ε" : a) << " ";
+        std::cout << "}" << std::endl;
+    }
+    //########## LOGGING ##########
 }
 
 void build_follow(cfg *grmr) {
@@ -305,7 +318,7 @@ std::ostream &operator<<(std::ostream& stream, const cfg::symbol::production &pr
     stream << prod.lhs;
     stream << " -> ";
     for (cfg::symbol *sym : prod.symbols) {
-        stream << sym->get_key() << ' ';
+        stream << (sym->is_eps() ? "ε" : sym->get_key()) << ' ';
     }
     stream << std::endl;
     return stream;
@@ -345,8 +358,11 @@ std::unordered_set<std::string> cfg::symbol::production::get_first(void) const {
 
 bool cfg::symbol::production::add_first(std::string _key){
     // TODO
-    first.insert(_key);
-    return true;
+    return first.insert(_key).second;
+}
+
+bool cfg::symbol::production::contains_first(std::string _key) const {
+    return first.find(_key) != first.end();
 }
 
 cfg::symbol::symbol(){
@@ -389,7 +405,9 @@ void cfg::symbol::add_follow(std::string _key){
 }
 
 bool cfg::symbol::contains_first(std::string _key) const{
-    // TODO
+    for (cfg::symbol::production prod : productions)
+        if (prod.contains_first(_key))
+            return true;
     return false;
 }
 
@@ -398,15 +416,17 @@ bool cfg::symbol::contains_follow(std::string _key) const{
 }
 
 std::unordered_set<std::string> cfg::symbol::get_first() const{
-    // TODO
-    throw std::invalid_argument("");
+    std::unordered_set<std::string> res;
+    for (cfg::symbol::production prod : productions)
+        res.insert(prod.get_first().begin(), prod.get_first().end());
+    return res;
 }
 
 std::unordered_set<std::string> cfg::symbol::get_follow() const{
     return follow;
 }
 
-std::vector<cfg::symbol::production> cfg::symbol::get_productions(){
+std::vector<cfg::symbol::production> & cfg::symbol::get_productions(){
     return productions;
 }
 

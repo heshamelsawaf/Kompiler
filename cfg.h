@@ -53,6 +53,8 @@ public:
              *       implementaiton details, to disallow inconsistency 
              *       caused by manipulation outside cfg class */
             bool add_first(std::string _key);
+
+            bool contains_first(std::string _key) const;
         };
 
         symbol();
@@ -77,13 +79,11 @@ public:
 
         bool contains_follow(std::string _key) const;
         
-        bool is_eps() const;
-
         std::unordered_set<std::string> get_first() const;
 
         std::unordered_set<std::string> get_follow() const;
 
-        std::vector<production> get_productions();
+        std::vector<production> & get_productions();
 
     private:
         bool terminal;
