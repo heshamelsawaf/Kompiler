@@ -14,7 +14,7 @@ bool build_first_util(cfg *grmr) {
 
         if (s->is_terminal())
             continue;
-        
+
         for (cfg::symbol::production prod : s->get_productions()) {
             /* For each production S->T where T is non-terminal,
              * Add FIRST(T) to FIRST(S), do not add eps if it is
@@ -30,7 +30,7 @@ bool build_first_util(cfg *grmr) {
             while (t != *prod.get_symbols().end())
                 if(!t->contains_first(EPS))
                     break;
-            
+
             /* If reached end of production, then eps is in
              * FIRST(S), else if it reached Xi, then FIRST(Xi) 
              * is in FIRST(S) */
@@ -51,7 +51,7 @@ void build_first(cfg *grmr) {
     /* Initialize FIRST sets for non-terminals */
     for (std::string sym_key : grmr->get_symbols()) {
         cfg::symbol *s = grmr->get_symbol(sym_key);
-        
+
         /* If symbol S is terminal, then FIRST(S) = { S } */
         if (s->is_terminal())
             continue;
@@ -76,7 +76,7 @@ void build_first(cfg *grmr) {
 }
 
 void build_follow(cfg *grmr) {
-    
+
 }
 
 int find_prefix(cfg::symbol::production &a, cfg::symbol::production &b) {
@@ -124,14 +124,14 @@ int leftFactor(cfg *grmr, std::string _sym_str) {
                     prefix = new_prefix;
                 else
                     prefix = std::min(prefix, new_prefix);
-            }        
+            }
         }
         if (prefix > 0) {
             removed.insert(i);
             removed.insert(common_prods.begin(), common_prods.end());
             // Add new symbol.
             new_symbols_cnt++;
-            std::string new_sym_str = add_aux_sym(grmr, _sym_str);        
+            std::string new_sym_str = add_aux_sym(grmr, _sym_str);
             bool eps_added = false;
             for (int prod : common_prods) {
                 std::vector<cfg::symbol *> production_symbols = prods[prod].get_symbols();
@@ -156,7 +156,7 @@ int leftFactor(cfg *grmr, std::string _sym_str) {
             rhs.push_back(grmr->get_symbol(new_sym_str));
             // TODO: this should not be on the stack.
             cfg::symbol::production new_production(_sym_str, rhs);
-            prods.push_back(new_production);   
+            prods.push_back(new_production);
         }
     }
     if (new_symbols_cnt > 0) {
@@ -224,13 +224,13 @@ bool remove_immediate_left_recursion(cfg *grmr, std::string _sym_str) {
 bool remove_left_recursion(cfg *grmr, std::string _sym_a_str, std::string _sym_b_str) {
     bool modified = false;
     std::vector<cfg::symbol::production> new_prods;
-    
+
     cfg::symbol *sym_a = grmr->get_symbol(_sym_a_str);
     cfg::symbol *sym_b = grmr->get_symbol(_sym_b_str);
 
     std::vector<cfg::symbol::production> prods_a = sym_a->get_productions();
     std::vector<cfg::symbol::production> prods_b = sym_b->get_productions();
-    
+
     for (int i = 0 ; i < prods_a.size() ; i++) {
         std::vector<cfg::symbol *> syms_a = prods_a[i].get_symbols();
         if (!syms_a.empty() && syms_a[0] == sym_b) {
@@ -242,7 +242,7 @@ bool remove_left_recursion(cfg *grmr, std::string _sym_a_str, std::string _sym_b
                 new_prod_rhs.insert(new_prod_rhs.end(), syms_a.begin() + 1, syms_a.end());
                 // TODO: remove this from the stack.
                 cfg::symbol::production new_production(_sym_a_str, new_prod_rhs);
-                new_prods.push_back(new_production);   
+                new_prods.push_back(new_production);
             }
         } else {
             new_prods.push_back(prods_a[i]);
@@ -311,4 +311,122 @@ std::ostream &operator<<(std::ostream& stream, cfg &grmr) {
         }
     }
     return stream;
+}
+
+
+cfg::symbol::production::production(){
+    // TODO
+}
+
+cfg::symbol::production::production(std::string lhs, std::vector<cfg::symbol *> symbols){
+    // TODO
+}
+
+void cfg::symbol::production::add_symbol(symbol *sym){
+    // TODO
+}
+
+std::vector<cfg::symbol *> cfg::symbol::production::get_symbols(void) const {
+    return symbols;
+}
+
+std::unordered_set<std::string> cfg::symbol::production::get_first(void) const {
+    return first;
+}
+
+bool cfg::symbol::production::add_first(std::string _key){
+    // TODO
+    return false;
+}
+
+cfg::symbol::symbol(){
+    // TODO
+}
+
+cfg::symbol::symbol(std::string _key, bool _terminal){
+    // TODO
+}
+
+bool cfg::symbol::is_terminal(void) const{
+    return terminal;
+}
+
+bool cfg::symbol::is_eps(void) const{
+    return key == EPS;
+}
+
+std::string cfg::symbol::get_key(void) const{
+    return key;
+}
+
+void cfg::symbol::add_production(production _production){
+    // TODO
+}
+
+void cfg::symbol::add_production(std::vector<symbol *> rhs){
+    // TODO
+}
+
+void cfg::symbol::clear_productions(){
+    // TODO
+}
+
+void cfg::symbol::add_follow(std::string _key){
+    // TODO
+}
+
+// TODO: should be removed, since it belongs to prod
+bool cfg::symbol::contains_first(std::string _key) const{
+    return false;
+}
+
+bool cfg::symbol::contains_follow(std::string _key) const{
+    return follow.count(_key);
+}
+
+// TODO: should be removed, since it belongs to prod
+std::unordered_set<std::string> cfg::symbol::get_first() const{
+    return std::unordered_set<std::string>();
+}
+
+std::unordered_set<std::string> cfg::symbol::get_follow() const{
+    return follow;
+}
+
+std::vector<cfg::symbol::production> cfg::symbol::get_productions(){
+    return productions;
+}
+
+cfg::cfg(std::string _grammar){
+    // TODO
+}
+
+cfg::symbol *cfg::add_symbol(std::string _key, bool _terminal){
+    // TODO
+    return nullptr;
+}
+
+bool cfg::add_production(std::string lhs, std::vector<std::string> &rhs){
+    // TODO
+    return false;
+}
+
+bool cfg::add_production(std::string lhs, std::vector<cfg::symbol *> &rhs){
+    // TODO
+    return false;
+}
+
+cfg::symbol *cfg::get_symbol(std::string _key){
+    if (!symbols.count(_key)){
+        throw std::invalid_argument("No symbol exists for provided key: " + _key);
+    }
+    return &symbols[_key];
+}
+
+std::vector<std::string> cfg::get_symbols(){
+    std::vector<std::string> syms;
+    for (auto& entry : symbols){
+        syms.push_back(entry.first);
+    }
+    return syms;
 }

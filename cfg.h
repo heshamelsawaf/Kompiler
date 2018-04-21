@@ -44,13 +44,17 @@ public:
             
             /* Return list representation of production. */
             std::vector<symbol *> get_symbols(void) const;
-            
+
+            std::unordered_set<std::string> get_first() const;
+
             /* Add a symbol to the first set of this production */
             /* TODO: add_first can be implemented internally, hiding
              *       implementaiton details, to disallow inconsistency 
              *       caused by manipulation outside cfg class */
             bool add_first(std::string _key);
         };
+
+        symbol();
 
         symbol(std::string _key, bool _terminal = false);
 
@@ -72,6 +76,7 @@ public:
 
         bool contains_follow(std::string _key) const;
 
+        // TODO: should be removed, since it belongs to prod
         std::unordered_set<std::string> get_first() const;
 
         std::unordered_set<std::string> get_follow() const;
