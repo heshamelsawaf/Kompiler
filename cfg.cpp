@@ -1,5 +1,7 @@
 #include "cfg.h"
 #define EPS "eps"
+#include <iostream>
+#include <stdexcept>
 
 /* Utility function to find each production A->B where B
  * is non-terminal and perform: FIRST(A) = FIRST(A) U FIRST(B).
@@ -88,6 +90,8 @@ int find_prefix(cfg::symbol::production &a, cfg::symbol::production &b) {
 }
 
 std::string add_aux_sym(cfg *grmr, std::string _sym_str) {
+    if (grmr == nullptr)
+        return "error";
     std::string new_sym_str = _sym_str;
     do {
         new_sym_str += "`";
@@ -128,10 +132,20 @@ int leftFactor(cfg *grmr, std::string _sym_str) {
             // Add new symbol.
             new_symbols_cnt++;
             std::string new_sym_str = add_aux_sym(grmr, _sym_str);        
+            bool eps_added = false;
             for (int prod : common_prods) {
                 std::vector<cfg::symbol *> production_symbols = prods[prod].get_symbols();
                 std::vector<cfg::symbol *> rhs(production_symbols.begin() + prefix, production_symbols.end());
                 if (rhs.empty()) {
+                    /*  Add eps once in case of repeated productions.
+                    *   e.g. A -> Bc | Bc | Bcd
+                    *   which becomes
+                    *   A -> BcA'
+                    *   A'-> eps | d
+                    */
+                    if (eps_added)
+                        continue;
+                    eps_added = true;
                     rhs.push_back(grmr->get_symbol(EPS));
                 }
                 grmr->add_production(new_sym_str, rhs);
@@ -181,6 +195,13 @@ bool remove_immediate_left_recursion(cfg *grmr, std::string _sym_str) {
     }
     if (recursive_prods.empty())
         return false;
+    // Handles cases like (A -> A | Ab | Ac) where no symbols have
+    if (recursive_prods.size() == prods.size()) {
+        std::string err_msg = "Error: Invalid Grammar: Symbol("
+                                 + _sym_str + ") is infinitely left recursive";
+        std::cerr << err_msg << std::endl;
+        throw std::invalid_argument(err_msg);
+    }
     std::string new_sym_str = add_aux_sym(grmr, _sym_str);
     sym->clear_productions();
     for (int i  = 0 ; i < prods.size() ; i++) {
