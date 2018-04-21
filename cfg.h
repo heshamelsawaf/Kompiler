@@ -83,7 +83,7 @@ public:
 
         std::unordered_set<std::string> get_follow() const;
 
-        std::vector<production> & get_productions();
+        std::vector<production> get_productions();
 
     private:
         bool terminal;
