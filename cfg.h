@@ -10,6 +10,7 @@
 #include <string>
 #include <vector>
 #include <iostream>
+#define EPS std::string(1, 0x01)
 
 class cfg {
 
@@ -38,7 +39,7 @@ public:
             /* Default Constructor */
             production();
             /* Construct production from list of symbols and rhs */
-            production(std::string lhs, std::vector<symbol *> symbols);
+            production(std::string _lhs, std::vector<symbol *> symbols);
             /* Appends symbol to production */
             void add_symbol(symbol *sym);
             
@@ -78,7 +79,6 @@ public:
         
         bool is_eps() const;
 
-        // TODO: should be removed, since it belongs to prod
         std::unordered_set<std::string> get_first() const;
 
         std::unordered_set<std::string> get_follow() const;

@@ -1,5 +1,4 @@
 #include "cfg.h"
-#define EPS "eps"
 #include <iostream>
 #include <stdexcept>
 
@@ -326,8 +325,10 @@ cfg::symbol::production::production(){
     // TODO
 }
 
-cfg::symbol::production::production(std::string lhs, std::vector<cfg::symbol *> symbols){
+cfg::symbol::production::production(std::string _lhs, std::vector<cfg::symbol *> _symbols){
     // TODO
+    symbols = _symbols;
+    lhs = _lhs;
 }
 
 void cfg::symbol::production::add_symbol(symbol *sym){
@@ -344,7 +345,8 @@ std::unordered_set<std::string> cfg::symbol::production::get_first(void) const {
 
 bool cfg::symbol::production::add_first(std::string _key){
     // TODO
-    return false;
+    first.insert(_key);
+    return true;
 }
 
 cfg::symbol::symbol(){
@@ -352,7 +354,8 @@ cfg::symbol::symbol(){
 }
 
 cfg::symbol::symbol(std::string _key, bool _terminal){
-    // TODO
+    key = _key;
+    terminal = _terminal;
 }
 
 bool cfg::symbol::is_terminal(void) const{
@@ -369,6 +372,7 @@ std::string cfg::symbol::get_key(void) const{
 
 void cfg::symbol::add_production(production _production){
     // TODO
+    productions.push_back(_production);
 }
 
 void cfg::symbol::add_production(std::vector<symbol *> rhs){
@@ -381,20 +385,21 @@ void cfg::symbol::clear_productions(){
 
 void cfg::symbol::add_follow(std::string _key){
     // TODO
+    follow.insert(_key);
 }
 
-// TODO: should be removed, since it belongs to prod
 bool cfg::symbol::contains_first(std::string _key) const{
+    // TODO
     return false;
 }
 
 bool cfg::symbol::contains_follow(std::string _key) const{
-    return follow.count(_key);
+    return (bool) follow.count(_key);
 }
 
-// TODO: should be removed, since it belongs to prod
 std::unordered_set<std::string> cfg::symbol::get_first() const{
-    return std::unordered_set<std::string>();
+    // TODO
+    throw std::invalid_argument("");
 }
 
 std::unordered_set<std::string> cfg::symbol::get_follow() const{
@@ -411,7 +416,12 @@ cfg::cfg(std::string _grammar){
 
 cfg::symbol *cfg::add_symbol(std::string _key, bool _terminal){
     // TODO
-    return nullptr;
+    if (symbols.count(_key))
+        return &symbols[_key];
+
+    cfg::symbol sym(_key, _terminal);
+    symbols[_key] = sym;
+    return &symbols[_key];
 }
 
 bool cfg::add_production(std::string lhs, std::vector<std::string> &rhs){
@@ -425,6 +435,7 @@ bool cfg::add_production(std::string lhs, std::vector<cfg::symbol *> &rhs){
 }
 
 cfg::symbol *cfg::get_symbol(std::string _key){
+    // TODO
     if (!symbols.count(_key)){
         throw std::invalid_argument("No symbol exists for provided key: " + _key);
     }
