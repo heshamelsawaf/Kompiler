@@ -8,7 +8,8 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <string>
-#include <list>
+#include <vector>
+#include <iostream>
 
 class cfg {
 
@@ -20,7 +21,7 @@ public:
 
             /* A production is represented by an ordered
              *  list of symbols */
-            std::list<symbol *> symbols;
+            std::vector<symbol *> symbols;
             
             /* Each production has a first set, which is a set
              * of terminals that can be matched from the non-terminal
@@ -30,13 +31,22 @@ public:
             /* Key of the nonterminal lhs of this production */
             std::string lhs;
 
+            /* Overloading the ostream operator */
+            friend std::ostream &operator<<(std::ostream& stream, const production &prod);
+
         public:
+            /* Default Constructor */
+            production();
+            /* Construct production from list of symbols and rhs */
+            production(std::string lhs, std::vector<symbol *> symbols);
             /* Appends symbol to production */
             void add_symbol(symbol *sym);
             
-            /* Return list representation of produciton. */
-            std::list<symbol *> get_symbols(void) const;
-            
+            /* Return list representation of production. */
+            std::vector<symbol *> get_symbols(void) const;
+
+            std::unordered_set<std::string> get_first() const;
+
             /* Add a symbol to the first set of this production */
             /* TODO: add_first can be implemented internally, hiding
              *       implementaiton details, to disallow inconsistency 
@@ -44,13 +54,21 @@ public:
             bool add_first(std::string _key);
         };
 
+        symbol();
+
         symbol(std::string _key, bool _terminal = false);
 
         bool is_terminal(void) const;
 
+        bool is_eps(void) const;
+
         std::string get_key(void) const;
 
         void add_production(production _production);
+
+        void add_production(std::vector<symbol *> rhs);
+
+        void clear_productions();
 
         void add_follow(std::string _key);
 
@@ -60,16 +78,17 @@ public:
         
         bool is_eps() const;
 
+        // TODO: should be removed, since it belongs to prod
         std::unordered_set<std::string> get_first() const;
 
         std::unordered_set<std::string> get_follow() const;
 
-        std::list<production> get_productions();
+        std::vector<production> get_productions();
 
     private:
         bool terminal;
         std::string key;
-        std::list<production> productions;
+        std::vector<production> productions;
         std::unordered_set<std::string> follow;
 
     };
@@ -82,14 +101,27 @@ public:
     symbol *add_symbol(std::string _key, bool _terminal = false);
 
     /* Adds a new production identified as lhs -> rhs;
+     * rhs is a list of all symbol names in the production.
+     * all the symbols will be added to the cfg symbols automatically if they do not exist.
+     * */
+    bool add_production(std::string lhs, std::vector<std::string> &rhs);
+
+    /* Adds a new production identified as lhs -> rhs;
      * rhs is a list of all symbols in the production.
      * all the symbols will be added to the cfg symbols automatically if they do not exist.
      * */
-    bool add_production(std::string lhs, std::list<std::string> &rhs);
+    bool add_production(std::string lhs, std::vector<symbol *> &rhs);
+
 
     symbol *get_symbol(std::string _key);
 
-    std::list<std::string> get_symbols();
+
+    std::vector<std::string> get_symbols();
+    
+    /* Tries to convert the cfg to LL(1)
+    *  returns true if the cfg was converted successfully
+    *  returns false if the cfg was already LL(1) */
+    bool toLL1();
 
     /* Builds CFG by computing first and follow sets for
      * each non-terminal, which are later used to build
@@ -99,6 +131,8 @@ public:
 private:
     std::unordered_map<std::string, symbol> symbols;
     std::string grammar;
+    /* Overloading the ostream operator */
+    friend std::ostream &operator<<(std::ostream& stream, cfg &grmr);
 
 };
 
