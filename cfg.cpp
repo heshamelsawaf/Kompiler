@@ -292,3 +292,22 @@ void cfg::build() {
     build_first(this);
     build_follow(this);
 }
+
+std::ostream &operator<<(std::ostream& stream, const cfg::symbol::production &prod) {
+    stream << prod.lhs;
+    stream << " -> ";
+    for (cfg::symbol *sym : prod.symbols) {
+        stream << sym->get_key() << ' ';
+    }
+    stream << std::endl;
+    return stream;
+}
+
+std::ostream &operator<<(std::ostream& stream, cfg &grmr) {
+    for (std::string sym_str : grmr.get_symbols()) {
+        for (cfg::symbol::production prod : grmr.get_symbol(sym_str)->get_productions()) {
+            stream << prod;
+        }
+    }
+    return stream;
+}

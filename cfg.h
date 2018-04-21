@@ -9,6 +9,7 @@
 #include <unordered_set>
 #include <string>
 #include <vector>
+#include <iostream>
 
 class cfg {
 
@@ -29,6 +30,9 @@ public:
 
             /* Key of the nonterminal lhs of this production */
             std::string lhs;
+
+            /* Overloading the ostream operator */
+            friend std::ostream &operator<<(std::ostream& stream, const production &prod);
 
         public:
             /* Default Constructor */
@@ -104,7 +108,9 @@ public:
 
     symbol *get_symbol(std::string _key);
 
+
     std::vector<std::string> get_symbols();
+    
     /* Tries to convert the cfg to LL(1)
     *  returns true if the cfg was converted successfully
     *  returns false if the cfg was already LL(1) */
@@ -118,6 +124,8 @@ public:
 private:
     std::unordered_map<std::string, symbol> symbols;
     std::string grammar;
+    /* Overloading the ostream operator */
+    friend std::ostream &operator<<(std::ostream& stream, cfg &grmr);
 
 };
 
