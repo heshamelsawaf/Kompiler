@@ -1,9 +1,9 @@
 GOOGLE_TEST_LIB = gtest
 GOOGLE_TEST_INCLUDE = /usr/local/include
-OBJS = dfa.o machine.o rexplib.o rexparser.o lexer.o parser.o cfg.o main.o 
+OBJS = dfa.o machine.o rexplib.o rexparser.o lexer.o parser.o cfg.o main.o parsetable.o
 LEXOBJS = machine.o lexer.o parser.o lex.o
 LEXGENOBJS = machine.o dfa.o rexplib.o rexparser.o lexgen.o
-PARSEROBJS = cfg.o parsergen.o
+PARSEROBJS = cfg.o parsergen.o parsetable.o
 CC = g++
 CFLAGS  = -O2 --std=c++11 -Wall -I $(GOOGLE_TEST_LIB)
 DFLAGS = -ggdb
@@ -63,6 +63,9 @@ parser.o: parser.cpp parser.h lexer.h
 
 cfg.o: cfg.cpp cfg.h
 	$(CC) $(CFLAGS) -c cfg.cpp
+
+parsetable.o: parsetable.cpp parsetable.h
+	$(CC) $(CFLAGS) -c parsetable.cpp
 
 parsergen.o: parsergen.cpp cfg.h
 	$(CC) $(CFLAGS) -c parsergen.cpp
