@@ -77,6 +77,98 @@ void build_follow(cfg *grmr) {
     
 }
 
+int find_prefix(cfg::symbol::production &a, cfg::symbol::production &b) {
+    int len = std::min(a.get_symbols().size(), b.get_symbols().size());
+    int i = 0;
+    for (i = 0 ; i < len ; i++) {
+        if (a.get_symbols()[i] != b.get_symbols()[i])
+            return i;
+    }
+    return i;
+}
+
+int leftFactor(cfg *grmr, std::string _sym_str) {
+    int new_symbols_cnt = 0;
+    cfg::symbol *sym = grmr->get_symbol(_sym_str);
+    if (grmr == nullptr || sym == nullptr || sym->get_productions().empty()) {
+        return 0;
+    }
+    std::unordered_set<int> removed;
+    std::vector<cfg::symbol::production> prods = sym->get_productions();
+    int len = prods.size();
+    for (int i = 0 ; i < len ; i++) {
+        if (removed.find(i) != removed.end())
+            continue;
+        std::vector<int> common_prods;
+        int prefix = 0;
+        for (int j = i + 1 ; j < len ; j++) {
+            if (removed.find(j) != removed.end())
+                continue;
+            int new_prefix = find_prefix(prods[i], prods[j]);
+            if (new_prefix > 0) {
+                common_prods.push_back(j);
+                if (prefix == 0)
+                    prefix = new_prefix;
+                else
+                    prefix = std::min(prefix, new_prefix);
+            }        
+        }
+        if (prefix > 0) {
+            std::string new_sym_str = _sym_str;
+            removed.insert(i);
+            removed.insert(common_prods.begin(), common_prods.end());
+            // Add new symbol.
+            new_symbols_cnt++;
+            do {
+                new_sym_str += "`";
+            } while (grmr->get_symbol(new_sym_str) != nullptr);
+            grmr->add_symbol(new_sym_str, false);
+            for (int prod : common_prods) {
+                std::vector<cfg::symbol *> production_symbols = prods[prod].get_symbols();
+                std::vector<cfg::symbol *> rhs(production_symbols.begin() + prefix, production_symbols.end());
+                if (rhs.empty()) {
+                    rhs.push_back(grmr->get_symbol(EPS));
+                }
+                grmr->add_production(new_sym_str, rhs);
+            }
+            // Add new production refering to symbol.
+            std::vector<cfg::symbol *> rhs(prods[i].get_symbols().begin(),
+                                         prods[i].get_symbols().begin() + prefix);
+            rhs.push_back(grmr->get_symbol(new_sym_str));          
+        }
+    }
+    if (new_symbols_cnt > 0) {
+        sym->clear_productions();
+        for (int i = 0 ; i < prods.size() ; i++) {
+            if (removed.find(i) == removed.end()) {
+                sym->add_production(prods[i]);
+            }
+        }
+    }
+    return new_symbols_cnt;
+}
+
+bool leftFactor(cfg *grmr) {
+    std::vector<std::string> symbols = grmr->get_symbols();
+    int len = symbols.size();
+    bool modified = false;
+    for (int i = 0 ; i < len ; i++) {
+        if (!grmr->get_symbol(symbols[i])->is_terminal()) {
+            int new_syms_cnt = leftFactor(grmr, symbols[i]);
+            len += new_syms_cnt;
+            if (new_syms_cnt > 0)
+                modified = true;
+        }
+    }
+    return modified;
+}
+
+bool cfg::toLL1() {
+    bool modified = false;
+    modified = modified || leftFactor(this);
+    return modified;
+}
+
 void cfg::build() {
     /* TODO: either make `build_first()`,
      * `build_follow()` non-static member functions
