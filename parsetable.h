@@ -16,16 +16,18 @@ public:
             ERROR, SYNC, PROD
         };
         States state;
-        cfg::symbol::production *prod;
+        cfg::symbol::production prod;
 
         entry();
 
-        entry(States _state, cfg::symbol::production *_prod);
+        entry(States _state);
     };
 
     parsetable(cfg);
 
     entry get_entry(std::string nonterm, std::string next_input);
+
+    std::string production_to_str(cfg::symbol::production p);
 
     void print_table();
 
