@@ -32,6 +32,7 @@ static inline std::string trim_copy(std::string s) {
 }
 
 cfg cfgparser::rules2cfg(const std::string rules) {
+    int productions_cnt = 0;
     cfg _cfg("JAVA");
     boost::tokenizer<boost::escaped_list_separator<char>>
             tok(rules, boost::escaped_list_separator<char>("\\", "#", "\'"));
@@ -69,6 +70,9 @@ cfg cfgparser::rules2cfg(const std::string rules) {
 
             add_production_to_cfg(_cfg, _lhs, symbols);
         }
+        if (!productions_cnt)
+            _cfg.set_starting_symbol(_cfg.add_symbol(_lhs));
+        productions_cnt++;
     }
     return _cfg;
 }

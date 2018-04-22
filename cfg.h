@@ -116,6 +116,10 @@ public:
 
     symbol *get_symbol(std::string _key);
 
+    symbol &get_starting_symbol(void);
+
+    void set_starting_symbol(symbol *s);
+
 
     std::vector<std::string> get_symbols();
     
@@ -131,6 +135,7 @@ public:
 
 private:
     std::unordered_map<std::string, symbol> symbols;
+    symbol *starting_sybmol;
     std::string grammar;
     /* Overloading the ostream operator */
     friend std::ostream &operator<<(std::ostream& stream, cfg &grmr);

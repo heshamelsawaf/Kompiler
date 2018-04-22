@@ -6,8 +6,7 @@
 #include <fstream>
 #include <sstream>
 #include "cfgparser.h"
-#include "rexparser.h"
-#include "lexer.h"
+#include <algorithm>
 
 using namespace std;
 

@@ -46,6 +46,14 @@ bool build_first_util(cfg *grmr) {
     return updated;
 }
 
+cfg::symbol &cfg::get_starting_symbol(void) {
+    return *starting_sybmol;
+}
+
+void cfg::set_starting_symbol(cfg::symbol *s) {
+    starting_sybmol = s;
+}
+
 /*      A -> BCd
         B -> Cd
         C -> Ad | eps
@@ -405,10 +413,9 @@ cfg::symbol::production::production() : lhs() {
 
 }
 
-cfg::symbol::production::production(std::string _lhs, std::vector<cfg::symbol *> _symbols) {
-    // TODO
-    symbols = _symbols;
-    lhs = _lhs;
+cfg::symbol::production::production(std::string _lhs, std::vector<cfg::symbol *> _symbols) : lhs(std::move(_lhs)),
+                                                                                             symbols(_symbols) {
+
 }
 
 void cfg::symbol::production::add_symbol(symbol *sym){

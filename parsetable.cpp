@@ -1,13 +1,12 @@
 #include "parsetable.h"
 
-parsetable::entry::entry() {
-}
+parsetable::entry::entry() = default;
 
-parsetable::entry::entry(parsetable::entry::States _state) {
-    state = _state;
+parsetable::entry::entry(parsetable::entry::States _state) : state(_state) {
 }
 
 parsetable::parsetable(cfg grammar) {
+    starting_symbol_key = grammar.get_starting_symbol().get_key();
     std::unordered_map<std::string, parsetable::entry> entries;
     for (std::string &sym : grammar.get_symbols()) {
         if (grammar.get_symbol(sym)->is_terminal() && !grammar.get_symbol(sym)->is_eps()) {
@@ -53,6 +52,14 @@ parsetable::parsetable(cfg grammar) {
             }
         }
     }
+}
+
+std::string parsetable::get_starting_symbol_key() {
+    return starting_symbol_key;
+}
+
+void parsetable::set_starting_symbol_key(std::string s) {
+    starting_symbol_key = s;
 }
 
 parsetable::entry parsetable::get_entry(std::string nonterm, std::string next_input) {

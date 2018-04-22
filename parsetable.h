@@ -31,8 +31,13 @@ public:
 
     void print_table();
 
+    std::string get_starting_symbol_key();
+
+    void set_starting_symbol_key(std::string s);
+
 private:
     std::unordered_map<std::string, std::unordered_map<std::string, entry>> table;
+    std::string starting_symbol_key;
 };
 
 
