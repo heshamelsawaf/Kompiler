@@ -107,7 +107,7 @@ std::string add_aux_sym(cfg *grmr, std::string _sym_str) {
     return new_sym_str;
 }
 
-int left_factor(cfg *grmr, std::string _sym_str) {
+int left_factor(cfg *grmr, std::string _sym_str, std::vector<std::string> &symbol_names) {
     int new_symbols_cnt = 0;
     cfg::symbol *sym = grmr->get_symbol(_sym_str);
     if (grmr == nullptr || sym == nullptr || sym->get_productions().empty()) {
@@ -139,6 +139,8 @@ int left_factor(cfg *grmr, std::string _sym_str) {
             // Add new symbol.
             new_symbols_cnt++;
             std::string new_sym_str = add_aux_sym(grmr, _sym_str);
+            symbol_names.push_back(new_sym_str);
+            // std::cout << new_symbols_cnt << ": " << new_sym_str << std::endl;
             bool eps_added = false;
             if (_sym_str == "T")
                 std::cout << common_prods.size() << std::endl;
@@ -186,8 +188,8 @@ bool left_factor(cfg *grmr) {
     bool modified = false;
     for (int i = 0 ; i < len ; i++) {
         if (!grmr->get_symbol(symbols[i])->is_terminal()) {
-            int new_syms_cnt = left_factor(grmr, symbols[i]);
-            len = symbols.size();
+            int new_syms_cnt = left_factor(grmr, symbols[i], symbols);
+            len += new_syms_cnt;
             if (new_syms_cnt > 0)
                 modified = true;
         }
@@ -219,6 +221,7 @@ bool remove_immediate_left_recursion(cfg *grmr, std::string _sym_str) {
         return false;
     // Handles cases like (A -> A | Ab | Ac) where no symbols have
     if (recursive_prods.size() == prods.size()) {
+        // std::cout << *grmr;
         std::string err_msg = "Error: Invalid Grammar: Symbol("
                                  + _sym_str + ") is infinitely left recursive";
         std::cerr << err_msg << std::endl;
@@ -256,44 +259,66 @@ bool remove_left_recursion(cfg *grmr, std::string _sym_a_str, std::string _sym_b
     std::vector<cfg::symbol::production> prods_b = sym_b->get_productions();
 
     for (int i = 0 ; i < prods_a.size() ; i++) {
+
         std::vector<cfg::symbol *> syms_a = prods_a[i].get_symbols();
+
         if (!syms_a.empty() && syms_a[0] == sym_b) {
+            
             modified = true;
 
             for (int j = 0 ; j < prods_b.size() ; j++) {
-                std::vector<cfg::symbol *> new_prod_rhs(prods_b[j].get_symbols().begin(),
-                                                        prods_b[j].get_symbols().end());
+                
+                std::vector<cfg::symbol *> syms_b = prods_b[j].get_symbols();
+
+                std::vector<cfg::symbol *> new_prod_rhs(syms_b.begin(),
+                                                        syms_b.end());
                 new_prod_rhs.insert(new_prod_rhs.end(), syms_a.begin() + 1, syms_a.end());
                 // TODO: remove this from the stack.
                 cfg::symbol::production new_production(_sym_a_str, new_prod_rhs);
                 new_prods.push_back(new_production);
             }
+
         } else {
             new_prods.push_back(prods_a[i]);
         }
     }
     if (!modified)
         return false;
+
     sym_a->clear_productions();
+
     for (int i = 0 ; i < new_prods.size() ; i++) {
         sym_a->add_production(new_prods[i]);
     }
+
     return true;
 }
+
 bool remove_left_recursion(cfg *grmr) {
+    
     bool modified = false;
+
     if (grmr == nullptr)
         return false;
+
     std::vector<std::string> symbols = grmr->get_symbols();
     int len = symbols.size();
+
     for (int i = 0 ; i < len ; i++) {
+
         if (grmr->get_symbol(symbols[i])->is_terminal())
             continue;
+
         for (int j = 0 ; j < i - 1 ; j++) {
+
             if (grmr->get_symbol(symbols[j])->is_terminal())
                 continue;
-            modified = modified || remove_left_recursion(grmr, symbols[i], symbols[j]);
+
+            std::cout << symbols[i] << ' ' << symbols[j] << std::endl;
+            modified = remove_left_recursion(grmr, symbols[i], symbols[j]) || modified;
+
         }
+
         bool contains_immediate_recursion = false;
         // Remove immediate left recursion of any length.
         do {
@@ -301,7 +326,9 @@ bool remove_left_recursion(cfg *grmr) {
             modified = modified || contains_immediate_recursion;
             // std::cout << *grmr << std::endl;
         } while (contains_immediate_recursion);
+
     }
+
     return modified;
 }
 
@@ -323,6 +350,7 @@ std::ostream &operator<<(std::ostream& stream, const cfg::symbol::production &pr
     stream << prod.lhs;
     stream << " -> ";
     for (cfg::symbol *sym : prod.symbols) {
+        // std::cout << sym << std::endl;
         stream << (sym->is_eps() ? "ε" : sym->get_key()) << ' ';
     }
     stream << std::endl;
