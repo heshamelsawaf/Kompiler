@@ -11,6 +11,8 @@
 #include <vector>
 #include <iostream>
 
+#define EPS std::string(1, 0x01)
+
 class cfg {
 
 public:
@@ -36,9 +38,9 @@ public:
 
         public:
             /* Default Constructor */
-            production(std::string _lhs);
+            production();
             /* Construct production from list of symbols and rhs */
-            production(std::string _lhs, std::vector<symbol *> &_symbols);
+            production(std::string _lhs, std::vector<symbol *> symbols);
             /* Appends symbol to production */
             void add_symbol(symbol *sym);
             
@@ -52,6 +54,8 @@ public:
              *       implementaiton details, to disallow inconsistency 
              *       caused by manipulation outside cfg class */
             bool add_first(std::string _key);
+
+            bool contains_first(std::string _key) const;
         };
 
         symbol();
@@ -76,7 +80,6 @@ public:
 
         bool contains_follow(std::string _key) const;
 
-        // TODO: should be removed, since it belongs to prod
         std::unordered_set<std::string> get_first() const;
 
         std::unordered_set<std::string> get_follow() const;
@@ -102,13 +105,13 @@ public:
      * rhs is a list of all symbol names in the production.
      * all the symbols will be added to the cfg symbols automatically if they do not exist.
      * */
-    bool add_production(std::string lhs, std::vector<std::string> &rhs);
+    bool add_production(std::string lhs, std::vector<std::string> rhs);
 
     /* Adds a new production identified as lhs -> rhs;
      * rhs is a list of all symbols in the production.
      * all the symbols will be added to the cfg symbols automatically if they do not exist.
      * */
-    bool add_production(std::string lhs, std::vector<symbol *> &rhs);
+    bool add_production(std::string lhs, std::vector<symbol *> rhs);
 
 
     symbol *get_symbol(std::string _key);
@@ -119,7 +122,7 @@ public:
     /* Tries to convert the cfg to LL(1)
     *  returns true if the cfg was converted successfully
     *  returns false if the cfg was already LL(1) */
-    bool toLL1();
+    bool to_ll1();
 
     /* Builds CFG by computing first and follow sets for
      * each non-terminal, which are later used to build
