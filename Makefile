@@ -1,14 +1,13 @@
 GOOGLE_TEST_LIB = gtest
-GOOGLE_TEST_INCLUDE = /usr/local/include
 OBJS = dfa.o machine.o rexplib.o rexparser.o lexer.o parser.o cfg.o main.o parsetable.o test/test_first.o test/test_ll1.o
 LEXOBJS = machine.o lexer.o parser.o lex.o
 LEXGENOBJS = machine.o dfa.o rexplib.o rexparser.o lexgen.o
 PARSEROBJS = cfg.o parsergen.o parsetable.o
 TESTOBJS = cfg.o test/test_first.o test/test_ll1.o test/test_main.o
 CC = g++
-CFLAGS  = -O2 --std=c++11 -Wall -I $(GOOGLE_TEST_LIB)
+CFLAGS  = -O2 --std=c++11 -Wall
 DFLAGS = -ggdb
-LDFLAGS = -L /usr/local/lib -l $(GOOGLE_TEST_LIB) -l pthread
+LDFLAGS = -l $(GOOGLE_TEST_LIB) -l pthread
 TARGET = Kompiler
 LEXANALYZER = lex
 LEXGEN = lexgen
@@ -34,7 +33,7 @@ $(PARSERGEN): $(PARSEROBJS)
 	echo Target $(PARSERGEN) compiled successfully
 
 $(TEST): $(TESTOBJS)
-	$(CC) $(CFLAGS) $(LDFLAGS) $(DFLAGS) $(TESTOBJS) -o test_main
+	$(CC) $(CFLAGS) $(DFLAGS) $(TESTOBJS) -o test_main $(LDFLAGS)
 	echo Target $(TEST) compiled successfully
 
 debug: $(OBJS)
@@ -69,7 +68,7 @@ parser.o: parser.cpp parser.h lexer.h
 	$(CC) $(CFLAGS) -c parser.cpp
 
 cfg.o: cfg.cpp cfg.h
-	$(CC) $(CFLAGS) -c cfg.cpp
+	$(CC) $(DFLAGS) $(CFLAGS) -c cfg.cpp
 
 parsetable.o: parsetable.cpp parsetable.h
 	$(CC) $(CFLAGS) -c parsetable.cpp

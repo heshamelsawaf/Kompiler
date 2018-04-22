@@ -32,7 +32,7 @@ TEST(LL1, LL11) {
     cfg::symbol *eps = g.add_symbol(EPS, true);
 
     cfg::symbol::production pE1("E", vector<cfg::symbol*>() = {E, plus, T});
-    cfg::symbol::production pE2("E", vector<cfg::symbol*>() = {eps});
+    cfg::symbol::production pE2("E", vector<cfg::symbol*>() = {T});
     E->add_production(pE1);
     E->add_production(pE2);
 

@@ -104,13 +104,13 @@ public:
      * rhs is a list of all symbol names in the production.
      * all the symbols will be added to the cfg symbols automatically if they do not exist.
      * */
-    bool add_production(std::string lhs, std::vector<std::string> &rhs);
+    bool add_production(std::string lhs, std::vector<std::string> rhs);
 
     /* Adds a new production identified as lhs -> rhs;
      * rhs is a list of all symbols in the production.
      * all the symbols will be added to the cfg symbols automatically if they do not exist.
      * */
-    bool add_production(std::string lhs, std::vector<symbol *> &rhs);
+    bool add_production(std::string lhs, std::vector<symbol *> rhs);
 
 
     symbol *get_symbol(std::string _key);

@@ -134,12 +134,14 @@ int left_factor(cfg *grmr, std::string _sym_str) {
             }
         }
         if (prefix > 0) {
-            removed.insert(i);
+            common_prods.push_back(i);
             removed.insert(common_prods.begin(), common_prods.end());
             // Add new symbol.
             new_symbols_cnt++;
             std::string new_sym_str = add_aux_sym(grmr, _sym_str);
             bool eps_added = false;
+            if (_sym_str == "T")
+                std::cout << common_prods.size() << std::endl;
             for (int prod : common_prods) {
                 std::vector<cfg::symbol *> production_symbols = prods[prod].get_symbols();
                 std::vector<cfg::symbol *> rhs(production_symbols.begin() + prefix, production_symbols.end());
@@ -158,8 +160,9 @@ int left_factor(cfg *grmr, std::string _sym_str) {
                 grmr->add_production(new_sym_str, rhs);
             }
             // Add new production refering to symbol.
-            std::vector<cfg::symbol *> rhs(prods[i].get_symbols().begin(),
-                                         prods[i].get_symbols().begin() + prefix);
+            std::vector<cfg::symbol *> prod_syms = prods[i].get_symbols();
+            std::vector<cfg::symbol *> rhs(prod_syms.begin(),
+                                         prod_syms.begin() + prefix);
             rhs.push_back(grmr->get_symbol(new_sym_str));
             // TODO: this should not be on the stack.
             cfg::symbol::production new_production(_sym_str, rhs);
@@ -184,7 +187,7 @@ bool left_factor(cfg *grmr) {
     for (int i = 0 ; i < len ; i++) {
         if (!grmr->get_symbol(symbols[i])->is_terminal()) {
             int new_syms_cnt = left_factor(grmr, symbols[i]);
-            len += new_syms_cnt;
+            len = symbols.size();
             if (new_syms_cnt > 0)
                 modified = true;
         }
@@ -446,7 +449,7 @@ cfg::symbol *cfg::add_symbol(std::string _key, bool _terminal){
     return &symbols[_key];
 }
 
-bool cfg::add_production(std::string lhs, std::vector<std::string> &rhs){
+bool cfg::add_production(std::string lhs, std::vector<std::string> rhs){
     std::vector<symbol *> syms;
     for (std::string sym_str : rhs) {
         symbol *sym = get_symbol(sym_str);
@@ -457,7 +460,7 @@ bool cfg::add_production(std::string lhs, std::vector<std::string> &rhs){
     return add_production(lhs, syms);
 }
 
-bool cfg::add_production(std::string lhs, std::vector<cfg::symbol *> &rhs){
+bool cfg::add_production(std::string lhs, std::vector<cfg::symbol *> rhs){
     symbol *lhs_sym = get_symbol(lhs);
     if (lhs_sym == nullptr)
         return false;
