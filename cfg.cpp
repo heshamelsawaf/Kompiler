@@ -87,44 +87,62 @@ void build_follow(cfg *grmr) {
 }
 
 int find_prefix(cfg::symbol::production &a, cfg::symbol::production &b) {
+   
     int len = std::min(a.get_symbols().size(), b.get_symbols().size());
     int i = 0;
+    
     for (i = 0 ; i < len ; i++) {
         if (a.get_symbols()[i] != b.get_symbols()[i])
             return i;
     }
+
     return i;
 }
 
 std::string add_aux_sym(cfg *grmr, std::string _sym_str) {
+    
     if (grmr == nullptr)
         return "error";
+
     std::string new_sym_str = _sym_str;
+
     do {
         new_sym_str += "`";
     } while (grmr->get_symbol(new_sym_str) != nullptr);
+
     grmr->add_symbol(new_sym_str, false);
+
     return new_sym_str;
 }
 
 int left_factor(cfg *grmr, std::string _sym_str, std::vector<std::string> &symbol_names) {
+    
     int new_symbols_cnt = 0;
     cfg::symbol *sym = grmr->get_symbol(_sym_str);
+
     if (grmr == nullptr || sym == nullptr || sym->get_productions().empty()) {
         return 0;
     }
+
     std::unordered_set<int> removed;
     std::vector<cfg::symbol::production> prods = sym->get_productions();
     int len = prods.size();
+    
     for (int i = 0 ; i < len ; i++) {
+       
         if (removed.find(i) != removed.end())
             continue;
+
         std::vector<int> common_prods;
         int prefix = 0;
+
         for (int j = i + 1 ; j < len ; j++) {
+           
             if (removed.find(j) != removed.end())
                 continue;
+
             int new_prefix = find_prefix(prods[i], prods[j]);
+
             if (new_prefix > 0) {
                 common_prods.push_back(j);
                 if (prefix == 0)
@@ -134,19 +152,22 @@ int left_factor(cfg *grmr, std::string _sym_str, std::vector<std::string> &symbo
             }
         }
         if (prefix > 0) {
+
             common_prods.push_back(i);
             removed.insert(common_prods.begin(), common_prods.end());
+
             // Add new symbol.
             new_symbols_cnt++;
             std::string new_sym_str = add_aux_sym(grmr, _sym_str);
             symbol_names.push_back(new_sym_str);
-            // std::cout << new_symbols_cnt << ": " << new_sym_str << std::endl;
+
             bool eps_added = false;
-            if (_sym_str == "T")
-                std::cout << common_prods.size() << std::endl;
+
             for (int prod : common_prods) {
+
                 std::vector<cfg::symbol *> production_symbols = prods[prod].get_symbols();
                 std::vector<cfg::symbol *> rhs(production_symbols.begin() + prefix, production_symbols.end());
+
                 if (rhs.empty()) {
                     /*  Add eps once in case of repeated productions.
                     *   e.g. A -> Bc | Bc | Bcd
@@ -159,6 +180,7 @@ int left_factor(cfg *grmr, std::string _sym_str, std::vector<std::string> &symbo
                     eps_added = true;
                     rhs.push_back(grmr->get_symbol(EPS));
                 }
+
                 grmr->add_production(new_sym_str, rhs);
             }
             // Add new production refering to symbol.
@@ -166,89 +188,100 @@ int left_factor(cfg *grmr, std::string _sym_str, std::vector<std::string> &symbo
             std::vector<cfg::symbol *> rhs(prod_syms.begin(),
                                          prod_syms.begin() + prefix);
             rhs.push_back(grmr->get_symbol(new_sym_str));
+
             // TODO: this should not be on the stack.
             cfg::symbol::production new_production(_sym_str, rhs);
             prods.push_back(new_production);
         }
     }
     if (new_symbols_cnt > 0) {
+
         sym->clear_productions();
+
         for (int i = 0 ; i < prods.size() ; i++) {
             if (removed.find(i) == removed.end()) {
                 sym->add_production(prods[i]);
             }
         }
     }
+
     return new_symbols_cnt;
 }
 
 bool left_factor(cfg *grmr) {
+
     std::vector<std::string> symbols = grmr->get_symbols();
     int len = symbols.size();
     bool modified = false;
+
     for (int i = 0 ; i < len ; i++) {
         if (!grmr->get_symbol(symbols[i])->is_terminal()) {
+
             int new_syms_cnt = left_factor(grmr, symbols[i], symbols);
             len += new_syms_cnt;
+
             if (new_syms_cnt > 0)
                 modified = true;
         }
     }
+
     return modified;
 }
 
 bool remove_immediate_left_recursion(cfg *grmr, std::string _sym_str) {
+    
     cfg::symbol *sym = grmr->get_symbol(_sym_str);
     std::unordered_set<int> recursive_prods;
     std::vector<cfg::symbol::production> prods = sym->get_productions();
+   
     for (int i = 0 ; i < prods.size() ; i++) {
         std::vector<cfg::symbol *> prod_symbols = prods[i].get_symbols();
+        
         if (!prod_symbols.empty() && prod_symbols[0] == sym)
             recursive_prods.insert(i);
     }
-    // static int i = 0;
-    // i++;
-    // // std::cout << i;
-    // if (i == 2) {
-    //     // std::cout << *grmr;
-    // } else if (i > 2) {
-    //     return false;
-    // }
-    // std::cout << "Sym: " << _sym_str << std::endl;
-    // std::cout << prods.size() << ' ' << recursive_prods.size() << std::endl;
-    // std::cout << *grmr;
+
     if (recursive_prods.empty())
         return false;
     // Handles cases like (A -> A | Ab | Ac) where no symbols have
     if (recursive_prods.size() == prods.size()) {
-        // std::cout << *grmr;
+
         std::string err_msg = "Error: Invalid Grammar: Symbol("
                                  + _sym_str + ") is infinitely left recursive";
         std::cerr << err_msg << std::endl;
+
         throw std::invalid_argument(err_msg);
     }
+
     std::string new_sym_str = add_aux_sym(grmr, _sym_str);
     sym->clear_productions();
-    // std::cout << *grmr;
+
     for (int i  = 0 ; i < prods.size() ; i++) {
+
         std::vector<cfg::symbol *> prod_symbols = prods[i].get_symbols();
+
         if (recursive_prods.find(i) == recursive_prods.end()) {
             if (prod_symbols.size() == 1 && prod_symbols[0]->get_key() == EPS)
                 prod_symbols.clear();
+
             prod_symbols.push_back(grmr->get_symbol(new_sym_str));
             grmr->add_production(_sym_str, prod_symbols);
+
         } else {
             std::vector<cfg::symbol *> new_prod_rhs(prod_symbols.begin() + 1, prod_symbols.end());
             new_prod_rhs.push_back(grmr->get_symbol(new_sym_str));
             grmr->add_production(new_sym_str, new_prod_rhs);
         }
     }
+
     std::vector<cfg::symbol *> eps_rhs;
     eps_rhs.push_back(grmr->get_symbol(EPS));
     grmr->add_production(new_sym_str, eps_rhs);
+
     return true;
 }
 bool remove_left_recursion(cfg *grmr, std::string _sym_a_str, std::string _sym_b_str) {
+    
     bool modified = false;
     std::vector<cfg::symbol::production> new_prods;
 
@@ -314,7 +347,6 @@ bool remove_left_recursion(cfg *grmr) {
             if (grmr->get_symbol(symbols[j])->is_terminal())
                 continue;
 
-            std::cout << symbols[i] << ' ' << symbols[j] << std::endl;
             modified = remove_left_recursion(grmr, symbols[i], symbols[j]) || modified;
 
         }
@@ -324,7 +356,6 @@ bool remove_left_recursion(cfg *grmr) {
         do {
             contains_immediate_recursion = remove_immediate_left_recursion(grmr, symbols[i]);
             modified = modified || contains_immediate_recursion;
-            // std::cout << *grmr << std::endl;
         } while (contains_immediate_recursion);
 
     }
@@ -333,8 +364,10 @@ bool remove_left_recursion(cfg *grmr) {
 }
 
 bool cfg::to_ll1() {
+
     bool factored = left_factor(this);
     bool removed_recursion = remove_left_recursion(this);
+
     return factored || removed_recursion;
 }
 
@@ -347,22 +380,25 @@ void cfg::build() {
 }
 
 std::ostream &operator<<(std::ostream& stream, const cfg::symbol::production &prod) {
+
     stream << prod.lhs;
     stream << " -> ";
     for (cfg::symbol *sym : prod.symbols) {
-        // std::cout << sym << std::endl;
         stream << (sym->is_eps() ? "ε" : sym->get_key()) << ' ';
     }
     stream << std::endl;
+
     return stream;
 }
 
 std::ostream &operator<<(std::ostream& stream, cfg &grmr) {
+
     for (std::string sym_str : grmr.get_symbols()) {
         for (cfg::symbol::production prod : grmr.get_symbol(sym_str)->get_productions()) {
             stream << prod;
         }
     }
+
     return stream;
 }
 
