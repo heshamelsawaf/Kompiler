@@ -46,18 +46,7 @@ bool build_first_util(cfg *grmr) {
     return updated;
 }
 
-cfg::symbol &cfg::get_starting_symbol(void) {
-    return *starting_sybmol;
-}
 
-void cfg::set_starting_symbol(cfg::symbol *s) {
-    starting_sybmol = s;
-}
-
-/*      A -> BCd
-        B -> Cd
-        C -> Ad | eps
-*
 /* Build first set for each and every production
  * in cfg grammar */
 void build_first(cfg *grmr) {
@@ -88,8 +77,64 @@ void build_first(cfg *grmr) {
     while (build_first_util(grmr));
 }
 
-void build_follow(cfg *grmr) {
+bool build_follow_util(cfg *grmr) {
+    bool updated = false;
 
+    for (std::string s_key : grmr->get_symbols()) {
+        cfg::symbol *s = grmr->get_symbol(s_key);
+
+        /* If symbol S is terminal, skip */
+        if (s->is_terminal())
+            continue;
+        
+        for (cfg::symbol::production &prod : s->get_productions()) {
+            cfg::symbol *t   = *prod.get_symbols().begin();
+            cfg::symbol *eol = *prod.get_symbols().end();
+
+            while (t != eol && t->is_terminal())
+                t++;
+            
+            if (t == eol)
+                continue;
+            
+            while (t != eol) {
+                if (t->is_terminal())
+                    continue;
+                cfg::symbol *u = t + 1;
+
+                while (u != eol) {
+                    if (u->is_terminal()) {
+                        updated |= t->add_follow(u->get_key());
+                        break;
+                    }
+                    
+                    for (std::string f : u->get_first())
+                        if (f != EPS)
+                            updated |= t->add_follow(f);
+                    
+                    if (u->contains_first(EPS))
+                        u++;
+                    else 
+                        break;
+                }
+
+                if (u == eol)
+                    for (std::string f : s->get_first())
+                        updated |= t->add_follow(f);
+                t++;
+            }
+        }
+    }
+
+    return updated;
+}
+
+void build_follow(cfg *grmr) {
+    /* Add EOF to starting symbol */
+    cfg::symbol *s = &grmr->get_starting_symbol();
+    s->add_follow(EOF);
+
+    while (build_follow_util(grmr));
 }
 
 int find_prefix(cfg::symbol::production &a, cfg::symbol::production &b) {
@@ -431,7 +476,6 @@ std::unordered_set<std::string> cfg::symbol::production::get_first() const {
 }
 
 bool cfg::symbol::production::add_first(std::string _key){
-    // TODO
     return first.insert(_key).second;
 }
 
@@ -474,9 +518,8 @@ void cfg::symbol::clear_productions(){
     productions.clear();
 }
 
-void cfg::symbol::add_follow(std::string _key){
-    // TODO
-    follow.insert(_key);
+bool cfg::symbol::add_follow(std::string _key){
+    return follow.insert(_key).second;
 }
 
 bool cfg::symbol::contains_first(std::string _key) const{
@@ -554,4 +597,12 @@ std::vector<std::string> cfg::get_symbols(){
         syms.push_back(entry.first);
     }
     return syms;
+}
+
+cfg::symbol &cfg::get_starting_symbol(void) {
+    return *starting_sybmol;
+}
+
+void cfg::set_starting_symbol(cfg::symbol *s) {
+    starting_sybmol = s;
 }

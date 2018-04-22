@@ -12,6 +12,7 @@
 #include <iostream>
 
 #define EPS std::string(1, 0x01)
+#define EOF std::string("$")
 
 class cfg {
 
@@ -74,7 +75,7 @@ public:
 
         void clear_productions();
 
-        void add_follow(std::string _key);
+        bool add_follow(std::string _key);
 
         bool contains_first(std::string _key) const;
 
