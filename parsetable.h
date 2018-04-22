@@ -29,6 +29,8 @@ public:
 
     std::string production_to_str(cfg::symbol::production p);
 
+    bool is_nonterm(std::string symbol);
+
     void print_table();
 
 private:

@@ -131,3 +131,8 @@ void parsetable::print_table() {
     }
     cout << endl;
 }
+
+
+bool parsetable::is_nonterm(std::string symbol) {
+    return table.find(symbol) != table.end();
+}
