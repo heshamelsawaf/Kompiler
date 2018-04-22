@@ -1,6 +1,4 @@
 #include "cfg.h"
-#include <iostream>
-#include <stdexcept>
 
 /* Utility function to find each production A->B where B
  * is non-terminal and perform: FIRST(A) = FIRST(A) U FIRST(B).
@@ -48,6 +46,14 @@ bool build_first_util(cfg *grmr) {
     return updated;
 }
 
+cfg::symbol &cfg::get_starting_symbol(void) {
+    return *starting_sybmol;
+}
+
+void cfg::set_starting_symbol(cfg::symbol *s) {
+    starting_sybmol = s;
+}
+
 /*      A -> BCd
         B -> Cd
         C -> Ad | eps
@@ -87,10 +93,10 @@ void build_follow(cfg *grmr) {
 }
 
 int find_prefix(cfg::symbol::production &a, cfg::symbol::production &b) {
-   
+
     int len = std::min(a.get_symbols().size(), b.get_symbols().size());
     int i = 0;
-    
+
     for (i = 0 ; i < len ; i++) {
         if (a.get_symbols()[i] != b.get_symbols()[i])
             return i;
@@ -100,7 +106,7 @@ int find_prefix(cfg::symbol::production &a, cfg::symbol::production &b) {
 }
 
 std::string add_aux_sym(cfg *grmr, std::string _sym_str) {
-    
+
     if (grmr == nullptr)
         return "error";
 
@@ -127,9 +133,9 @@ int left_factor(cfg *grmr, std::string _sym_str, std::vector<std::string> &symbo
     std::unordered_set<int> removed;
     std::vector<cfg::symbol::production> prods = sym->get_productions();
     int len = prods.size();
-    
+
     for (int i = 0 ; i < len ; i++) {
-       
+
         if (removed.find(i) != removed.end())
             continue;
 
@@ -137,7 +143,7 @@ int left_factor(cfg *grmr, std::string _sym_str, std::vector<std::string> &symbo
         int prefix = 0;
 
         for (int j = i + 1 ; j < len ; j++) {
-           
+
             if (removed.find(j) != removed.end())
                 continue;
 
@@ -186,7 +192,7 @@ int left_factor(cfg *grmr, std::string _sym_str, std::vector<std::string> &symbo
             // Add new production refering to symbol.
             std::vector<cfg::symbol *> prod_syms = prods[i].get_symbols();
             std::vector<cfg::symbol *> rhs(prod_syms.begin(),
-                                         prod_syms.begin() + prefix);
+                                           prod_syms.begin() + prefix);
             rhs.push_back(grmr->get_symbol(new_sym_str));
 
             // TODO: this should not be on the stack.
@@ -229,14 +235,14 @@ bool left_factor(cfg *grmr) {
 }
 
 bool remove_immediate_left_recursion(cfg *grmr, std::string _sym_str) {
-    
+
     cfg::symbol *sym = grmr->get_symbol(_sym_str);
     std::unordered_set<int> recursive_prods;
     std::vector<cfg::symbol::production> prods = sym->get_productions();
-   
+
     for (int i = 0 ; i < prods.size() ; i++) {
         std::vector<cfg::symbol *> prod_symbols = prods[i].get_symbols();
-        
+
         if (!prod_symbols.empty() && prod_symbols[0] == sym)
             recursive_prods.insert(i);
     }
@@ -281,7 +287,7 @@ bool remove_immediate_left_recursion(cfg *grmr, std::string _sym_str) {
     return true;
 }
 bool remove_left_recursion(cfg *grmr, std::string _sym_a_str, std::string _sym_b_str) {
-    
+
     bool modified = false;
     std::vector<cfg::symbol::production> new_prods;
 
@@ -296,11 +302,11 @@ bool remove_left_recursion(cfg *grmr, std::string _sym_a_str, std::string _sym_b
         std::vector<cfg::symbol *> syms_a = prods_a[i].get_symbols();
 
         if (!syms_a.empty() && syms_a[0] == sym_b) {
-            
+
             modified = true;
 
             for (int j = 0 ; j < prods_b.size() ; j++) {
-                
+
                 std::vector<cfg::symbol *> syms_b = prods_b[j].get_symbols();
 
                 std::vector<cfg::symbol *> new_prod_rhs(syms_b.begin(),
@@ -328,7 +334,7 @@ bool remove_left_recursion(cfg *grmr, std::string _sym_a_str, std::string _sym_b
 }
 
 bool remove_left_recursion(cfg *grmr) {
-    
+
     bool modified = false;
 
     if (grmr == nullptr)
@@ -403,25 +409,24 @@ std::ostream &operator<<(std::ostream& stream, cfg &grmr) {
 }
 
 
-cfg::symbol::production::production(){
-    // TODO
+cfg::symbol::production::production() : lhs() {
+
 }
 
-cfg::symbol::production::production(std::string _lhs, std::vector<cfg::symbol *> _symbols){
-    // TODO
-    symbols = _symbols;
-    lhs = _lhs;
+cfg::symbol::production::production(std::string _lhs, std::vector<cfg::symbol *> _symbols) : lhs(std::move(_lhs)),
+                                                                                             symbols(_symbols) {
+
 }
 
 void cfg::symbol::production::add_symbol(symbol *sym){
-    // TODO
+    symbols.push_back(sym);
 }
 
-std::vector<cfg::symbol *> cfg::symbol::production::get_symbols(void) const {
+std::vector<cfg::symbol *> cfg::symbol::production::get_symbols() const {
     return symbols;
 }
 
-std::unordered_set<std::string> cfg::symbol::production::get_first(void) const {
+std::unordered_set<std::string> cfg::symbol::production::get_first() const {
     return first;
 }
 
@@ -438,20 +443,20 @@ cfg::symbol::symbol(){
     // TODO
 }
 
-cfg::symbol::symbol(std::string _key, bool _terminal){
+cfg::symbol::symbol(std::string _key, bool _terminal) {
     key = _key;
     terminal = _terminal;
 }
 
-bool cfg::symbol::is_terminal(void) const{
+bool cfg::symbol::is_terminal() const {
     return terminal;
 }
 
-bool cfg::symbol::is_eps(void) const{
+bool cfg::symbol::is_eps() const {
     return key == EPS;
 }
 
-std::string cfg::symbol::get_key(void) const{
+std::string cfg::symbol::get_key() const {
     return key;
 }
 
@@ -460,8 +465,9 @@ void cfg::symbol::add_production(production _production){
     productions.push_back(_production);
 }
 
-void cfg::symbol::add_production(std::vector<symbol *> rhs){
-    // TODO
+void cfg::symbol::add_production(std::vector<symbol *> &rhs) {
+    production p(key, rhs);
+    add_production(p);
 }
 
 void cfg::symbol::clear_productions(){
@@ -499,8 +505,8 @@ std::vector<cfg::symbol::production> cfg::symbol::get_productions(){
     return productions;
 }
 
-cfg::cfg(std::string _grammar){
-    // TODO
+cfg::cfg(std::string _grammar) : grammar(std::move(_grammar)) {
+
 }
 
 cfg::symbol *cfg::add_symbol(std::string _key, bool _terminal){
@@ -513,7 +519,7 @@ cfg::symbol *cfg::add_symbol(std::string _key, bool _terminal){
     return &symbols[_key];
 }
 
-bool cfg::add_production(std::string lhs, std::vector<std::string> rhs){
+bool cfg::add_production(std::string lhs, std::vector<std::string> rhs) {
     std::vector<symbol *> syms;
     for (std::string sym_str : rhs) {
         symbol *sym = get_symbol(sym_str);
@@ -524,7 +530,7 @@ bool cfg::add_production(std::string lhs, std::vector<std::string> rhs){
     return add_production(lhs, syms);
 }
 
-bool cfg::add_production(std::string lhs, std::vector<cfg::symbol *> rhs){
+bool cfg::add_production(std::string lhs, std::vector<cfg::symbol *> rhs) {
     symbol *lhs_sym = get_symbol(lhs);
     if (lhs_sym == nullptr)
         return false;

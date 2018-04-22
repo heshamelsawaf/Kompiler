@@ -10,6 +10,7 @@
 #include <string>
 #include <vector>
 #include <iostream>
+
 #define EPS std::string(1, 0x01)
 
 class cfg {
@@ -69,7 +70,7 @@ public:
 
         void add_production(production _production);
 
-        void add_production(std::vector<symbol *> rhs);
+        void add_production(std::vector<symbol *> &rhs);
 
         void clear_productions();
 
@@ -78,7 +79,7 @@ public:
         bool contains_first(std::string _key) const;
 
         bool contains_follow(std::string _key) const;
-        
+
         std::unordered_set<std::string> get_first() const;
 
         std::unordered_set<std::string> get_follow() const;
@@ -115,6 +116,10 @@ public:
 
     symbol *get_symbol(std::string _key);
 
+    symbol &get_starting_symbol(void);
+
+    void set_starting_symbol(symbol *s);
+
 
     std::vector<std::string> get_symbols();
     
@@ -130,6 +135,7 @@ public:
 
 private:
     std::unordered_map<std::string, symbol> symbols;
+    symbol *starting_sybmol;
     std::string grammar;
     /* Overloading the ostream operator */
     friend std::ostream &operator<<(std::ostream& stream, cfg &grmr);
