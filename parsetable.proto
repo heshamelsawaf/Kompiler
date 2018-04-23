@@ -15,7 +15,7 @@ message ParseTable {
          required States state = 1;
          required string nonterm = 2;
          required string term = 3;
-         optional string production = 4;
+         repeated string productions = 4;
 
     }
 }

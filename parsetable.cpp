@@ -9,8 +9,10 @@ parsetable::entry::entry(parsetable::entry::States _state) : state(_state) {
 }
 
 parsetable::parsetable(cfg grammar) {
-    
-    starting_symbol_key = grammar.get_starting_symbol().get_key();
+    if (grammar.get_starting_symbol() == nullptr) {
+        throw std::invalid_argument("Grammar missing a starting symbol.");
+    }
+    starting_symbol_key = grammar.get_starting_symbol()->get_key();
     std::unordered_map<std::string, parsetable::entry> entries;
     for (std::string &sym : grammar.get_symbols()) {
         if (grammar.get_symbol(sym)->is_terminal() && !grammar.get_symbol(sym)->is_eps()) {
@@ -37,11 +39,8 @@ parsetable::parsetable(cfg grammar) {
                                 "Grammar is not LL(1). Entry [" + sym + "," + first + "] has duplicate values.");
                     }
                     table[sym][first].state = parsetable::entry::States::PROD;
-                    std::ostringstream stream;
-                    stream << prod;
-                    table[sym][first].production = stream.str();
-                    while (table[sym][first].production.back() == '\n') {
-                        table[sym][first].production.pop_back();
+                    for (auto prod_sym : prod.get_symbols()){
+                        table[sym][first].productions.push_back(prod_sym->get_key());
                     }
                 }
             }
@@ -52,7 +51,7 @@ parsetable::parsetable(cfg grammar) {
                         "Grammar is not LL(1). Entry [" + sym + "," + follow + "] has duplicate values.");
             }
             if (has_eps_prod) {
-                table[sym][follow].production = "\\EPS";
+                table[sym][follow].productions.push_back("\\EPS");
                 table[sym][follow].state = parsetable::entry::States::PROD;
             } else {
                 table[sym][follow].state = parsetable::entry::States::SYNC;
@@ -76,7 +75,39 @@ parsetable::entry parsetable::get_entry(std::string nonterm, std::string next_in
     return parsetable::table[nonterm][next_input];
 }
 
-void parsetable::serialize(std::string file_name) {
+bool parsetable::deserialize(std::string file_name) {
+    parser::ParseTable parse_table;
+    std::fstream input(file_name, std::ios::in | std::ios::binary);
+    if (!parse_table.ParseFromIstream(&input)) {
+        std::cerr << "Failed to parse " + file_name << std::endl;
+        return false;
+    }
+
+    starting_symbol_key = parse_table.starting_symbol();
+    table.clear();
+
+    for (int i = 0; i < parse_table.entries_size(); i++){
+        parsetable::entry entry;
+        switch(parse_table.entries(i).state()){
+            case parser::ParseTable::Entry::ERROR:
+                entry.state = parsetable::entry::States::ERROR;
+                break;
+            case parser::ParseTable::Entry::SYNC:
+                entry.state = parsetable::entry::States::SYNC;
+                break;
+            case parser::ParseTable::Entry::PROD:
+                entry.state = parsetable::entry::States::PROD;
+                for (int j = 0; j < parse_table.entries(i).productions.size(); j++){
+                    entry.productions.push_back(parse_table.entries(i).productions(j));
+                }
+                break;
+        }
+        table[parse_table.entries(i).nonterm()][parse_table.entries(i).term()] = entry;
+    }
+    return true;
+}
+
+bool parsetable::serialize(std::string file_name) {
     GOOGLE_PROTOBUF_VERIFY_VERSION;
 
     parser::ParseTable parse_table;
@@ -86,7 +117,9 @@ void parsetable::serialize(std::string file_name) {
             parser::ParseTable_Entry *entry = parse_table.add_entries();
             entry->set_nonterm(k.first);
             entry->set_term(u.first);
-            entry->set_production(u.second.production);
+            for (auto& prod_sym : u.second.productions){
+                entry->add_productions(prod_sym);
+            }
             switch (u.second.state){
                 case parsetable::entry::States::ERROR:
                     entry->set_state(parser::ParseTable::Entry::ERROR);
@@ -104,10 +137,10 @@ void parsetable::serialize(std::string file_name) {
     std::fstream output(file_name, std::ios::out | std::ios::trunc | std::ios::binary);
     if (!parse_table.SerializeToOstream(&output)) {
         std::cerr << "Failed to write parsetable." << std::endl;
-        return;
+        return false;
     }
     google::protobuf::ShutdownProtobufLibrary();
-
+    return true;
 }
 
 std::ostream &operator<<(std::ostream &stream, const parsetable &t) {
@@ -139,7 +172,11 @@ std::ostream &operator<<(std::ostream &stream, const parsetable &t) {
             } else if (t.table.at(T.back()[0]).at(T[0][i]).state == parsetable::entry::States::SYNC) {
                 T.back().push_back("\\SYNC");
             } else {
-                T.back().push_back(t.table.at(T.back()[0]).at(T[0][i]).production);
+                std::string temp = k.first + " ->";
+                for (auto &prod_sym : t.table.at(T.back()[0]).at(T[0][i]).productions){
+                    temp += " " + prod_sym;
+                }
+                T.back().push_back(temp);
             }
             max_len = max_len < T.back().back().length() ? T.back().back().length() : max_len;
         }

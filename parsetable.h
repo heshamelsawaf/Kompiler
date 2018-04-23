@@ -17,7 +17,7 @@ public:
             ERROR, SYNC, PROD
         };
         States state;
-        std::string production;
+        std::vector<std::string> productions;
 
         entry();
 
@@ -32,7 +32,9 @@ public:
 
     bool is_nonterm(std::string symbol);
 
-    void serialize(std::string file_name);
+    bool serialize(std::string file_name);
+
+    bool deserialize(std::string file_name);
 
     friend std::ostream &operator<<(std::ostream &stream, const parsetable &t);
 

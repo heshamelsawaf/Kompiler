@@ -87,11 +87,11 @@ const ::google::protobuf::uint32 TableStruct::offsets[] GOOGLE_PROTOBUF_ATTRIBUT
   GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(::parser::ParseTable_Entry, state_),
   GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(::parser::ParseTable_Entry, nonterm_),
   GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(::parser::ParseTable_Entry, term_),
-  GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(::parser::ParseTable_Entry, production_),
-  3,
+  GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(::parser::ParseTable_Entry, productions_),
+  2,
   0,
   1,
-  2,
+  ~0u,
   GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(::parser::ParseTable, _has_bits_),
   GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(::parser::ParseTable, _internal_metadata_),
   ~0u,  // no _extensions_
@@ -134,16 +134,16 @@ void protobuf_RegisterTypes(const ::std::string&) {
 void AddDescriptorsImpl() {
   InitDefaults();
   static const char descriptor[] GOOGLE_PROTOBUF_ATTRIBUTE_SECTION_VARIABLE(protodesc_cold) = {
-      "\n\020parsetable.proto\022\006parser\"\346\001\n\nParseTabl"
+      "\n\020parsetable.proto\022\006parser\"\347\001\n\nParseTabl"
       "e\022\027\n\017starting_symbol\030\001 \002(\t\022)\n\007entries\030\002 "
-      "\003(\0132\030.parser.ParseTable.Entry\032\223\001\n\005Entry\022"
+      "\003(\0132\030.parser.ParseTable.Entry\032\224\001\n\005Entry\022"
       ".\n\005state\030\001 \002(\0162\037.parser.ParseTable.Entry"
-      ".States\022\017\n\007nonterm\030\002 \002(\t\022\014\n\004term\030\003 \002(\t\022\022"
-      "\n\nproduction\030\004 \001(\t\"\'\n\006States\022\t\n\005ERROR\020\000\022"
-      "\010\n\004SYNC\020\001\022\010\n\004PROD\020\002"
+      ".States\022\017\n\007nonterm\030\002 \002(\t\022\014\n\004term\030\003 \002(\t\022\023"
+      "\n\013productions\030\004 \003(\t\"\'\n\006States\022\t\n\005ERROR\020\000"
+      "\022\010\n\004SYNC\020\001\022\010\n\004PROD\020\002"
   };
   ::google::protobuf::DescriptorPool::InternalAddGeneratedFile(
-      descriptor, 259);
+      descriptor, 260);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "parsetable.proto", &protobuf_RegisterTypes);
 }
@@ -192,7 +192,7 @@ void ParseTable_Entry::InitAsDefaultInstance() {
 const int ParseTable_Entry::kStateFieldNumber;
 const int ParseTable_Entry::kNontermFieldNumber;
 const int ParseTable_Entry::kTermFieldNumber;
-const int ParseTable_Entry::kProductionFieldNumber;
+const int ParseTable_Entry::kProductionsFieldNumber;
 #endif  // !defined(_MSC_VER) || _MSC_VER >= 1900
 
 ParseTable_Entry::ParseTable_Entry()
@@ -207,7 +207,8 @@ ParseTable_Entry::ParseTable_Entry(const ParseTable_Entry& from)
   : ::google::protobuf::Message(),
       _internal_metadata_(NULL),
       _has_bits_(from._has_bits_),
-      _cached_size_(0) {
+      _cached_size_(0),
+      productions_(from.productions_) {
   _internal_metadata_.MergeFrom(from._internal_metadata_);
   nonterm_.UnsafeSetDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   if (from.has_nonterm()) {
@@ -217,10 +218,6 @@ ParseTable_Entry::ParseTable_Entry(const ParseTable_Entry& from)
   if (from.has_term()) {
     term_.AssignWithDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), from.term_);
   }
-  production_.UnsafeSetDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
-  if (from.has_production()) {
-    production_.AssignWithDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), from.production_);
-  }
   state_ = from.state_;
   // @@protoc_insertion_point(copy_constructor:parser.ParseTable.Entry)
 }
@@ -229,7 +226,6 @@ void ParseTable_Entry::SharedCtor() {
   _cached_size_ = 0;
   nonterm_.UnsafeSetDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   term_.UnsafeSetDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
-  production_.UnsafeSetDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   state_ = 0;
 }
 
@@ -241,7 +237,6 @@ ParseTable_Entry::~ParseTable_Entry() {
 void ParseTable_Entry::SharedDtor() {
   nonterm_.DestroyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   term_.DestroyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
-  production_.DestroyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
 
 void ParseTable_Entry::SetCachedSize(int size) const {
@@ -273,8 +268,9 @@ void ParseTable_Entry::Clear() {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
+  productions_.Clear();
   cached_has_bits = _has_bits_[0];
-  if (cached_has_bits & 7u) {
+  if (cached_has_bits & 3u) {
     if (cached_has_bits & 0x00000001u) {
       GOOGLE_DCHECK(!nonterm_.IsDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited()));
       (*nonterm_.UnsafeRawStringPointer())->clear();
@@ -282,10 +278,6 @@ void ParseTable_Entry::Clear() {
     if (cached_has_bits & 0x00000002u) {
       GOOGLE_DCHECK(!term_.IsDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited()));
       (*term_.UnsafeRawStringPointer())->clear();
-    }
-    if (cached_has_bits & 0x00000004u) {
-      GOOGLE_DCHECK(!production_.IsDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited()));
-      (*production_.UnsafeRawStringPointer())->clear();
     }
   }
   state_ = 0;
@@ -355,16 +347,17 @@ bool ParseTable_Entry::MergePartialFromCodedStream(
         break;
       }
 
-      // optional string production = 4;
+      // repeated string productions = 4;
       case 4: {
         if (static_cast< ::google::protobuf::uint8>(tag) ==
             static_cast< ::google::protobuf::uint8>(34u /* 34 & 0xFF */)) {
           DO_(::google::protobuf::internal::WireFormatLite::ReadString(
-                input, this->mutable_production()));
+                input, this->add_productions()));
           ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
-            this->production().data(), static_cast<int>(this->production().length()),
+            this->productions(this->productions_size() - 1).data(),
+            static_cast<int>(this->productions(this->productions_size() - 1).length()),
             ::google::protobuf::internal::WireFormat::PARSE,
-            "parser.ParseTable.Entry.production");
+            "parser.ParseTable.Entry.productions");
         } else {
           goto handle_unusual;
         }
@@ -399,7 +392,7 @@ void ParseTable_Entry::SerializeWithCachedSizes(
 
   cached_has_bits = _has_bits_[0];
   // required .parser.ParseTable.Entry.States state = 1;
-  if (cached_has_bits & 0x00000008u) {
+  if (cached_has_bits & 0x00000004u) {
     ::google::protobuf::internal::WireFormatLite::WriteEnum(
       1, this->state(), output);
   }
@@ -424,14 +417,14 @@ void ParseTable_Entry::SerializeWithCachedSizes(
       3, this->term(), output);
   }
 
-  // optional string production = 4;
-  if (cached_has_bits & 0x00000004u) {
+  // repeated string productions = 4;
+  for (int i = 0, n = this->productions_size(); i < n; i++) {
     ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
-      this->production().data(), static_cast<int>(this->production().length()),
+      this->productions(i).data(), static_cast<int>(this->productions(i).length()),
       ::google::protobuf::internal::WireFormat::SERIALIZE,
-      "parser.ParseTable.Entry.production");
-    ::google::protobuf::internal::WireFormatLite::WriteStringMaybeAliased(
-      4, this->production(), output);
+      "parser.ParseTable.Entry.productions");
+    ::google::protobuf::internal::WireFormatLite::WriteString(
+      4, this->productions(i), output);
   }
 
   if (_internal_metadata_.have_unknown_fields()) {
@@ -450,7 +443,7 @@ void ParseTable_Entry::SerializeWithCachedSizes(
 
   cached_has_bits = _has_bits_[0];
   // required .parser.ParseTable.Entry.States state = 1;
-  if (cached_has_bits & 0x00000008u) {
+  if (cached_has_bits & 0x00000004u) {
     target = ::google::protobuf::internal::WireFormatLite::WriteEnumToArray(
       1, this->state(), target);
   }
@@ -477,15 +470,14 @@ void ParseTable_Entry::SerializeWithCachedSizes(
         3, this->term(), target);
   }
 
-  // optional string production = 4;
-  if (cached_has_bits & 0x00000004u) {
+  // repeated string productions = 4;
+  for (int i = 0, n = this->productions_size(); i < n; i++) {
     ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
-      this->production().data(), static_cast<int>(this->production().length()),
+      this->productions(i).data(), static_cast<int>(this->productions(i).length()),
       ::google::protobuf::internal::WireFormat::SERIALIZE,
-      "parser.ParseTable.Entry.production");
-    target =
-      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
-        4, this->production(), target);
+      "parser.ParseTable.Entry.productions");
+    target = ::google::protobuf::internal::WireFormatLite::
+      WriteStringToArray(4, this->productions(i), target);
   }
 
   if (_internal_metadata_.have_unknown_fields()) {
@@ -531,7 +523,7 @@ size_t ParseTable_Entry::ByteSizeLong() const {
       ::google::protobuf::internal::WireFormat::ComputeUnknownFieldsSize(
         _internal_metadata_.unknown_fields());
   }
-  if (((_has_bits_[0] & 0x0000000b) ^ 0x0000000b) == 0) {  // All required fields are present.
+  if (((_has_bits_[0] & 0x00000007) ^ 0x00000007) == 0) {  // All required fields are present.
     // required string nonterm = 2;
     total_size += 1 +
       ::google::protobuf::internal::WireFormatLite::StringSize(
@@ -549,11 +541,12 @@ size_t ParseTable_Entry::ByteSizeLong() const {
   } else {
     total_size += RequiredFieldsByteSizeFallback();
   }
-  // optional string production = 4;
-  if (has_production()) {
-    total_size += 1 +
-      ::google::protobuf::internal::WireFormatLite::StringSize(
-        this->production());
+  // repeated string productions = 4;
+  total_size += 1 *
+      ::google::protobuf::internal::FromIntSize(this->productions_size());
+  for (int i = 0, n = this->productions_size(); i < n; i++) {
+    total_size += ::google::protobuf::internal::WireFormatLite::StringSize(
+      this->productions(i));
   }
 
   int cached_size = ::google::protobuf::internal::ToCachedSize(total_size);
@@ -585,8 +578,9 @@ void ParseTable_Entry::MergeFrom(const ParseTable_Entry& from) {
   ::google::protobuf::uint32 cached_has_bits = 0;
   (void) cached_has_bits;
 
+  productions_.MergeFrom(from.productions_);
   cached_has_bits = from._has_bits_[0];
-  if (cached_has_bits & 15u) {
+  if (cached_has_bits & 7u) {
     if (cached_has_bits & 0x00000001u) {
       set_has_nonterm();
       nonterm_.AssignWithDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), from.nonterm_);
@@ -596,10 +590,6 @@ void ParseTable_Entry::MergeFrom(const ParseTable_Entry& from) {
       term_.AssignWithDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), from.term_);
     }
     if (cached_has_bits & 0x00000004u) {
-      set_has_production();
-      production_.AssignWithDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), from.production_);
-    }
-    if (cached_has_bits & 0x00000008u) {
       state_ = from.state_;
     }
     _has_bits_[0] |= cached_has_bits;
@@ -621,7 +611,7 @@ void ParseTable_Entry::CopyFrom(const ParseTable_Entry& from) {
 }
 
 bool ParseTable_Entry::IsInitialized() const {
-  if ((_has_bits_[0] & 0x0000000b) != 0x0000000b) return false;
+  if ((_has_bits_[0] & 0x00000007) != 0x00000007) return false;
   return true;
 }
 
@@ -631,9 +621,9 @@ void ParseTable_Entry::Swap(ParseTable_Entry* other) {
 }
 void ParseTable_Entry::InternalSwap(ParseTable_Entry* other) {
   using std::swap;
+  productions_.InternalSwap(&other->productions_);
   nonterm_.Swap(&other->nonterm_);
   term_.Swap(&other->term_);
-  production_.Swap(&other->production_);
   swap(state_, other->state_);
   swap(_has_bits_[0], other->_has_bits_[0]);
   _internal_metadata_.Swap(&other->_internal_metadata_);

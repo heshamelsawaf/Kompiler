@@ -64,9 +64,8 @@ void parse::parse_ll1(parsetable &parsetable, std::vector<lexer::token> &tokeniz
             switch (entry.state) {
             case parsetable::entry::PROD:
                 stack.pop_back();
-                symbols = entry;
-                for (int i = symbols.size() - 1 ; i >= 0 ; i--) {
-                    stack.push_back(symbols[i]->get_key());
+                for (int i = entry.productions.size() - 1 ; i >= 0 ; i--) {
+                    stack.push_back(entry.productions[i]);
                 }
                 break;
             case parsetable::entry::SYNC:
