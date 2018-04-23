@@ -17,7 +17,7 @@ public:
             ERROR, SYNC, PROD
         };
         States state;
-        std::string production;
+        std::vector<std::string> productions;
 
         entry();
 
@@ -30,7 +30,9 @@ public:
 
     std::string get_starting_symbol_key() const;
 
-    void serialize(std::string file_name);
+//    bool serialize(std::string file_name);
+
+//    bool deserialize(std::string file_name);
 
     friend std::ostream &operator<<(std::ostream &stream, const parsetable &t);
 
