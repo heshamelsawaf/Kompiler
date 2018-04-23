@@ -75,69 +75,73 @@ parsetable::entry parsetable::get_entry(std::string nonterm, std::string next_in
     return parsetable::table[nonterm][next_input];
 }
 
-//bool parsetable::deserialize(std::string file_name) {
-//    parser::ParseTable parse_table;
-//    std::fstream input(file_name, std::ios::in | std::ios::binary);
-//    if (!parse_table.ParseFromIstream(&input)) {
-//        std::cerr << "Failed to parse " + file_name << std::endl;
-//        return false;
-//    }
-//
-//    starting_symbol_key = parse_table.starting_symbol();
-//    table.clear();
-//
-//    for (int i = 0; i < parse_table.entries_size(); i++){
-//        parsetable::entry entry;
-//        switch(parse_table.entries(i).state()){
-//            case parser::ParseTable::Entry::ERROR:
-//                entry.state = parsetable::entry::States::ERROR;
-//                break;
-//            case parser::ParseTable::Entry::SYNC:
-//                entry.state = parsetable::entry::States::SYNC;
-//                break;
-//            case parser::ParseTable::Entry::PROD:
-//                entry.state = parsetable::entry::States::PROD;
-//                entry.production = parse_table.entries(i).production();
-//                break;
-//        }
-//        table[parse_table.entries(i).nonterm()][parse_table.entries(i).term()] = entry;
-//    }
-//    return true;
-//}
-//
-//bool parsetable::serialize(std::string file_name) {
-//    GOOGLE_PROTOBUF_VERIFY_VERSION;
-//
-//    parser::ParseTable parse_table;
-//    parse_table.set_starting_symbol(starting_symbol_key);
-//    for (auto& k : table){
-//        for (auto& u : k.second){
-//            parser::ParseTable_Entry *entry = parse_table.add_entries();
-//            entry->set_nonterm(k.first);
-//            entry->set_term(u.first);
-//            entry->set_production(u.second.production);
-//            switch (u.second.state){
-//                case parsetable::entry::States::ERROR:
-//                    entry->set_state(parser::ParseTable::Entry::ERROR);
-//                    break;
-//                case parsetable::entry::States::SYNC:
-//                    entry->set_state(parser::ParseTable::Entry::SYNC);
-//                    break;
-//                case parsetable::entry::States::PROD:
-//                    entry->set_state(parser::ParseTable::Entry::PROD);
-//                    break;
-//            }
-//        }
-//    }
-//
-//    std::fstream output(file_name, std::ios::out | std::ios::trunc | std::ios::binary);
-//    if (!parse_table.SerializeToOstream(&output)) {
-//        std::cerr << "Failed to write parsetable." << std::endl;
-//        return false;
-//    }
-//    google::protobuf::ShutdownProtobufLibrary();
-//    return true;
-//}
+bool parsetable::deserialize(std::string file_name) {
+    parser::ParseTable parse_table;
+    std::fstream input(file_name, std::ios::in | std::ios::binary);
+    if (!parse_table.ParseFromIstream(&input)) {
+        std::cerr << "Failed to parse " + file_name << std::endl;
+        return false;
+    }
+
+    starting_symbol_key = parse_table.starting_symbol();
+    table.clear();
+
+    for (int i = 0; i < parse_table.entries_size(); i++){
+        parsetable::entry entry;
+        switch(parse_table.entries(i).state()){
+            case parser::ParseTable::Entry::ERROR:
+                entry.state = parsetable::entry::States::ERROR;
+                break;
+            case parser::ParseTable::Entry::SYNC:
+                entry.state = parsetable::entry::States::SYNC;
+                break;
+            case parser::ParseTable::Entry::PROD:
+                entry.state = parsetable::entry::States::PROD;
+                for (int j = 0; j < parse_table.entries(i).productions_size(); j++){
+                    entry.productions.push_back(parse_table.entries(i).productions(j));
+                }
+                break;
+        }
+        table[parse_table.entries(i).nonterm()][parse_table.entries(i).term()] = entry;
+    }
+    return true;
+}
+
+bool parsetable::serialize(std::string file_name) {
+    GOOGLE_PROTOBUF_VERIFY_VERSION;
+
+    parser::ParseTable parse_table;
+    parse_table.set_starting_symbol(starting_symbol_key);
+    for (auto& k : table){
+        for (auto& u : k.second){
+            parser::ParseTable_Entry *entry = parse_table.add_entries();
+            entry->set_nonterm(k.first);
+            entry->set_term(u.first);
+            for (auto& prod_sym : u.second.productions){
+                entry->add_productions(prod_sym);
+            }
+            switch (u.second.state){
+                case parsetable::entry::States::ERROR:
+                    entry->set_state(parser::ParseTable::Entry::ERROR);
+                    break;
+                case parsetable::entry::States::SYNC:
+                    entry->set_state(parser::ParseTable::Entry::SYNC);
+                    break;
+                case parsetable::entry::States::PROD:
+                    entry->set_state(parser::ParseTable::Entry::PROD);
+                    break;
+            }
+        }
+    }
+
+    std::fstream output(file_name, std::ios::out | std::ios::trunc | std::ios::binary);
+    if (!parse_table.SerializeToOstream(&output)) {
+        std::cerr << "Failed to write parsetable." << std::endl;
+        return false;
+    }
+    google::protobuf::ShutdownProtobufLibrary();
+    return true;
+}
 
 std::ostream &operator<<(std::ostream &stream, const parsetable &t) {
 

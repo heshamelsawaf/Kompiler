@@ -201,6 +201,28 @@ class ParseTable_Entry : public ::google::protobuf::Message /* @@protoc_insertio
 
   // accessors -------------------------------------------------------
 
+  // repeated string productions = 4;
+  int productions_size() const;
+  void clear_productions();
+  static const int kProductionsFieldNumber = 4;
+  const ::std::string& productions(int index) const;
+  ::std::string* mutable_productions(int index);
+  void set_productions(int index, const ::std::string& value);
+  #if LANG_CXX11
+  void set_productions(int index, ::std::string&& value);
+  #endif
+  void set_productions(int index, const char* value);
+  void set_productions(int index, const char* value, size_t size);
+  ::std::string* add_productions();
+  void add_productions(const ::std::string& value);
+  #if LANG_CXX11
+  void add_productions(::std::string&& value);
+  #endif
+  void add_productions(const char* value);
+  void add_productions(const char* value, size_t size);
+  const ::google::protobuf::RepeatedPtrField< ::std::string>& productions() const;
+  ::google::protobuf::RepeatedPtrField< ::std::string>* mutable_productions();
+
   // required string nonterm = 2;
   bool has_nonterm() const;
   void clear_nonterm();
@@ -231,21 +253,6 @@ class ParseTable_Entry : public ::google::protobuf::Message /* @@protoc_insertio
   ::std::string* release_term();
   void set_allocated_term(::std::string* term);
 
-  // optional string production = 4;
-  bool has_production() const;
-  void clear_production();
-  static const int kProductionFieldNumber = 4;
-  const ::std::string& production() const;
-  void set_production(const ::std::string& value);
-  #if LANG_CXX11
-  void set_production(::std::string&& value);
-  #endif
-  void set_production(const char* value);
-  void set_production(const char* value, size_t size);
-  ::std::string* mutable_production();
-  ::std::string* release_production();
-  void set_allocated_production(::std::string* production);
-
   // required .parser.ParseTable.Entry.States state = 1;
   bool has_state() const;
   void clear_state();
@@ -261,8 +268,6 @@ class ParseTable_Entry : public ::google::protobuf::Message /* @@protoc_insertio
   void clear_has_nonterm();
   void set_has_term();
   void clear_has_term();
-  void set_has_production();
-  void clear_has_production();
 
   // helper for ByteSizeLong()
   size_t RequiredFieldsByteSizeFallback() const;
@@ -270,9 +275,9 @@ class ParseTable_Entry : public ::google::protobuf::Message /* @@protoc_insertio
   ::google::protobuf::internal::InternalMetadataWithArena _internal_metadata_;
   ::google::protobuf::internal::HasBits<1> _has_bits_;
   mutable int _cached_size_;
+  ::google::protobuf::RepeatedPtrField< ::std::string> productions_;
   ::google::protobuf::internal::ArenaStringPtr nonterm_;
   ::google::protobuf::internal::ArenaStringPtr term_;
-  ::google::protobuf::internal::ArenaStringPtr production_;
   int state_;
   friend struct ::protobuf_parsetable_2eproto::TableStruct;
   friend void ::protobuf_parsetable_2eproto::InitDefaultsParseTable_EntryImpl();
@@ -423,13 +428,13 @@ class ParseTable : public ::google::protobuf::Message /* @@protoc_insertion_poin
 
 // required .parser.ParseTable.Entry.States state = 1;
 inline bool ParseTable_Entry::has_state() const {
-  return (_has_bits_[0] & 0x00000008u) != 0;
+  return (_has_bits_[0] & 0x00000004u) != 0;
 }
 inline void ParseTable_Entry::set_has_state() {
-  _has_bits_[0] |= 0x00000008u;
+  _has_bits_[0] |= 0x00000004u;
 }
 inline void ParseTable_Entry::clear_has_state() {
-  _has_bits_[0] &= ~0x00000008u;
+  _has_bits_[0] &= ~0x00000004u;
 }
 inline void ParseTable_Entry::clear_state() {
   state_ = 0;
@@ -572,67 +577,73 @@ inline void ParseTable_Entry::set_allocated_term(::std::string* term) {
   // @@protoc_insertion_point(field_set_allocated:parser.ParseTable.Entry.term)
 }
 
-// optional string production = 4;
-inline bool ParseTable_Entry::has_production() const {
-  return (_has_bits_[0] & 0x00000004u) != 0;
+// repeated string productions = 4;
+inline int ParseTable_Entry::productions_size() const {
+  return productions_.size();
 }
-inline void ParseTable_Entry::set_has_production() {
-  _has_bits_[0] |= 0x00000004u;
+inline void ParseTable_Entry::clear_productions() {
+  productions_.Clear();
 }
-inline void ParseTable_Entry::clear_has_production() {
-  _has_bits_[0] &= ~0x00000004u;
+inline const ::std::string& ParseTable_Entry::productions(int index) const {
+  // @@protoc_insertion_point(field_get:parser.ParseTable.Entry.productions)
+  return productions_.Get(index);
 }
-inline void ParseTable_Entry::clear_production() {
-  production_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
-  clear_has_production();
+inline ::std::string* ParseTable_Entry::mutable_productions(int index) {
+  // @@protoc_insertion_point(field_mutable:parser.ParseTable.Entry.productions)
+  return productions_.Mutable(index);
 }
-inline const ::std::string& ParseTable_Entry::production() const {
-  // @@protoc_insertion_point(field_get:parser.ParseTable.Entry.production)
-  return production_.GetNoArena();
-}
-inline void ParseTable_Entry::set_production(const ::std::string& value) {
-  set_has_production();
-  production_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), value);
-  // @@protoc_insertion_point(field_set:parser.ParseTable.Entry.production)
+inline void ParseTable_Entry::set_productions(int index, const ::std::string& value) {
+  // @@protoc_insertion_point(field_set:parser.ParseTable.Entry.productions)
+  productions_.Mutable(index)->assign(value);
 }
 #if LANG_CXX11
-inline void ParseTable_Entry::set_production(::std::string&& value) {
-  set_has_production();
-  production_.SetNoArena(
-    &::google::protobuf::internal::GetEmptyStringAlreadyInited(), ::std::move(value));
-  // @@protoc_insertion_point(field_set_rvalue:parser.ParseTable.Entry.production)
+inline void ParseTable_Entry::set_productions(int index, ::std::string&& value) {
+  // @@protoc_insertion_point(field_set:parser.ParseTable.Entry.productions)
+  productions_.Mutable(index)->assign(std::move(value));
 }
 #endif
-inline void ParseTable_Entry::set_production(const char* value) {
+inline void ParseTable_Entry::set_productions(int index, const char* value) {
   GOOGLE_DCHECK(value != NULL);
-  set_has_production();
-  production_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), ::std::string(value));
-  // @@protoc_insertion_point(field_set_char:parser.ParseTable.Entry.production)
+  productions_.Mutable(index)->assign(value);
+  // @@protoc_insertion_point(field_set_char:parser.ParseTable.Entry.productions)
 }
-inline void ParseTable_Entry::set_production(const char* value, size_t size) {
-  set_has_production();
-  production_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(),
-      ::std::string(reinterpret_cast<const char*>(value), size));
-  // @@protoc_insertion_point(field_set_pointer:parser.ParseTable.Entry.production)
+inline void ParseTable_Entry::set_productions(int index, const char* value, size_t size) {
+  productions_.Mutable(index)->assign(
+    reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_set_pointer:parser.ParseTable.Entry.productions)
 }
-inline ::std::string* ParseTable_Entry::mutable_production() {
-  set_has_production();
-  // @@protoc_insertion_point(field_mutable:parser.ParseTable.Entry.production)
-  return production_.MutableNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+inline ::std::string* ParseTable_Entry::add_productions() {
+  // @@protoc_insertion_point(field_add_mutable:parser.ParseTable.Entry.productions)
+  return productions_.Add();
 }
-inline ::std::string* ParseTable_Entry::release_production() {
-  // @@protoc_insertion_point(field_release:parser.ParseTable.Entry.production)
-  clear_has_production();
-  return production_.ReleaseNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+inline void ParseTable_Entry::add_productions(const ::std::string& value) {
+  productions_.Add()->assign(value);
+  // @@protoc_insertion_point(field_add:parser.ParseTable.Entry.productions)
 }
-inline void ParseTable_Entry::set_allocated_production(::std::string* production) {
-  if (production != NULL) {
-    set_has_production();
-  } else {
-    clear_has_production();
-  }
-  production_.SetAllocatedNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), production);
-  // @@protoc_insertion_point(field_set_allocated:parser.ParseTable.Entry.production)
+#if LANG_CXX11
+inline void ParseTable_Entry::add_productions(::std::string&& value) {
+  productions_.Add(std::move(value));
+  // @@protoc_insertion_point(field_add:parser.ParseTable.Entry.productions)
+}
+#endif
+inline void ParseTable_Entry::add_productions(const char* value) {
+  GOOGLE_DCHECK(value != NULL);
+  productions_.Add()->assign(value);
+  // @@protoc_insertion_point(field_add_char:parser.ParseTable.Entry.productions)
+}
+inline void ParseTable_Entry::add_productions(const char* value, size_t size) {
+  productions_.Add()->assign(reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_add_pointer:parser.ParseTable.Entry.productions)
+}
+inline const ::google::protobuf::RepeatedPtrField< ::std::string>&
+ParseTable_Entry::productions() const {
+  // @@protoc_insertion_point(field_list:parser.ParseTable.Entry.productions)
+  return productions_;
+}
+inline ::google::protobuf::RepeatedPtrField< ::std::string>*
+ParseTable_Entry::mutable_productions() {
+  // @@protoc_insertion_point(field_mutable_list:parser.ParseTable.Entry.productions)
+  return &productions_;
 }
 
 // -------------------------------------------------------------------

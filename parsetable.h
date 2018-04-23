@@ -30,9 +30,9 @@ public:
 
     std::string get_starting_symbol_key() const;
 
-//    bool serialize(std::string file_name);
+    bool serialize(std::string file_name);
 
-//    bool deserialize(std::string file_name);
+    bool deserialize(std::string file_name);
 
     friend std::ostream &operator<<(std::ostream &stream, const parsetable &t);
 
