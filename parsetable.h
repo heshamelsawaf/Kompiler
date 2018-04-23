@@ -4,6 +4,7 @@
 #include <unordered_map>
 #include <string>
 #include "cfg.h"
+#include "parsetable.pb.h"
 
 #define EOI std::string(1, 0x03)
 
@@ -16,7 +17,7 @@ public:
             ERROR, SYNC, PROD
         };
         States state;
-        cfg::symbol::production prod;
+        std::string production;
 
         entry();
 
@@ -27,13 +28,11 @@ public:
 
     entry get_entry(std::string nonterm, std::string next_input);
 
-    std::string production_to_str(cfg::symbol::production p);
+    std::string get_starting_symbol_key() const;
 
-    void print_table();
+    void serialize(std::string file_name);
 
-    std::string get_starting_symbol_key();
-
-    void set_starting_symbol_key(std::string s);
+    friend std::ostream &operator<<(std::ostream &stream, const parsetable &t);
 
 private:
     std::unordered_map<std::string, std::unordered_map<std::string, entry>> table;
