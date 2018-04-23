@@ -121,7 +121,7 @@ public:
 
     symbol *get_symbol(std::string _key);
 
-    symbol &get_starting_symbol(void);
+    symbol *get_starting_symbol(void);
 
     void set_starting_symbol(symbol *s);
 

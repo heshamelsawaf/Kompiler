@@ -46,16 +46,15 @@ bool build_first_util(cfg *grmr) {
     return updated;
 }
 
+cfg::symbol *cfg::get_starting_symbol(void) {
+    return starting_sybmol;
+}
 cfg::symbol::production &cfg::symbol::operator[](std::size_t idx) {
     return productions[idx];
 }
 
 const cfg::symbol::production &cfg::symbol::operator[](std::size_t idx) const {
     return productions[idx];
-}
-
-cfg::symbol &cfg::get_starting_symbol(void) {
-    return *starting_sybmol;
 }
 
 void cfg::set_starting_symbol(cfg::symbol *s) {

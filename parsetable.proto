@@ -1,0 +1,22 @@
+syntax = "proto2";
+
+package parser;
+
+message ParseTable {
+    required string starting_symbol = 1;
+    repeated Entry entries = 2;
+
+    message Entry {
+         enum States {
+            ERROR = 0;
+            SYNC = 1;
+            PROD = 2;
+         }
+         required States state = 1;
+         required string nonterm = 2;
+         required string term = 3;
+         repeated string productions = 4;
+
+    }
+}
+
