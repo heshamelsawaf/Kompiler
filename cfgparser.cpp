@@ -36,9 +36,8 @@ cfg cfgparser::rules2cfg(const std::string rules) {
     cfg _cfg("JAVA");
     boost::tokenizer<boost::escaped_list_separator<char>>
             tok(rules, boost::escaped_list_separator<char>("\\", "#", "\'"));
-    for (boost::tokenizer<boost::escaped_list_separator<char> >::iterator i = tok.begin(); i != tok.end(); ++i) {
-        std::string s = *i;
-        std::vector<std::string> lhs_and_rhs = split(s, "::=");
+    for (auto i : tok) {
+        std::vector<std::string> lhs_and_rhs = split(i, "::=");
         if (lhs_and_rhs.empty())
             continue;
         if (lhs_and_rhs.size() < 2) //error
@@ -50,22 +49,19 @@ cfg cfgparser::rules2cfg(const std::string rules) {
 
         boost::tokenizer<boost::escaped_list_separator<char>>
                 rhs_tok(_rhs, boost::escaped_list_separator<char>("\\", "|", "\'"));
-        for (boost::tokenizer<boost::escaped_list_separator<char> >::iterator j = rhs_tok.begin();
-             j != rhs_tok.end(); j++) {
-            std::string syms = trim_copy(*j);
-            if (syms.empty())
+        for (auto j : rhs_tok) {
+            j = trim_copy(j);
+            if (j.empty())
                 perror("Error!2");
 
             std::vector<std::string> symbols;
             boost::tokenizer<boost::escaped_list_separator<char>>
-                    prod_tok(syms, boost::escaped_list_separator<char>("\\", " ", "\'"));
-            for (boost::tokenizer<boost::escaped_list_separator<char> >::iterator k = prod_tok.begin();
-                 k != prod_tok.end(); k++) {
-                std::string sym = *k;
-                if (sym.empty())
+                    prod_tok(j, boost::escaped_list_separator<char>("\\", " ", "\'"));
+            for (auto k : prod_tok) {
+                if (k.empty())
                     perror("Error!3");
 
-                symbols.push_back(sym);
+                symbols.push_back(k);
             }
 
             add_production_to_cfg(_cfg, _lhs, symbols);
