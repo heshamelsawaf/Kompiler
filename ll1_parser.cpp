@@ -5,7 +5,7 @@ void parse::parse_ll1(parsetable &parsetable, std::vector<lexer::token> &tokeniz
     
     std::vector<std::string> stack;
     stack.push_back(EOI);
-    std::string starting_symbol = "temp";
+    std::string starting_symbol = parsetable.get_starting_symbol_key();
     stack.push_back(starting_symbol);
     // std::ostringstream leftmost_derivation;
 
@@ -64,7 +64,7 @@ void parse::parse_ll1(parsetable &parsetable, std::vector<lexer::token> &tokeniz
             switch (entry.state) {
             case parsetable::entry::PROD:
                 stack.pop_back();
-                symbols = entry.prod.get_symbols();
+                symbols = entry;
                 for (int i = symbols.size() - 1 ; i >= 0 ; i--) {
                     stack.push_back(symbols[i]->get_key());
                 }
