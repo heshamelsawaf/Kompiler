@@ -6,6 +6,8 @@
 #include "cfg.h"
 #include "parsetable.pb.h"
 
+#define EPS_STR "\\EPS"
+
 #define EOI std::string(1, 0x03)
 
 class parsetable {

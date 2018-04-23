@@ -6,6 +6,7 @@
 #include <string>
 #include "parsetable.h"
 #include "cfg.h"
+#include "ll1_parser.h"
 
 using namespace std;
 
@@ -72,7 +73,7 @@ int main(int argc, char **argv) {
     cfg::symbol *T_ = g.add_symbol("T'", false);
     cfg::symbol *F = g.add_symbol("F", false);
     cfg::symbol *plus = g.add_symbol("+", true);
-    cfg::symbol *eps = g.add_symbol(EPS, true);
+    cfg::symbol *eps = g.add_symbol(std::string(1, 0x01), true);
     cfg::symbol *mul = g.add_symbol("*", true);
     cfg::symbol *open = g.add_symbol("(", true);
     cfg::symbol *close = g.add_symbol(")", true);
@@ -88,7 +89,7 @@ int main(int argc, char **argv) {
     p1.add_first("+");
     E_->add_production(p1);
     cfg::symbol::production p2("E_", vector<cfg::symbol*>() = {eps});
-    p2.add_first(EPS);
+    p2.add_first(std::string(1, 0x01));
     E_->add_production(p2);
 
     cfg::symbol::production p3("T", vector<cfg::symbol*>() = {F, T_});
@@ -99,7 +100,7 @@ int main(int argc, char **argv) {
     p4.add_first("*");
     T_->add_production(p4);
     cfg::symbol::production p5("T_", vector<cfg::symbol*>() = {eps});
-    p5.add_first(EPS);
+    p5.add_first(std::string(1, 0x01));
     T_->add_production(p5);
 
     cfg::symbol::production p6("F", vector<cfg::symbol*>() = {open, E, close});
@@ -131,8 +132,13 @@ int main(int argc, char **argv) {
     parsetable t(g);
 
     cout << t;
-    t.serialize("prototest");
+    
+    std::vector<lexer::token> tokens;
+    tokens.push_back(lexer::token("a", "id"));
+    tokens.push_back(lexer::token("*", "id"));
+    tokens.push_back(lexer::token("b", "id"));
 
+    parse::parse_ll1(t, tokens);
     
 }
 
