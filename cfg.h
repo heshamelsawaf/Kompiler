@@ -57,6 +57,7 @@ public:
             bool add_first(std::string _key);
 
             bool contains_first(std::string _key) const;
+
         };
 
         symbol();
@@ -86,6 +87,10 @@ public:
         std::unordered_set<std::string> get_follow() const;
 
         std::vector<production> get_productions();
+
+        production &operator[](std::size_t idx);
+
+        const production &operator[](std::size_t idx) const;
 
     private:
         bool terminal;
@@ -117,7 +122,7 @@ public:
 
     symbol *get_symbol(std::string _key);
 
-    symbol &get_starting_symbol(void);
+    symbol *get_starting_symbol(void);
 
     void set_starting_symbol(symbol *s);
 

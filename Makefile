@@ -1,13 +1,14 @@
 GOOGLE_TEST_LIB = gtest
-OBJS = dfa.o machine.o rexplib.o rexparser.o lexer.o parser.o cfg.o main.o parsetable.o test/test_first.o test/test_ll1.o
+OBJS = dfa.o machine.o rexplib.o rexparser.o lexer.o parser.o cfg.o main.o parsetable.o test/test_first.o test/test_ll1.o parsetable.pb.o
 LEXOBJS = machine.o lexer.o parser.o lex.o
 LEXGENOBJS = machine.o dfa.o rexplib.o rexparser.o lexgen.o
-PARSEROBJS = cfg.o parsergen.o parsetable.o
+PARSEROBJS = cfg.o parsergen.o parsetable.o parsetable.pb.o
 TESTOBJS = cfg.o test/test_first.o test/test_ll1.o test/test_main.o
 CC = g++
 CFLAGS  = -O2 --std=c++11 -Wall
 DFLAGS = -ggdb
 LDFLAGS = -l $(GOOGLE_TEST_LIB) -l pthread
+PBFLAGS = -lprotoc -lprotobuf -lpthread
 TARGET = Kompiler
 LEXANALYZER = lex
 LEXGEN = lexgen
@@ -29,7 +30,7 @@ $(LEXGEN): $(LEXGENOBJS)
 	echo Target $(LEXGEN) compiled successfully
 
 $(PARSERGEN): $(PARSEROBJS)
-	$(CC) $(CFLAGS) $(DFLAGS) $(PARSEROBJS) -o $(PARSERGEN)
+	$(CC) $(CFLAGS) $(DFLAGS) $(PARSEROBJS) -o $(PARSERGEN) $(PBFLAGS)
 	echo Target $(PARSERGEN) compiled successfully
 
 $(TEST): $(TESTOBJS)
@@ -72,6 +73,9 @@ cfg.o: cfg.cpp cfg.h
 
 parsetable.o: parsetable.cpp parsetable.h
 	$(CC) $(CFLAGS) -c parsetable.cpp
+
+parsetable.pb.o: parsetable.pb.cc parsetable.pb.h
+	$(CC) $(CFLAGS) -c parsetable.pb.cc
 
 parsergen.o: parsergen.cpp cfg.h
 	$(CC) $(CFLAGS) -c parsergen.cpp
