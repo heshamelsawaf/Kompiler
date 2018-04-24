@@ -115,6 +115,8 @@ leftmost_derivation parse::parse_ll1(parsetable &parsetable, machine &mac, std::
                 }
                 break;
             case parsetable::entry::SYNC:
+                prev_production = production_to_string(cur_symbol, entry.productions);
+                prev_is_production = "SYNC";
                 stack.pop_back();
                 break;
             case parsetable::entry::ERROR:
