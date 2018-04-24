@@ -4,6 +4,8 @@
 
 #include <iostream>
 #include <string>
+#include <sstream>
+#include <fstream>
 #include "parsetable.h"
 #include "cfg.h"
 #include "ll1_parser.h"
@@ -72,7 +74,7 @@ int main(int argc, char **argv) {
     cfg::symbol *T = g.add_symbol("T", false);
     cfg::symbol *T_ = g.add_symbol("T'", false);
     cfg::symbol *F = g.add_symbol("F", false);
-    cfg::symbol *plus = g.add_symbol("+", true);
+    cfg::symbol *plus = g.add_symbol("addop", true);
     cfg::symbol *eps = g.add_symbol(std::string(1, 0x01), true);
     cfg::symbol *mul = g.add_symbol("*", true);
     cfg::symbol *open = g.add_symbol("(", true);
@@ -86,7 +88,7 @@ int main(int argc, char **argv) {
     p.add_first("id");
     E->add_production(p);
     cfg::symbol::production p1("E_", vector<cfg::symbol*>() = {plus, T, E_});
-    p1.add_first("+");
+    p1.add_first("addop");
     E_->add_production(p1);
     cfg::symbol::production p2("E_", vector<cfg::symbol*>() = {eps});
     p2.add_first(std::string(1, 0x01));
@@ -116,15 +118,15 @@ int main(int argc, char **argv) {
     E_->add_follow(EOI);
     E_->add_follow(")");
 
-    T->add_follow("+");
+    T->add_follow("addop");
     T->add_follow(")");
     T->add_follow(EOI);
 
-    T_->add_follow("+");
+    T_->add_follow("addop");
     T_->add_follow(")");
     T_->add_follow(EOI);
 
-    F->add_follow("+");
+    F->add_follow("addop");
     F->add_follow(")");
     F->add_follow("*");
     F->add_follow(EOI);
@@ -133,12 +135,21 @@ int main(int argc, char **argv) {
 
     cout << t;
     
-    std::vector<lexer::token> tokens;
-    tokens.push_back(lexer::token("a", "id"));
-    tokens.push_back(lexer::token("*", "id"));
-    tokens.push_back(lexer::token("b", "id"));
+    t.serialize("prototest");
 
-    parse::parse_ll1(t, tokens);
+    ifstream ttab("m.out");
+
+    machine m("");
+
+    ttab >> m;
+    // std::vector<lexer::token> tokens;
+    // tokens.push_back(lexer::token("a", "id"));
+    // tokens.push_back(lexer::token("*", "id"));
+    // tokens.push_back(lexer::token("b", "id"));
+
+    std::stringstream input_stream("a + b");
+    
+    parse::parse_ll1(t, m, input_stream);
     
 }
 
