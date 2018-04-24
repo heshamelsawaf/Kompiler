@@ -1,5 +1,6 @@
 #include "ll1_parser.h"
 #include "machine.h"
+#include "error.h"
 #include <stack>
 
 void parse::parse_ll1(parsetable &parsetable, machine &mac, std::istream &input_stream) {
@@ -15,6 +16,7 @@ void parse::parse_ll1(parsetable &parsetable, machine &mac, std::istream &input_
     // std::ostringstream leftmost_derivation;
 
     std::vector<std::vector<std::string> > leftmost_derivation;
+    std::vector<error> errors;
 
     bool substitute = false;
     std::string substitute_str = "";
@@ -63,12 +65,16 @@ void parse::parse_ll1(parsetable &parsetable, machine &mac, std::istream &input_
                 // leftmost_derivation[step][cur_symbol_idx] = tokenized_input[i].get_str();
             } else {
                 if (cur_symbol == EOI) {
-                    std::cerr << "Error near: \"" << cur_token.get_str() << "\"" << std::endl;
+                    errors.push_back(error(cur_token.get_line(),
+                                           cur_token.get_col(),
+                                           "Error near: \"" + cur_token.get_str() + "\""));
+                    // std::cerr << "Error near: \"" << cur_token.get_str() << "\"" << std::endl;
                     break;
                 }
                 stack.pop_back();
-                std::cerr << "Error: Expected \"" << cur_symbol
-                         << "\"\nAutomatically Inserted: " << cur_symbol << std::endl;
+                errors.push_back(error(cur_token.get_line(),
+                                    cur_token.get_col(),
+                                    "Error: Expected \"" + cur_symbol + "\", Automatically Inserted."));
             }
         } else {
             parsetable::entry entry = parsetable.get_entry(cur_symbol, cur_token_class);
@@ -90,11 +96,17 @@ void parse::parse_ll1(parsetable &parsetable, machine &mac, std::istream &input_
                 break;
             case parsetable::entry::ERROR:
                 if (cur_token_class != EOI) {
-                    std::cerr << "Error near: \"" << cur_token.get_str() << "\"" << std::endl;
+                    errors.push_back(error(cur_token.get_line(),
+                                           cur_token.get_col(),
+                                           "Error near: \"" + cur_token.get_str() + "\""));
                     cur_token = lex.next_token(input_stream);
                 } else {
-                    std::cerr << "Error: Expected \"" << cur_symbol
-                         << "\"\nAutomatically Inserted: " << cur_symbol << std::endl;
+                    
+                    errors.push_back(error(cur_token.get_line(),
+                                           cur_token.get_col(),
+                                           "Error: Expected \"" + cur_symbol + "\", Automatically Inserted."));
+                    // std::cerr << "Error: Expected \"" << cur_symbol
+                    //      << "\"\nAutomatically Inserted: " << cur_symbol << std::endl;
                 }
                 break;
             default:
@@ -114,6 +126,11 @@ void parse::parse_ll1(parsetable &parsetable, machine &mac, std::istream &input_
     if (stack.back() != EOI) {
         std::cout << stack.back() << std::endl;
     } else {
+        if (!errors.empty()) {
+            for (error err : errors)
+                std::cout << err << "\n";
+            return;
+        }
         std::cout << "Parsed Successfully" << std::endl;
     }
 }

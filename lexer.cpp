@@ -6,7 +6,7 @@
 
 lexer::lexer(machine &mac) : ttab(mac) {
     line = 1;
-    col = 1;
+    col = 0;
 }
 
 lexer::token lexer::next_token(std::istream &ifs) {
@@ -22,7 +22,7 @@ lexer::token lexer::next_token(std::istream &ifs) {
     while (isspace((char) ifs.peek())) {
         if(ifs.peek() == '\n') {
             line++;
-            col = 1;
+            col = 0;
         } else {
             col++;
         }

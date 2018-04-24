@@ -2,7 +2,7 @@ GOOGLE_TEST_LIB = gtest
 OBJS = dfa.o machine.o rexplib.o rexparser.o lexer.o parser.o cfg.o main.o parsetable.o test/test_first.o test/test_ll1.o parsetable.pb.o
 LEXOBJS = machine.o lexer.o parser.o lex.o
 LEXGENOBJS = machine.o dfa.o rexplib.o rexparser.o lexgen.o
-PARSEROBJS = cfg.o parsergen.o machine.o lexer.o parsetable.o parsetable.pb.o ll1_parser.o
+PARSEROBJS = cfg.o parsergen.o machine.o lexer.o error.o parsetable.o parsetable.pb.o ll1_parser.o
 TESTOBJS = cfg.o test/test_first.o test/test_ll1.o test/test_main.o
 CC = g++
 CFLAGS  = -O2 --std=c++11 -Wall
@@ -82,6 +82,9 @@ parsergen.o: parsergen.cpp cfg.h
 
 ll1_parser.o: ll1_parser.cpp ll1_parser.h parsetable.h lexer.h
 	$(CC) $(CFLAGS) -c ll1_parser.cpp
+
+error.o: error.cpp error.h
+	$(CC) $(CFLAGS) -c error.cpp
 
 test/test_main.o: test/test_main.cpp
 	$(CC) $(CFLAGS) $(LDFLAGS) -c test/test_main.cpp
