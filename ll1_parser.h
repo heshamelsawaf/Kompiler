@@ -3,6 +3,7 @@
 
 #include "parsetable.h"
 #include "lexer.h"
+#include "leftmost_derivation.h"
 #include <string>
 #include <iostream>
 
@@ -10,7 +11,7 @@ namespace parse {
 
 // void parse_ll1(parsetable &parsetable, std::vector<lexer::token> &tokenized_input);
 
-void parse_ll1(parsetable &parsetable, machine &mac, std::istream &input_file);
+leftmost_derivation parse_ll1(parsetable &parsetable, machine &mac, std::istream &input_file);
 
 }
 
