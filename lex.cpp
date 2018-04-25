@@ -17,7 +17,7 @@ int main(int argc, char** argv) {
 <symbol_table_output_file>\n\n\
 -./lex <transition_table_input_file> <src_input_file>\n\toutputs symbol table to stdout\n\n\
 -./lex <transition_table_input_file>\n\treads src from stdin and outputs symbol table to stdout\n\n\
--./lexgen\n\treads transition table from ttab.in, src from stdin and outputs symbol table to stdout\n";
+-./lex\n\treads transition table from ttab.in, src from stdin and outputs symbol table to stdout\n";
     if (argc == 1) {
         ttab_ifs.open("ttab.in");
         retval = lex(ttab_ifs, std::cin, std::cout);

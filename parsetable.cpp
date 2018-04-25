@@ -8,6 +8,8 @@ parsetable::entry::entry() = default;
 parsetable::entry::entry(parsetable::entry::States _state) : state(_state) {
 }
 
+parsetable::parsetable() = default;
+
 parsetable::parsetable(cfg grammar) {
     if (grammar.get_starting_symbol() == nullptr) {
         throw std::invalid_argument("Grammar missing a starting symbol.");

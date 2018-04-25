@@ -28,6 +28,8 @@ public:
 
     parsetable(cfg);
 
+    parsetable();
+
     entry get_entry(std::string nonterm, std::string next_input);
 
     std::string get_starting_symbol_key() const;
