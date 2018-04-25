@@ -175,7 +175,7 @@ std::ostream &operator<<(std::ostream &stream, const parsetable &t) {
                 T.back().push_back("\\SYNC");
             } else {
                 std::string temp = k.first + " ->";
-                for (auto &prod_sym : t.table.at(T.back()[0]).at(T[0][i]).productions){
+                for (auto &prod_sym : t.table.at(T.back()[0]).at(T[0][i]).productions) {
                     temp += " " + prod_sym;
                 }
                 T.back().push_back(temp);

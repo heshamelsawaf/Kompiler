@@ -15,9 +15,11 @@ private:
 public:
     sentential_expression(std::vector<std::string> _symbols, std::string _production);
 
-    std::vector<std::string> get_symbols();
+    std::vector<std::string> get_symbols() const;
     
-    std::string get_production();
+    std::string get_production() const;
+
+    std::string get_symbols_str() const;
 };
 
 #endif //SENTENTIAL_EXPRESSION_H
