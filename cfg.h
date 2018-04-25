@@ -90,7 +90,7 @@ public:
 
         production &operator[](std::size_t idx);
 
-        const production &operator[](std::size_t idx) const;
+        std::size_t get_production_count() const;
 
     private:
         bool terminal;
@@ -141,7 +141,7 @@ public:
 
 private:
     std::unordered_map<std::string, symbol> symbols;
-    symbol *starting_sybmol;
+    symbol *starting_symbol;
     std::string grammar;
     /* Overloading the ostream operator */
     friend std::ostream &operator<<(std::ostream& stream, cfg &grmr);

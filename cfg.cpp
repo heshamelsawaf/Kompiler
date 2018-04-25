@@ -12,21 +12,26 @@ bool build_first_util(cfg *grmr) {
         if (s->is_terminal())
             continue;
 
-        for (cfg::symbol::production &prod : s->get_productions()) {
+        for (int i = 0; i < s->get_production_count(); i++) {
+            cfg::symbol::production &prod = (*s)[i];
+
             /* For each production S->T where T is non-terminal,
              * Add FIRST(T) to FIRST(S), do not add eps if it is
              * in FIRST(T) */
             cfg::symbol *t = *prod.get_symbols().begin();
-            if (!t->is_terminal())
+
+            if (t->is_terminal())
                 for (std::string a : t->get_first())
                     if (a != EPS)
                         updated |= prod.add_first(a);
 
             /* For production S -> X1 X2 X3... Xk, if eps is in
              * FIRST(X1..k), then eps is in FIRST(S) */
-            while (t != *prod.get_symbols().end())
+            while (t != *prod.get_symbols().end()) {
                 if(!t->contains_first(EPS))
                     break;
+                t++;
+            }
 
             /* If reached end of production, then eps is in
              * FIRST(S), else if it reached Xi, then FIRST(Xi) 
@@ -60,8 +65,9 @@ void build_first(cfg *grmr) {
 
         /* If symbol S is non-terminal, add all terminals in the
          * beginning of its productions (including EPS) to its first set */
-        for (cfg::symbol::production &prod : s->get_productions()) {
-            cfg::symbol *t = *prod.get_symbols().begin();
+        for (int i = 0; i < s->get_production_count(); i++) {
+            cfg::symbol::production &prod = (*s)[i];
+            cfg::symbol *t = prod.get_symbols().front();
 
             /* If S -> a(X) is a production where a is terminal,
              * add a to FIRST(S) */
@@ -80,61 +86,61 @@ void build_first(cfg *grmr) {
 bool build_follow_util(cfg *grmr) {
     bool updated = false;
 
-    for (std::string s_key : grmr->get_symbols()) {
-        cfg::symbol *s = grmr->get_symbol(s_key);
+    // for (std::string s_key : grmr->get_symbols()) {
+    //     cfg::symbol *s = grmr->get_symbol(s_key);
 
-        /* If symbol S is terminal, skip */
-        if (s->is_terminal())
-            continue;
+    //     /* If symbol S is terminal, skip */
+    //     if (s->is_terminal())
+    //         continue;
         
-        for (cfg::symbol::production &prod : s->get_productions()) {
-            cfg::symbol *t   = *prod.get_symbols().begin();
-            cfg::symbol *eol = *prod.get_symbols().end();
+    //     for (cfg::symbol::production &prod : s->get_productions()) {
+    //         cfg::symbol *t   = *prod.get_symbols().begin();
+    //         cfg::symbol *eol = *prod.get_symbols().end();
 
-            while (t != eol && t->is_terminal())
-                t++;
+    //         while (t != eol && t->is_terminal())
+    //             t++;
             
-            if (t == eol)
-                continue;
+    //         if (t == eol)
+    //             continue;
             
-            while (t != eol) {
-                if (t->is_terminal())
-                    continue;
-                cfg::symbol *u = t + 1;
+    //         while (t != eol) {
+    //             if (t->is_terminal())
+    //                 continue;
+    //             cfg::symbol *u = t + 1;
 
-                while (u != eol) {
-                    if (u->is_terminal()) {
-                        updated |= t->add_follow(u->get_key());
-                        break;
-                    }
+    //             while (u != eol) {
+    //                 if (u->is_terminal()) {
+    //                     updated |= t->add_follow(u->get_key());
+    //                     break;
+    //                 }
                     
-                    for (std::string f : u->get_first())
-                        if (f != EPS)
-                            updated |= t->add_follow(f);
+    //                 for (std::string f : u->get_first())
+    //                     if (f != EPS)
+    //                         updated |= t->add_follow(f);
                     
-                    if (u->contains_first(EPS))
-                        u++;
-                    else 
-                        break;
-                }
+    //                 if (u->contains_first(EPS))
+    //                     u++;
+    //                 else 
+    //                     break;
+    //             }
 
-                if (u == eol)
-                    for (std::string f : s->get_first())
-                        updated |= t->add_follow(f);
-                t++;
-            }
-        }
-    }
+    //             if (u == eol)
+    //                 for (std::string f : s->get_first())
+    //                     updated |= t->add_follow(f);
+    //             t++;
+    //         }
+    //     }
+    // }
 
     return updated;
 }
 
 void build_follow(cfg *grmr) {
-    /* Add EOF to starting symbol */
-    cfg::symbol *s = &grmr->get_starting_symbol();
-    s->add_follow(EOF);
+    // /* Add EOF to starting symbol */
+    // cfg::symbol *s = &grmr->get_starting_symbol();
+    // s->add_follow(EOF);
 
-    while (build_follow_util(grmr));
+    // while (build_follow_util(grmr));
 }
 
 int find_prefix(cfg::symbol::production &a, cfg::symbol::production &b) {
@@ -548,6 +554,14 @@ std::vector<cfg::symbol::production> cfg::symbol::get_productions(){
     return productions;
 }
 
+std::size_t cfg::symbol::get_production_count() const {
+    return productions.size();
+}
+
+cfg::symbol::production &cfg::symbol::operator[](std::size_t idx) {
+    return productions[idx];
+}
+
 cfg::cfg(std::string _grammar) : grammar(std::move(_grammar)) {
 
 }
@@ -599,10 +613,11 @@ std::vector<std::string> cfg::get_symbols(){
     return syms;
 }
 
-cfg::symbol &cfg::get_starting_symbol(void) {
-    return *starting_sybmol;
+cfg::symbol *cfg::get_starting_symbol(void) {
+    return starting_symbol;
 }
 
 void cfg::set_starting_symbol(cfg::symbol *s) {
-    starting_sybmol = s;
+    starting_symbol = s;
 }
+
