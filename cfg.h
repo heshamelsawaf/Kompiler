@@ -46,7 +46,7 @@ public:
             void add_symbol(symbol *sym);
             
             /* Return list representation of production. */
-            std::vector<symbol *> get_symbols(void) const;
+            std::vector<symbol *> &get_symbols(void) ;
 
             std::unordered_set<std::string> get_first() const;
 

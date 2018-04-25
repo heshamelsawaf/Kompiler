@@ -442,7 +442,7 @@ bool cfg::to_ll1() {
 
 void cfg::build() {
     build_first(this);
-    // build_follow(this);
+    build_follow(this);
 }
 
 std::ostream &operator<<(std::ostream& stream, const cfg::symbol::production &prod) {
@@ -482,7 +482,7 @@ void cfg::symbol::production::add_symbol(symbol *sym){
     symbols.push_back(sym);
 }
 
-std::vector<cfg::symbol *> cfg::symbol::production::get_symbols() const {
+std::vector<cfg::symbol *> &cfg::symbol::production::get_symbols() {
     return symbols;
 }
 
