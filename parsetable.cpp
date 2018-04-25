@@ -8,6 +8,8 @@ parsetable::entry::entry() = default;
 parsetable::entry::entry(parsetable::entry::States _state) : state(_state) {
 }
 
+parsetable::parsetable() = default;
+
 parsetable::parsetable(cfg grammar) {
     if (grammar.get_starting_symbol() == nullptr) {
         throw std::invalid_argument("Grammar missing a starting symbol.");
@@ -51,7 +53,7 @@ parsetable::parsetable(cfg grammar) {
                         "Grammar is not LL(1). Entry [" + sym + "," + follow + "] has duplicate values.");
             }
             if (has_eps_prod) {
-                table[sym][follow].productions.push_back("\\EPS");
+                table[sym][follow].productions.push_back(EPS_STR);
                 table[sym][follow].state = parsetable::entry::States::PROD;
             } else {
                 table[sym][follow].state = parsetable::entry::States::SYNC;
@@ -173,7 +175,7 @@ std::ostream &operator<<(std::ostream &stream, const parsetable &t) {
                 T.back().push_back("\\SYNC");
             } else {
                 std::string temp = k.first + " ->";
-                for (auto &prod_sym : t.table.at(T.back()[0]).at(T[0][i]).productions){
+                for (auto &prod_sym : t.table.at(T.back()[0]).at(T[0][i]).productions) {
                     temp += " " + prod_sym;
                 }
                 T.back().push_back(temp);
@@ -202,3 +204,7 @@ std::ostream &operator<<(std::ostream &stream, const parsetable &t) {
     return stream;
 }
 
+
+bool parsetable::is_nonterm(std::string symbol) {
+    return table.find(symbol) != table.end();
+}

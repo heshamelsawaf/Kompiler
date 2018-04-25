@@ -6,6 +6,8 @@
 #include "cfg.h"
 #include "parsetable.pb.h"
 
+#define EPS_STR "\\EPS"
+
 #define EOI std::string(1, 0x03)
 
 class parsetable {
@@ -26,9 +28,13 @@ public:
 
     parsetable(cfg);
 
+    parsetable();
+
     entry get_entry(std::string nonterm, std::string next_input);
 
     std::string get_starting_symbol_key() const;
+
+    bool is_nonterm(std::string symbol);
 
     bool serialize(std::string file_name);
 
