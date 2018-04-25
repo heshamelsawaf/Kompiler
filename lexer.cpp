@@ -12,7 +12,7 @@ lexer::lexer(machine &mac) : ttab(mac) {
 lexer::token lexer::next_token(std::istream &ifs) {
     std::ostringstream accum_ss;
     std::ostringstream token_ss;
-    std::string token_class = "error";
+    std::string token_class = ERROR_CLASS;
     
     if (!ifs || ifs.eof())
         return lexer::token("", EOF, line, col);
@@ -55,7 +55,7 @@ lexer::token lexer::next_token(std::istream &ifs) {
             token_class = ttab.get_token_class();
         }
     }
-    if (token_class == "error") {
+    if (token_class == ERROR_CLASS) {
         ifs.get(c);
         token_ss << c;
     }

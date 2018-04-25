@@ -6,6 +6,7 @@
 #include "trantable.h"
 
 #define EOF "eof"
+#define ERROR_CLASS "error"
 
 class lexer {
 public:
