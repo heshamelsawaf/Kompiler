@@ -12,7 +12,7 @@
 #include <iostream>
 
 #define EPS std::string(1, 0x01)
-#define EOF std::string("$")
+#define EOI std::string("$")
 
 class cfg {
 
