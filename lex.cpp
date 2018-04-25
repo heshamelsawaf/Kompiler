@@ -1,6 +1,6 @@
 #include "machine.h"
 #include "lexer.h"
-#include "parser.h"
+#include "tokenizer.h"
 #include <cstring>
 #include <fstream>
 #include <string>

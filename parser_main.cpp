@@ -1,6 +1,4 @@
 #include "machine.h"
-#include "lexer.h"
-#include "parser.h"
 #include "ll1_parser.h"
 #include <cstring>
 #include <fstream>
@@ -56,7 +54,7 @@ void read_ttab(std::istream &in, machine &m) {
     in >> m;
 }
 
-int parse(std::istream &ttab_in, std::string ptab_in, std::istream &src_in, std::ostream &lmost_derivation_out) {
+int stack_parse(std::istream &ttab_in, std::string ptab_in, std::istream &src_in, std::ostream &lmost_derivation_out) {
     try {
         if (!ttab_in | !src_in | !lmost_derivation_out) {
             perror("Unable to read file");

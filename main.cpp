@@ -8,7 +8,7 @@
 #include <sstream>
 #include "rexparser.h"
 #include "lexer.h"
-#include "parser.h"
+#include "tokenizer.h"
 #include "dfa.h"
 
 using namespace std;

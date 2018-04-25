@@ -1,4 +1,4 @@
-#include "parser.h"
+#include "tokenizer.h"
 
 parser::parser(std::istream *_ifs, lexer &_lex) : lex{_lex} {
     ifs = _ifs;
