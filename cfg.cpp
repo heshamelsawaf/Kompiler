@@ -12,32 +12,39 @@ bool build_first_util(cfg *grmr) {
         if (s->is_terminal())
             continue;
 
-        for (cfg::symbol::production &prod : s->get_productions()) {
+        for (int i = 0; i < s->get_production_count(); i++) {
+            cfg::symbol::production &prod = (*s)[i];
+
             /* For each production S->T where T is non-terminal,
              * Add FIRST(T) to FIRST(S), do not add eps if it is
              * in FIRST(T) */
-            cfg::symbol *t = *prod.get_symbols().begin();
-            if (!t->is_terminal())
-                for (std::string a : t->get_first())
+            std::vector<cfg::symbol *> symbols = prod.get_symbols();
+            std::vector<cfg::symbol *>::iterator t = symbols.begin();
+            std::vector<cfg::symbol *>::iterator eol = symbols.end();
+
+            if ((*t)->is_terminal())
+                for (std::string a : (*t)->get_first())
                     if (a != EPS)
                         updated |= prod.add_first(a);
 
             /* For production S -> X1 X2 X3... Xk, if eps is in
              * FIRST(X1..k), then eps is in FIRST(S) */
-            while (t != *prod.get_symbols().end())
-                if(!t->contains_first(EPS))
+            while (t != eol) {
+                if(!(*t)->contains_first(EPS))
                     break;
+                t++;
+            }
 
             /* If reached end of production, then eps is in
              * FIRST(S), else if it reached Xi, then FIRST(Xi) 
              * is in FIRST(S) */
-            if (t == *prod.get_symbols().end())
+            if (t == eol)
                 updated |= prod.add_first(EPS);
             else {
-                if (t->is_terminal())
-                    updated |= prod.add_first(t->get_key());
+                if ((*t)->is_terminal())
+                    updated |= prod.add_first((*t)->get_key());
                 else
-                    for (std::string a : t->get_first())
+                    for (std::string a : (*t)->get_first())
                         updated |= prod.add_first(a);
             }
         }
@@ -46,25 +53,6 @@ bool build_first_util(cfg *grmr) {
     return updated;
 }
 
-cfg::symbol *cfg::get_starting_symbol(void) {
-    return starting_sybmol;
-}
-cfg::symbol::production &cfg::symbol::operator[](std::size_t idx) {
-    return productions[idx];
-}
-
-const cfg::symbol::production &cfg::symbol::operator[](std::size_t idx) const {
-    return productions[idx];
-}
-
-void cfg::set_starting_symbol(cfg::symbol *s) {
-    starting_sybmol = s;
-}
-
-/*      A -> BCd
-        B -> Cd
-        C -> Ad | eps
-*
 /* Build first set for each and every production
  * in cfg grammar */
 void build_first(cfg *grmr) {
@@ -78,8 +66,9 @@ void build_first(cfg *grmr) {
 
         /* If symbol S is non-terminal, add all terminals in the
          * beginning of its productions (including EPS) to its first set */
-        for (cfg::symbol::production &prod : s->get_productions()) {
-            cfg::symbol *t = *prod.get_symbols().begin();
+        for (int i = 0; i < s->get_production_count(); i++) {
+            cfg::symbol::production &prod = (*s)[i];
+            cfg::symbol *t = prod.get_symbols().front();
 
             /* If S -> a(X) is a production where a is terminal,
              * add a to FIRST(S) */
@@ -95,8 +84,75 @@ void build_first(cfg *grmr) {
     while (build_first_util(grmr));
 }
 
-void build_follow(cfg *grmr) {
+bool build_follow_util(cfg *grmr) {
+    bool updated = false;
 
+    for (std::string s_key : grmr->get_symbols()) {
+        cfg::symbol *s = grmr->get_symbol(s_key);
+
+        /* If symbol S is terminal, skip */
+        if (s->is_terminal())
+            continue;
+        
+        for (int i = 0; i < s->get_production_count(); i++) {
+            cfg::symbol::production &prod = (*s)[i];
+            std::vector<cfg::symbol *> symbols = prod.get_symbols();
+            std::vector<cfg::symbol *>::iterator t = symbols.begin();
+            std::vector<cfg::symbol *>::iterator eol = symbols.end();
+
+            while (t != eol) {
+                /* Skip any terminals or epsilon productions */
+                if ((*t)->is_terminal() || (*t)->is_eps()) {
+                    t++;
+                    continue;
+                }
+
+                /* t is a nonterminal inside the production,
+                 * u is the next symbol */
+                std::vector<cfg::symbol *>::iterator u = t + 1;
+
+                while (u != eol) {
+                    /* If u is found to be a terminal, then add this terminal
+                     * to FOLLOW(T) and break */
+                    if ((*u)->is_terminal()) {
+                        updated |= (*t)->add_follow((*u)->get_key());
+                        break;
+                    }
+                    
+                    /* If u is found to be a non-terminal,
+                     * add FIRST(U) - except for eps - to FOLLOW(T) */
+                    for (std::string f : (*u)->get_first())
+                        if (f != EPS)
+                            updated |= (*t)->add_follow(f);
+                    
+                    /* Advance if eps is in FIRST(u) */
+                    if ((*u)->contains_first(EPS))
+                        u++;
+                    else 
+                        break;
+                }
+
+                /* If all of u contains eps, FOLLOW(S) C FOLLOW(T) */
+                if (u == eol)
+                    for (std::string f : s->get_follow())
+                        updated |= (*t)->add_follow(f);
+                t++;
+            }
+        }
+    }
+
+    return updated;
+}
+
+void build_follow(cfg *grmr) {
+    /* Add EOF to starting symbol */
+    cfg::symbol *s = grmr->get_starting_symbol();
+    if (s == nullptr)
+        throw std::invalid_argument("Can't find a starting symbol!");
+
+    s->add_follow(EOI);
+
+    while (build_follow_util(grmr));
 }
 
 int find_prefix(cfg::symbol::production &a, cfg::symbol::production &b) {
@@ -385,9 +441,6 @@ bool cfg::to_ll1() {
 }
 
 void cfg::build() {
-    /* TODO: either make `build_first()`,
-     * `build_follow()` non-static member functions
-     * or separate them outside cfg.cpp */
     build_first(this);
     build_follow(this);
 }
@@ -429,7 +482,7 @@ void cfg::symbol::production::add_symbol(symbol *sym){
     symbols.push_back(sym);
 }
 
-std::vector<cfg::symbol *> cfg::symbol::production::get_symbols() const {
+std::vector<cfg::symbol *> cfg::symbol::production::get_symbols() {
     return symbols;
 }
 
@@ -438,7 +491,6 @@ std::unordered_set<std::string> cfg::symbol::production::get_first() const {
 }
 
 bool cfg::symbol::production::add_first(std::string _key){
-    // TODO
     return first.insert(_key).second;
 }
 
@@ -453,6 +505,7 @@ cfg::symbol::symbol(){
 cfg::symbol::symbol(std::string _key, bool _terminal) {
     key = _key;
     terminal = _terminal;
+
 }
 
 bool cfg::symbol::is_terminal() const {
@@ -481,12 +534,11 @@ void cfg::symbol::clear_productions(){
     productions.clear();
 }
 
-void cfg::symbol::add_follow(std::string _key){
-    // TODO
-    follow.insert(_key);
+bool cfg::symbol::add_follow(std::string _key){
+    return follow.insert(_key).second;
 }
 
-bool cfg::symbol::contains_first(std::string _key) const{
+bool cfg::symbol::contains_first(std::string _key) const {
     for (cfg::symbol::production prod : productions)
         if (prod.contains_first(_key))
             return true;
@@ -510,6 +562,14 @@ std::unordered_set<std::string> cfg::symbol::get_follow() const{
 
 std::vector<cfg::symbol::production> cfg::symbol::get_productions(){
     return productions;
+}
+
+std::size_t cfg::symbol::get_production_count() const {
+    return productions.size();
+}
+
+cfg::symbol::production &cfg::symbol::operator[](std::size_t idx) {
+    return productions[idx];
 }
 
 cfg::cfg(std::string _grammar) : grammar(std::move(_grammar)) {
@@ -561,3 +621,12 @@ std::vector<std::string> cfg::get_symbols(){
     }
     return syms;
 }
+
+cfg::symbol *cfg::get_starting_symbol(void) {
+    return starting_symbol;
+}
+
+void cfg::set_starting_symbol(cfg::symbol *s) {
+    starting_symbol = s;
+}
+

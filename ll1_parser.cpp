@@ -21,19 +21,19 @@ std::string production_to_string(std::string lhs, std::vector<std::string> rhs) 
 std::string get_message(std::string cur_symbol, std::string cur_token, error_type error) {
     switch (error) {
     case MISSING_SYMBOL:
-        return "Error: Expected \"" + cur_symbol + "\", Automatically Inserted.";
+        return "Error: Expected \"" + cur_symbol + "\"";
         break;
     case INVALID_TOKEN:
-        return "Error: Invalid token or identifier \"" + cur_token + "\", Ignored";
+        return "Error: Invalid token or identifier \"" + cur_token + "\"";
         break;
     case ERROR_PRODUCTION:
-        return "Error production near: \"" + cur_token + "\", Ignored.";
+        return "Error production near: \"" + cur_token + "\"";
         break;
     case EXCESS_SYMBOL:
-        return "Error near: \"" + cur_token + "\", Ignored.";
+        return "Error near: \"" + cur_token + "\"";
         break;
     case REACHED_EOF:
-        return "Error: Expected \"" + cur_symbol + "\", Automatically Inserted.";
+        return "Error: Expected \"" + cur_symbol + "\"";
         break;
     default:
         return "";

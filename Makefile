@@ -1,10 +1,10 @@
 GOOGLE_TEST_LIB = gtest
-OBJS = dfa.o machine.o rexplib.o rexparser.o lexer.o tokenizer.o cfg.o main.o parsetable.o test/test_first.o test/test_ll1.o parsetable.pb.o
+OBJS = dfa.o machine.o rexplib.o rexparser.o lexer.o tokenizer.o cfg.o main.o parsetable.o test/test_all.o test/test_ll1.o parsetable.pb.o
 LEXOBJS = machine.o lexer.o tokenizer.o lex.o
 LEXGENOBJS = machine.o dfa.o rexplib.o rexparser.o lexgen.o
-PARSERGENOBJS = cfg.o parsergen.o machine.o lexer.o error.o parsetable.o parsetable.pb.o ll1_parser.o sentential_expression.o leftmost_derivation.o
-PARSEROBJS = cfg.o parser_main.o machine.o lexer.o error.o parsetable.o parsetable.pb.o ll1_parser.o sentential_expression.o leftmost_derivation.o
-TESTOBJS = cfg.o test/test_first.o test/test_ll1.o test/test_main.o
+PARSERGENOBJS = cfg.o parsergen.o cfgparser.o machine.o lexer.o error.o parsetable.o parsetable.pb.o ll1_parser.o sentential_expression.o leftmost_derivation.o
+PARSEROBJS = cfg.o parser_main.o machine.o lexer.o error.o parsetable.o parsetable.pb.o ll1_parser.o cfgparser.o sentential_expression.o leftmost_derivation.o
+TESTOBJS = cfg.o cfgparser.o test/test_all.o test/test_ll1.o test/test_main.o
 CC = g++
 CFLAGS  = -O2 --std=c++11 -Wall
 DFLAGS = -ggdb
@@ -78,6 +78,9 @@ tokenizer.o: tokenizer.cpp tokenizer.h lexer.h
 cfg.o: cfg.cpp cfg.h
 	$(CC) $(DFLAGS) $(CFLAGS) -c cfg.cpp
 
+cfgparser.o: cfg.h cfgparser.h cfgparser.cpp
+	$(CC) $(DFLAGS) $(CFLAGS) -c cfgparser.cpp
+
 parsetable.o: parsetable.cpp parsetable.h
 	$(CC) $(CFLAGS) -c parsetable.cpp
 
@@ -106,9 +109,9 @@ test/test_main.o: test/test_main.cpp
 	$(CC) $(CFLAGS) $(LDFLAGS) -c test/test_main.cpp
 	mv test_main.o test
 
-test/test_first.o: test/test_first.cpp cfg.h
-	$(CC) $(CFLAGS) $(LDFLAGS) -c test/test_first.cpp
-	mv test_first.o test
+test/test_all.o: test/test_all.cpp cfg.h
+	$(CC) $(CFLAGS) $(LDFLAGS) -c test/test_all.cpp
+	mv test_all.o test
 
 test/test_ll1.o: test/test_ll1.cpp cfg.h
 	$(CC) $(CFLAGS) $(LDFLAGS) -c test/test_ll1.cpp

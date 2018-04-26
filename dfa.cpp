@@ -18,7 +18,7 @@ void dfa::epsilon_closure(machine m, sid_t s, std::set<sid_t> &res)
         sid_t u = stack.top();
         stack.pop();
         std::vector<sid_t> eps_trans =
-            m.get_transitions(u, EPS);
+            m.get_transitions(u, EPS_CHAR);
         for (sid_t t : eps_trans) {
             stack.push(t);
             // std::cout << "25-Eps Trans For: " << u << " is: " << t << std::endl; 
@@ -133,7 +133,7 @@ machine dfa::to_dfa(machine &nfa) {
         // std::cout << get_key(cur_states) << std::endl;
         states_vec.pop_back();
         for (char input : nfa.get_language()) {
-            if (input == EPS)
+            if (input == EPS_CHAR)
                 continue;
             std::set<sid_t> temp;
             dfa::move(nfa, cur_states, temp, input);

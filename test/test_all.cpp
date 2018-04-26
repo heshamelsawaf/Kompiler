@@ -1,10 +1,37 @@
 #include <gtest/gtest.h>
 #include <string>
+#include <fstream>
+#include <sstream>
 #include <vector>
+#include "../cfgparser.h"
 #include "../cfg.h"
-#define EOI "$"
 
 using namespace std;
+
+TEST(FIRST, ALL1) {
+    ifstream grammar_ifs;
+    grammar_ifs.open("lan2.cfg");
+
+    auto s = [&grammar_ifs] {
+        std::ostringstream ss;
+        ss << grammar_ifs.rdbuf();
+        return ss.str();
+    }();
+
+    if (s.empty())
+        return;
+
+    s.erase(std::remove(s.begin(), s.end(), '\n'), s.end());
+
+    cfgparser _cfgparser;
+    cfg _cfg = _cfgparser.rules2cfg(s);
+    std::cout << _cfg << "\n-----------------------------------\n";
+    _cfg.to_ll1();
+    std::cout << _cfg << std::endl;
+
+    grammar_ifs.close();
+
+}
 
 TEST(FIRST, FIRST1) {
     /*  E → TX
@@ -28,6 +55,8 @@ TEST(FIRST, FIRST1) {
     cfg::symbol *rp   = g.add_symbol(")", true);
     cfg::symbol *id   = g.add_symbol("id", true);
     cfg::symbol *eps = g.add_symbol(EPS, true);
+
+    g.set_starting_symbol(E);
 
     cfg::symbol::production pE("E", vector<cfg::symbol*>() = {T, X});
     E->add_production(pE);
@@ -73,4 +102,12 @@ TEST(FIRST, FIRST1) {
     EXPECT_TRUE(Y->get_first().find("*") != Y->get_first().end());
     
     cout << g << endl;
+
+    for (std::string sym_key : g.get_symbols()) {
+        cfg::symbol *s = g.get_symbol(sym_key);
+        cout << s->get_key() << ": ";
+        for (std::string f : s->get_follow())
+            std::cout << f << " ";
+        std::cout << std::endl;
+    }
 }

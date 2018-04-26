@@ -110,7 +110,7 @@ machine machine_ops::char_range(char start, char end) {
 
 machine machine_ops::string_concat(std::string s) {
     if (s == "")
-        return single_char(EPS);
+        return single_char(EPS_CHAR);
 
     std::vector<machine> m;
     for (int i = 0; i < s.length(); i++) {

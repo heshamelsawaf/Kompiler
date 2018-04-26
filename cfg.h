@@ -12,6 +12,7 @@
 #include <iostream>
 
 #define EPS std::string(1, 0x01)
+#define EOI std::string("$")
 
 class cfg {
 
@@ -45,7 +46,7 @@ public:
             void add_symbol(symbol *sym);
             
             /* Return list representation of production. */
-            std::vector<symbol *> get_symbols(void) const;
+            std::vector<symbol *> get_symbols(void) ;
 
             std::unordered_set<std::string> get_first() const;
 
@@ -75,7 +76,7 @@ public:
 
         void clear_productions();
 
-        void add_follow(std::string _key);
+        bool add_follow(std::string _key);
 
         bool contains_first(std::string _key) const;
 
@@ -89,7 +90,7 @@ public:
 
         production &operator[](std::size_t idx);
 
-        const production &operator[](std::size_t idx) const;
+        std::size_t get_production_count() const;
 
     private:
         bool terminal;
@@ -140,7 +141,7 @@ public:
 
 private:
     std::unordered_map<std::string, symbol> symbols;
-    symbol *starting_sybmol;
+    symbol *starting_symbol;
     std::string grammar;
     /* Overloading the ostream operator */
     friend std::ostream &operator<<(std::ostream& stream, cfg &grmr);
