@@ -43,8 +43,6 @@ add_executable(Kompiler dfa.cpp dfa.h machine.cpp machine.h main.cpp rexplib.h r
 add_executable(Parser ${CFG} cfggen.cpp ${CFG_PARSER} ${MACHINE} ${LEXER} ${ERROR} parsetable.pb.cc parsetable.pb.h ${PARSE_TABLE} ${LL1_PARSER}
         ${SENTENTIAL_EXPRESSION} ${LEFTMOST_DERIVATION} ${COMMAND_OPTIONS})
 
-add_executable(Test test/test_first.cpp cfg.h test/test_ll1.cpp test/test_main.cpp cfg.cpp)
-
 
 target_link_libraries(Parser ${Boost_LIBRARIES})
 target_link_libraries(Parser ${Protobuf_LIBRARIES})

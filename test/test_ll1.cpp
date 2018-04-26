@@ -1,6 +1,4 @@
 #include <gtest/gtest.h>
-#include <string>
-#include <vector>
 #include "../cfg.h"
 #define EOI "$"
 
@@ -91,7 +89,7 @@ TEST(LL1, LL11) {
     for (int i = 0; i < prod.size(); i++)
         EXPECT_EQ(prod[i], F->get_productions()[0].get_symbols()[i]->get_key());
     EXPECT_EQ("id", F->get_productions()[1].get_symbols()[0]->get_key());
-    
+
 }
 
 TEST(LL1, LL2) {
@@ -103,30 +101,30 @@ TEST(LL1, LL2) {
     cfg::symbol *F = g.add_symbol("F", false);
 
     cfg::symbol *plus = g.add_symbol("+", true);
-    cfg::symbol *mul  = g.add_symbol("*", true);
-    cfg::symbol *lp   = g.add_symbol("(", true);
-    cfg::symbol *rp   = g.add_symbol(")", true);
-    cfg::symbol *id   = g.add_symbol("id", true);
+    cfg::symbol *mul = g.add_symbol("*", true);
+    cfg::symbol *lp = g.add_symbol("(", true);
+    cfg::symbol *rp = g.add_symbol(")", true);
+    cfg::symbol *id = g.add_symbol("id", true);
     cfg::symbol *eps = g.add_symbol(std::string(1, 0x01), true);
 
-    cfg::symbol::production pE1("E", vector<cfg::symbol*>() = {T, E, E, plus, T});
-    cfg::symbol::production pE2("E", vector<cfg::symbol*>() = {T, E});
-    cfg::symbol::production pE3("E", vector<cfg::symbol*>() = {T, id});
-    cfg::symbol::production pE4("E", vector<cfg::symbol*>() = {E, id});
+    cfg::symbol::production pE1("E", vector<cfg::symbol *>() = {T, E, E, plus, T});
+    cfg::symbol::production pE2("E", vector<cfg::symbol *>() = {T, E});
+    cfg::symbol::production pE3("E", vector<cfg::symbol *>() = {T, id});
+    cfg::symbol::production pE4("E", vector<cfg::symbol *>() = {E, id});
     E->add_production(pE1);
     E->add_production(pE2);
     E->add_production(pE3);
     E->add_production(pE4);
 
-    cfg::symbol::production pT1("T", vector<cfg::symbol*>() = {T, E, T, mul, F});
-    cfg::symbol::production pT2("T", vector<cfg::symbol*>() = {E, F});
-    cfg::symbol::production pT3("T", vector<cfg::symbol*>() = {eps});
+    cfg::symbol::production pT1("T", vector<cfg::symbol *>() = {T, E, T, mul, F});
+    cfg::symbol::production pT2("T", vector<cfg::symbol *>() = {E, F});
+    cfg::symbol::production pT3("T", vector<cfg::symbol *>() = {eps});
     T->add_production(pT1);
     T->add_production(pT2);
     T->add_production(pT3);
 
-    cfg::symbol::production pF1("F", vector<cfg::symbol*>() = {lp, E, rp});
-    cfg::symbol::production pF2("F", vector<cfg::symbol*>() = {id});
+    cfg::symbol::production pF1("F", vector<cfg::symbol *>() = {lp, E, rp});
+    cfg::symbol::production pF2("F", vector<cfg::symbol *>() = {id});
     F->add_production(pF1);
     F->add_production(pF2);
     cout << "Before LL1: " << endl;
@@ -135,7 +133,7 @@ TEST(LL1, LL2) {
     cout << "-----------------------" << endl;
     cout << "After LL1: " << endl;
     cout << g << endl;
-    
+
 //    parsetable t(g);
 //    t.print_table();
 }

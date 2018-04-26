@@ -30,7 +30,7 @@ bool build_first_util(cfg *grmr) {
             /* For production S -> X1 X2 X3... Xk, if eps is in
              * FIRST(X1..k), then eps is in FIRST(S) */
             while (t != eol) {
-                if(!(*t)->contains_first(EPS))
+                if (!(*t)->contains_first(EPS))
                     break;
                 t++;
             }
@@ -93,7 +93,7 @@ bool build_follow_util(cfg *grmr) {
         /* If symbol S is terminal, skip */
         if (s->is_terminal())
             continue;
-        
+
         for (int i = 0; i < s->get_production_count(); i++) {
             cfg::symbol::production &prod = (*s)[i];
             std::vector<cfg::symbol *> symbols = prod.get_symbols();
@@ -118,17 +118,17 @@ bool build_follow_util(cfg *grmr) {
                         updated |= (*t)->add_follow((*u)->get_key());
                         break;
                     }
-                    
+
                     /* If u is found to be a non-terminal,
                      * add FIRST(U) - except for eps - to FOLLOW(T) */
                     for (std::string f : (*u)->get_first())
                         if (f != EPS)
                             updated |= (*t)->add_follow(f);
-                    
+
                     /* Advance if eps is in FIRST(u) */
                     if ((*u)->contains_first(EPS))
                         u++;
-                    else 
+                    else
                         break;
                 }
 
@@ -534,7 +534,7 @@ void cfg::symbol::clear_productions(){
     productions.clear();
 }
 
-bool cfg::symbol::add_follow(std::string _key){
+bool cfg::symbol::add_follow(std::string _key) {
     return follow.insert(_key).second;
 }
 
