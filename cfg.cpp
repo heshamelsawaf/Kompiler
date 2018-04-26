@@ -18,8 +18,9 @@ bool build_first_util(cfg *grmr) {
             /* For each production S->T where T is non-terminal,
              * Add FIRST(T) to FIRST(S), do not add eps if it is
              * in FIRST(T) */
-            std::vector<cfg::symbol *>::iterator t = prod.get_symbols().begin();
-            std::vector<cfg::symbol *>::iterator eol = prod.get_symbols().end();
+            std::vector<cfg::symbol *> symbols = prod.get_symbols();
+            std::vector<cfg::symbol *>::iterator t = symbols.begin();
+            std::vector<cfg::symbol *>::iterator eol = symbols.end();
 
             if ((*t)->is_terminal())
                 for (std::string a : (*t)->get_first())
@@ -96,9 +97,9 @@ bool build_follow_util(cfg *grmr) {
         
         for (int i = 0; i < s->get_production_count(); i++) {
             cfg::symbol::production &prod = (*s)[i];
-            std::vector<cfg::symbol *>::iterator t = prod.get_symbols().begin();
-            std::vector<cfg::symbol *>::iterator eol = prod.get_symbols().end();
-
+            std::vector<cfg::symbol *> symbols = prod.get_symbols();
+            std::vector<cfg::symbol *>::iterator t = symbols.begin();
+            std::vector<cfg::symbol *>::iterator eol = symbols.end();
 
             while (t != eol) {
                 /* Skip any terminals or epsilon productions */
@@ -482,7 +483,7 @@ void cfg::symbol::production::add_symbol(symbol *sym){
     symbols.push_back(sym);
 }
 
-std::vector<cfg::symbol *> &cfg::symbol::production::get_symbols() {
+std::vector<cfg::symbol *> cfg::symbol::production::get_symbols() {
     return symbols;
 }
 
