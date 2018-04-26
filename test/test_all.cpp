@@ -5,6 +5,7 @@
 #include <vector>
 #include "../cfgparser.h"
 #include "../cfg.h"
+#include "../parsetable.h"
 
 using namespace std;
 
@@ -26,11 +27,142 @@ TEST(FIRST, ALL1) {
     cfgparser _cfgparser;
     cfg _cfg = _cfgparser.rules2cfg(s);
     std::cout << _cfg << "\n-----------------------------------\n";
+    
     _cfg.to_ll1();
+
     std::cout << _cfg << std::endl;
 
     grammar_ifs.close();
 
+}
+
+TEST(FIRST, ALL2) {
+    ifstream grammar_ifs;
+    grammar_ifs.open("lan2.cfg");
+
+    auto s = [&grammar_ifs] {
+        std::ostringstream ss;
+        ss << grammar_ifs.rdbuf();
+        return ss.str();
+    }();
+
+    if (s.empty())
+        return;
+
+    s.erase(std::remove(s.begin(), s.end(), '\n'), s.end());
+
+    cfgparser _cfgparser;
+    cfg _cfg = _cfgparser.rules2cfg(s);
+    std::cout << _cfg << "\n-----------------------------------\n";
+    
+    _cfg.build();
+
+    for (string k : _cfg.get_symbols()) {
+        cfg::symbol *s = _cfg.get_symbol(k);
+
+        if (s->is_terminal())
+            continue;
+        
+        cout << "FIRST(" << k << ") = { ";
+        for (string f : s->get_first())
+            cout << f << " ";
+        cout << "}" << endl;
+        cout << "FOLLOW(" << k << ") = { ";
+        for (string f : s->get_follow())
+            cout << f << " ";
+        cout << "}" << endl;
+    }
+
+    grammar_ifs.close();    
+}
+
+TEST(FIRST, ALL3) {
+    cfg g("java");
+
+    cfg::symbol *E  = g.add_symbol("E", false);
+    cfg::symbol *E_ = g.add_symbol("E`", false);
+    cfg::symbol *T  = g.add_symbol("T", false);
+    cfg::symbol *T_ = g.add_symbol("T`", false);
+    cfg::symbol *F  = g.add_symbol("F", false);
+    cfg::symbol *F_ = g.add_symbol("F`", false);
+    cfg::symbol *P  = g.add_symbol("P", false);
+
+    cfg::symbol *plus = g.add_symbol("+", true);
+    cfg::symbol *mul  = g.add_symbol("*", true);
+    cfg::symbol *lp   = g.add_symbol("(", true);
+    cfg::symbol *rp   = g.add_symbol(")", true);
+    cfg::symbol *a    = g.add_symbol("a", true);
+    cfg::symbol *b    = g.add_symbol("b", true);
+    cfg::symbol *Em    = g.add_symbol("Em", true);
+    cfg::symbol *eps  = g.add_symbol(EPS, true);
+
+    g.set_starting_symbol(E);
+
+    cfg::symbol::production pE("E", vector<cfg::symbol*>() = {T, E_});
+    E->add_production(pE);
+
+    cfg::symbol::production pE_1("E`", vector<cfg::symbol*>() = {plus, E});
+    cfg::symbol::production pE_2("E`", vector<cfg::symbol*>() = {eps});
+    E_->add_production(pE_1);
+    E_->add_production(pE_2);
+
+    cfg::symbol::production pT("T", vector<cfg::symbol*>() = {F, T_});
+    T->add_production(pT);
+
+    cfg::symbol::production pT_1("T`", vector<cfg::symbol*>() = {T});
+    cfg::symbol::production pT_2("T`", vector<cfg::symbol*>() = {eps});
+    T_->add_production(pT_1);
+    T_->add_production(pT_2);
+
+    cfg::symbol::production pF("F", vector<cfg::symbol*>() = {P, F_});
+    F->add_production(pF);
+
+    cfg::symbol::production pF_1("F`", vector<cfg::symbol*>() = {mul, F});
+    cfg::symbol::production pF_2("F`", vector<cfg::symbol*>() = {eps});
+    F_->add_production(pF_1);
+    F_->add_production(pF_2);
+
+    cfg::symbol::production pP1("P", vector<cfg::symbol*>() = {lp, E, rp});
+    cfg::symbol::production pP2("P", vector<cfg::symbol*>() = {a});
+    cfg::symbol::production pP3("P", vector<cfg::symbol*>() = {b});
+    cfg::symbol::production pP4("P", vector<cfg::symbol*>() = {Em});
+    P->add_production(pP1);
+    P->add_production(pP2);
+    P->add_production(pP3);
+    P->add_production(pP4);
+
+    g.build();
+
+    cout << g << endl;
+    cout << "\n-----------------------------\n";
+    for (string k : g.get_symbols()) {
+        cfg::symbol *s = g.get_symbol(k);
+
+        if (s->is_terminal())
+            continue;
+        
+        cout << "FIRST(" << k << ") = { ";
+        for (string f : s->get_first())
+            cout << (f == EPS ? "Ɛ" : f) << " ";
+        cout << "}" << endl;
+    }
+    cout << "\n-----------------------------\n";
+    for (string k : g.get_symbols()) {
+        cfg::symbol *s = g.get_symbol(k);
+
+        if (s->is_terminal())
+            continue;
+        
+        cout << "FOLLOW(" << k << ") = { ";
+        for (string f : s->get_follow())
+            cout << (f == EPS ? "Ɛ" : f) << " ";
+        cout << "}" << endl;
+    }
+    cout << "\n-----------------------------\n";
+    parsetable t(g);
+    cout << t << endl;
+    cout << "\n-----------------------------\n";
+    
 }
 
 TEST(FIRST, FIRST1) {
