@@ -67,7 +67,7 @@ bool machine::state::add_new_transition(int to_id, char on_input) {
 
 machine::machine(std::string _machine_identifier) {
     machine_identifier = _machine_identifier;
-    language.insert(EPS);
+    language.insert(EPS_C);
     starting = -1;
 }
 
@@ -293,7 +293,7 @@ void machine::print_machine() {
           vector<int> v = get_transitions(i, c);
           for (auto to : v) {
               cout << i << " -> " << to << ' ';
-              if (c == EPS)
+              if (c == EPS_C)
                 cout << "[label=\"ε\"];";
               else
                 cout << "[label=\"" << c << "\"];";

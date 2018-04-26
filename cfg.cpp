@@ -517,7 +517,6 @@ cfg::cfg(std::string _grammar) : grammar(std::move(_grammar)) {
 }
 
 cfg::symbol *cfg::add_symbol(std::string _key, bool _terminal){
-    // TODO
     if (symbols.count(_key))
         return &symbols[_key];
 

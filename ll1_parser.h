@@ -2,6 +2,7 @@
 #define KOMPILER_LL1_PARSER_H
 
 #include "parsetable.h"
+#include "machine.h"
 #include "lexer.h"
 #include "leftmost_derivation.h"
 #include <string>

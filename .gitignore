@@ -1,6 +1,5 @@
 .vscode/
 .cmake-build-debug/
-CMakeLists.txt
 *.out
 *.dot
 *.png

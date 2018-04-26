@@ -115,4 +115,4 @@ test/test_ll1.o: test/test_ll1.cpp cfg.h
 	mv test_ll1.o test
 
 clean:
-	rm $(OBJS) $(TARGET) *.o $(LEXANALYZER) $(LEXGEN) $(PARSERGEN)
+	rm -r $(OBJS) $(TARGET) *.o $(LEXANALYZER) $(LEXGEN) $(PARSERGEN)
