@@ -1,6 +1,4 @@
 #include "ll1_parser.h"
-#include "machine.h"
-#include "error.h"
 #include <stack>
 
 enum error_type {
@@ -69,7 +67,7 @@ leftmost_derivation parse::parse_ll1(parsetable &parsetable, machine &mac, std::
     lexer::token cur_token = lex.next_token(input_stream);
     while (true) {
         std::string cur_symbol = stack.back();
-        std::string cur_token_class = cur_token.get_class() == EOF ? EOI : cur_token.get_class();
+        std::string cur_token_class = cur_token.get_class() == EOF_MARK ? EOI : cur_token.get_class();
         
         if (cur_token_class == ERROR_CLASS) {
             errors.push_back(error(cur_token.get_line(),

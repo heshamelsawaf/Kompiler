@@ -5,7 +5,6 @@
 #include "rexparser.h"
 #include <sstream>
 #include <algorithm>
-#include <ctype.h>
 #include "rexplib.h"
 #include <iostream>
 
@@ -243,7 +242,7 @@ machine rexparser::handler_regular (const std::string line)
             }
           index++;
           if (line.at (index) == 'L')
-            holder += EPS_CHAR;
+              holder += EPS_CHAR;
           else
             holder += line.at (index);
         }

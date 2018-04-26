@@ -5,7 +5,7 @@
 #include "machine.h"
 #include "trantable.h"
 
-#define EOF "eof"
+#define EOF_MARK "eof"
 #define ERROR_CLASS "error"
 
 class lexer {
