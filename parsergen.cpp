@@ -147,8 +147,8 @@ int main(int argc, char **argv) {
     // tokens.push_back(lexer::token("*", "id"));
     // tokens.push_back(lexer::token("b", "id"));
 
-    std::stringstream input_stream("a + b");
-    // std::ifstream input_stream("ll1_parser.cpp");
+    // std::stringstream input_stream("a * b");
+    std::ifstream input_stream("ll1_parser.cpp");
     leftmost_derivation d = parse::parse_ll1(t, m, input_stream);
     std::cout << d << std::endl;
 }

@@ -243,7 +243,7 @@ machine rexparser::handler_regular (const std::string line)
             }
           index++;
           if (line.at (index) == 'L')
-            holder += EPS;
+            holder += EPS_CHAR;
           else
             holder += line.at (index);
         }

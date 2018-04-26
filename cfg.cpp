@@ -53,7 +53,6 @@ bool build_first_util(cfg *grmr) {
     return updated;
 }
 
-
 /* Build first set for each and every production
  * in cfg grammar */
 void build_first(cfg *grmr) {
