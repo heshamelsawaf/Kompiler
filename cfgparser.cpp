@@ -5,6 +5,8 @@
 #include "cfgparser.h"
 #include <boost/tokenizer.hpp>
 
+#define SPLIT_S "="
+
 // trim from start (in place)
 static inline void ltrim(std::string &s) {
     s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](int ch) {
@@ -56,7 +58,7 @@ cfg cfgparser::rules2cfg(std::string rules) {
     boost::tokenizer<boost::escaped_list_separator<char>>
             tok(rules, boost::escaped_list_separator<char>("", "#", "\""));
     for (auto i : tok) {
-        std::vector<std::string> lhs_and_rhs = split(i, "::=");
+        std::vector<std::string> lhs_and_rhs = split(i, SPLIT_S);
         if (lhs_and_rhs.empty())
             continue;
         if (lhs_and_rhs.size() < 2) {
@@ -67,7 +69,7 @@ cfg cfgparser::rules2cfg(std::string rules) {
         std::string _lhs = trim_copy(lhs_and_rhs[0]);
         std::string _rhs;
         for (size_t j = 1; j < lhs_and_rhs.size(); j++)
-            _rhs += lhs_and_rhs[j];
+            _rhs += (j == 1 ? "" : SPLIT_S) + lhs_and_rhs[j];
 
         boost::tokenizer<boost::escaped_list_separator<char>>
                 rhs_tok(_rhs, boost::escaped_list_separator<char>("", "|", "\""));
