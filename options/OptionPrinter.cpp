@@ -19,13 +19,14 @@ namespace rad {
 
     }
 
-//---------------------------------------------------------------------------------------------------------------------
+
+    //---------------------------------------------------------------------------------------------------------------------
     std::string OptionPrinter::usage() {
         std::stringstream usageDesc;
         /** simple flags that have a short version
          */
         bool firstShortOption = true;
-        usageDesc << "[";
+        usageDesc << "[" << bold_on;
         for (std::vector<rad::CustomOptionDescription>::iterator it = options_.begin();
              it != options_.end();
              ++it) {
@@ -39,7 +40,7 @@ namespace rad {
             }
 
         }
-        usageDesc << "] ";
+        usageDesc << bold_off << "] ";
 
         /** simple flags that DO NOT have a short version
          */
@@ -47,7 +48,7 @@ namespace rad {
              it != options_.end();
              ++it) {
             if (!it->hasShort_ && !it->hasArgument_ && !it->required_) {
-                usageDesc << "[" << it->optionDisplayName_ << "] ";
+                usageDesc << "[" << bold_on << it->optionDisplayName_ << bold_off << "] ";
             }
 
         }
@@ -58,7 +59,7 @@ namespace rad {
              it != options_.end();
              ++it) {
             if (it->hasArgument_ && !it->required_) {
-                usageDesc << "[" << it->optionDisplayName_ << " ARG] ";
+                usageDesc << "[" << bold_on << it->optionDisplayName_ << bold_off << " ARG] ";
             }
 
         }
@@ -69,7 +70,7 @@ namespace rad {
              it != options_.end();
              ++it) {
             if (it->hasArgument_ && it->required_) {
-                usageDesc << it->optionDisplayName_ << " ARG ";
+                usageDesc << bold_on << it->optionDisplayName_ << bold_off << " ARG ";
             }
 
         }
@@ -79,7 +80,7 @@ namespace rad {
         for (std::vector<rad::CustomOptionDescription>::iterator it = positionalOptions_.begin();
              it != positionalOptions_.end();
              ++it) {
-            usageDesc << it->optionDisplayName_ << " ";
+            usageDesc << bold_on << it->optionDisplayName_ << bold_off << " ";
 
         }
 
@@ -113,7 +114,7 @@ namespace rad {
     }
 
 //---------------------------------------------------------------------------------------------------------------------
-    void OptionPrinter::printStandardAppDesc(const std::string &appName,
+    void OptionPrinter::printStandardAppDesc(const std::string &appName, const std::string app_descripton,
                                              std::ostream &out,
                                              boost::program_options::options_description desc,
                                              boost::program_options::positional_options_description *positionalDesc) {
@@ -133,9 +134,12 @@ namespace rad {
 
         } // foreach option
 
-        out << "USAGE: " << appName << " " << optionPrinter.usage() << std::endl
+        out << bold_on << "NAME" << bold_off << std::endl << "\t" << appName << " - " << app_descripton
+            << "\n" << std::endl
+            << bold_on << "SYNOPSIS" << bold_off << std::endl << "\t" << appName << " " << optionPrinter.usage() <<
+            std::endl
             << std::endl
-            << "-- Option Descriptions --" << std::endl
+            << bold_on << "DESCRIPTION" << bold_off << std::endl
             << std::endl
             << "Positional arguments:" << std::endl
             << optionPrinter.positionalOptionDetails()

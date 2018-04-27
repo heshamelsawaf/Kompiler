@@ -27,7 +27,7 @@ namespace rad {
         std::string optionDetails();
 
     public: // static
-        static void printStandardAppDesc(const std::string &appName,
+        static void printStandardAppDesc(const std::string &appName, const std::string app_descripton,
                                          std::ostream &out,
                                          boost::program_options::options_description desc,
                                          boost::program_options::positional_options_description *positionalDesc = NULL);
@@ -39,6 +39,14 @@ namespace rad {
         std::vector<CustomOptionDescription> positionalOptions_;
 
     }; // class
+
+    inline static std::ostream &bold_on(std::ostream &os) {
+        return os << "\e[1m";
+    }
+
+    inline static std::ostream &bold_off(std::ostream &os) {
+        return os << "\e[0m";
+    }
 
 //*********************************************************************************************************************
 
