@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.5)
 project(Kompiler)
 
 set(CMAKE_CXX_STANDARD 11)
@@ -37,12 +37,15 @@ set(LEFTMOST_DERIVATION leftmost_derivation.cpp leftmost_derivation.h error.h se
 set(COMMAND_OPTIONS options/CustomOptionDescription.cpp options/CustomOptionDescription.hpp options/OptionPrinter.hpp
         options/OptionPrinter.cpp)
 
-add_executable(Kompiler dfa.cpp dfa.h machine.cpp machine.h main.cpp rexplib.h rexplib.cpp lexer.cpp lexer.h
-        trantable.h rexparser.h rexparser.cpp)
+add_executable(Kompiler ${CFG} parser_main.cpp ${CFG_PARSER} ${MACHINE} ${LEXER} ${ERROR} parsetable.pb.cc parsetable.pb.h ${PARSE_TABLE} ${LL1_PARSER}
+        ${SENTENTIAL_EXPRESSION} ${LEFTMOST_DERIVATION} ${COMMAND_OPTIONS})
 
 add_executable(Parser ${CFG} cfggen.cpp ${CFG_PARSER} ${MACHINE} ${LEXER} ${ERROR} parsetable.pb.cc parsetable.pb.h ${PARSE_TABLE} ${LL1_PARSER}
         ${SENTENTIAL_EXPRESSION} ${LEFTMOST_DERIVATION} ${COMMAND_OPTIONS})
 
+
+target_link_libraries(Kompiler ${Boost_LIBRARIES})
+target_link_libraries(Kompiler ${Protobuf_LIBRARIES})
 
 target_link_libraries(Parser ${Boost_LIBRARIES})
 target_link_libraries(Parser ${Protobuf_LIBRARIES})

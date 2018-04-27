@@ -211,3 +211,19 @@ std::ostream &operator<<(std::ostream &stream, const parsetable &t) {
 bool parsetable::is_nonterm(std::string symbol) {
     return table.find(symbol) != table.end();
 }
+
+bool parsetable::has_sync(std::string symbol) {
+    if (!is_nonterm(symbol)) {
+        return false;
+    }
+    std::unordered_map<std::string, entry> trans = table[symbol];
+    for (std::pair<std::string, entry> term : trans) {
+        if (term.second.state == entry::SYNC)
+            return true;
+        if (term.second.state == entry::PROD
+            && term.second.productions.size() == 1
+            && term.second.productions[0] == EPS)
+            return true;
+    }
+    return false;
+}

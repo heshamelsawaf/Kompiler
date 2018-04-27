@@ -149,6 +149,7 @@
 #include <fstream>
 #include <sstream>
 #include "cfgparser.h"
+#include "parsetable.h"
 #include <algorithm>
 
 using namespace std;
@@ -157,7 +158,7 @@ int main(int argc, char **argv) {
     ifstream grammar_ifs;
 
     if (argc < 2) {
-        perror("Invalid number of arguments!\n USAGE: CFG <grammar_file>");
+        perror("Invalid number of arguments!\n USAGE: CFG <grammar_file> <parsetable_output_file>");
         errno = EINVAL;
         exit(-1);
     }
@@ -183,7 +184,12 @@ int main(int argc, char **argv) {
     cfgparser _cfgparser;
 
     cfg _cfg = _cfgparser.rules2cfg(s);
-    std::cout << _cfg << std::endl;
+    // std::cout << _cfg << std::endl;
+
+    _cfg.to_ll1();
+    _cfg.build();
+
+    parsetable ptab(_cfg);
 
     grammar_ifs.close();
 

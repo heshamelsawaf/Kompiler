@@ -3,6 +3,8 @@
 #include "machine.h"
 typedef int sid_t;
 
+#define EPS_CHAR 0x1
+
 namespace dfa {
     void epsilon_closure(machine m, sid_t s, std::set<sid_t> &res);
 

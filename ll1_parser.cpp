@@ -33,11 +33,27 @@ std::string get_message(std::string cur_symbol, std::string cur_token, error_typ
         return "Error near: \"" + cur_token + "\"";
         break;
     case REACHED_EOF:
-        return "Error: Expected \"" + cur_symbol + "\"";
+        return "Error: Expected \"" + cur_symbol + "\" , but end of file was found.";
         break;
     default:
         return "";
         break;
+    }
+}
+
+void panic(parsetable &parsetable, std::vector<std::string> &stack,
+           lexer &lex, lexer::token &cur_token, std::string &prev_production,
+           std::string cur_symbol, error_type err_type, std::istream &input_stream,
+           bool &prev_is_production, std::vector<error> &errors) {
+    errors.push_back(error(cur_token.get_line(),
+                                           cur_token.get_col(),
+                                           get_message(cur_symbol, cur_token.get_str(), err_type)));
+    prev_production = get_message(cur_symbol, cur_token.get_str(), err_type);
+    prev_is_production = true;
+    if (err_type == REACHED_EOF) {
+        stack.push_back(EOI);
+    } else {
+        cur_token = lex.next_token(input_stream);
     }
 }
 
@@ -48,10 +64,6 @@ leftmost_derivation parse::parse_ll1(parsetable &parsetable, machine &mac, std::
     stack.push_back(EOI);
     std::string starting_symbol = parsetable.get_starting_symbol_key();
     stack.push_back(starting_symbol);
-    // for (lexer::token t : tokenized_input)  {
-    //     std::cout << t.get_class() << ' ' << t.get_str() << std::endl;
-    // }
-    // std::ostringstream derivations;
 
     std::vector<std::vector<std::string> > derivations;
     std::vector<std::string> productions;
@@ -91,7 +103,6 @@ leftmost_derivation parse::parse_ll1(parsetable &parsetable, machine &mac, std::
             }
         }
 
-        // cur_symbol_idx = derivations[step].size();
 
         if (prev_is_production) {
             productions[step] = std::string(prev_production);
@@ -106,7 +117,8 @@ leftmost_derivation parse::parse_ll1(parsetable &parsetable, machine &mac, std::
         }
 
         for (auto it = stack.end() - 1; it > stack.begin() ; it--) {
-            derivations[step].push_back(*it);
+            if (*it != EOI)
+                derivations[step].push_back(*it);
         }
         if (cur_symbol == EOI && cur_token_class == EOI) {
             break;
@@ -120,33 +132,18 @@ leftmost_derivation parse::parse_ll1(parsetable &parsetable, machine &mac, std::
                 substitute = true;
                 cur_symbol_idx++;
                 substitute_str = cur_token.get_str();
-                // std::cout << cur_symbol << ' ' << substitute_str << std::endl;
                 cur_token = lex.next_token(input_stream);
-                // derivations[step][cur_symbol_idx] = tokenized_input[i].get_str();
             } else {
+                error_type err_type;
                 if (cur_symbol == EOI) {
-                    errors.push_back(error(cur_token.get_line(),
-                                           cur_token.get_col(),
-                                           get_message(cur_symbol, cur_token.get_str(), EXCESS_SYMBOL)));
-                    prev_production = get_message(cur_symbol, cur_token.get_str(), EXCESS_SYMBOL);
-                    prev_is_production = true;
-                    // std::cerr << "Error near: \"" << cur_token.get_str() << "\"" << std::endl;
-                    cur_token = lex.next_token(input_stream);
+                    err_type = EXCESS_SYMBOL;
                 } else if (cur_token_class == EOI) {
-                    errors.push_back(error(cur_token.get_line(),
-                                           cur_token.get_col(),
-                                           get_message(cur_symbol, cur_token.get_str(), REACHED_EOF)));
-                    prev_production = get_message(cur_symbol, cur_token.get_str(), REACHED_EOF);
-                    prev_is_production = true;
-                    stack.pop_back();
+                    err_type = REACHED_EOF;
                 } else {
-                    stack.pop_back();
-                    errors.push_back(error(cur_token.get_line(),
-                                        cur_token.get_col(),
-                                        get_message(cur_symbol, cur_token.get_str(), MISSING_SYMBOL)));
-                    prev_production = get_message(cur_symbol, cur_token.get_str(), MISSING_SYMBOL);
-                    prev_is_production = true;
+                    err_type = MISSING_SYMBOL;
                 }
+                panic(parsetable, stack, lex, cur_token, prev_production,
+                          cur_symbol, err_type, input_stream, prev_is_production, errors);
             }
         } else {
             parsetable::entry entry = parsetable.get_entry(cur_symbol, cur_token_class);
@@ -173,21 +170,11 @@ leftmost_derivation parse::parse_ll1(parsetable &parsetable, machine &mac, std::
                 break;
             case parsetable::entry::ERROR:
                 if (cur_token_class != EOI) {
-                    errors.push_back(error(cur_token.get_line(),
-                                           cur_token.get_col(),
-                                           get_message(cur_symbol, cur_token.get_str(), ERROR_PRODUCTION)));
-                    prev_production = get_message(cur_symbol, cur_token.get_str(), ERROR_PRODUCTION);
-                    prev_is_production = true;
-                    cur_token = lex.next_token(input_stream);
+                    panic(parsetable, stack, lex, cur_token, prev_production,
+                          cur_symbol, ERROR_PRODUCTION, input_stream, prev_is_production, errors);
                 } else {
-                    errors.push_back(error(cur_token.get_line(),
-                                           cur_token.get_col(),
-                                           get_message(cur_symbol, cur_token.get_str(), REACHED_EOF)));
-                    prev_production = get_message(cur_symbol, cur_token.get_str(), REACHED_EOF);
-                    prev_is_production = true;
-                    stack.pop_back();
-                    // std::cerr << "Error: Expected \"" << cur_symbol
-                    //      << "\"\nAutomatically Inserted: " << cur_symbol << std::endl;
+                    panic(parsetable, stack, lex, cur_token, prev_production,
+                          cur_symbol, REACHED_EOF, input_stream, prev_is_production, errors);
                 }
                 break;
             default:

@@ -56,6 +56,7 @@ lexer::token lexer::next_token(std::istream &ifs) {
     if (token_class == ERROR_CLASS) {
         ifs.get(c);
         token_ss << c;
+        col++;
     }
 
     ttab.reset();

@@ -36,10 +36,11 @@ TEST(FIRST, ALL1) {
     ifstream ttab("m.out");
     machine m("");
     ttab >> m;
-
+    
     parsetable ptab(_cfg);
-    std::cout << ptab << std::endl;
-    std::ifstream input_stream("in.c");
+    // std::cout << ptab << std::endl;
+
+    std::ifstream input_stream("dfa.cpp");
     leftmost_derivation d = parse::parse_ll1(ptab, m, input_stream);
     std::cout << d << std::endl;
 
