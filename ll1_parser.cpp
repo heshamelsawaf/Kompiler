@@ -21,7 +21,7 @@ std::string production_to_string(std::string lhs, std::vector<std::string> rhs) 
 std::string get_message(std::string cur_symbol, std::string cur_token, error_type error) {
     switch (error) {
     case MISSING_SYMBOL:
-        return "Error: Expected \"" + cur_symbol + "\"";
+        return "Error: Expected \"" + cur_symbol + "\", Found: \"" + cur_token + "\"";
         break;
     case INVALID_TOKEN:
         return "Error: Invalid token or identifier \"" + cur_token + "\"";
@@ -64,6 +64,7 @@ leftmost_derivation parse::parse_ll1(parsetable &parsetable, machine &mac, std::
 
 
     int step = 0;
+    int cur_symbol_idx = 0;
     lexer::token cur_token = lex.next_token(input_stream);
     while (true) {
         std::string cur_symbol = stack.back();
@@ -80,11 +81,9 @@ leftmost_derivation parse::parse_ll1(parsetable &parsetable, machine &mac, std::
         derivations.push_back(std::vector<std::string> ());
         productions.push_back("");
 
-        int cur_symbol_idx = 0;
-
-
         if (step > 0) {
-            for (std::string symbol : derivations[step - 1]) {
+            for (int i = 0 ; i < cur_symbol_idx ; i++) {
+                std::string symbol = derivations[step - 1][i];
                 if (!parsetable.is_nonterm(symbol))
                     derivations[step].push_back(symbol);
                 else
@@ -92,7 +91,7 @@ leftmost_derivation parse::parse_ll1(parsetable &parsetable, machine &mac, std::
             }
         }
 
-        cur_symbol_idx = derivations[step].size();
+        // cur_symbol_idx = derivations[step].size();
 
         if (prev_is_production) {
             productions[step] = std::string(prev_production);
@@ -115,10 +114,11 @@ leftmost_derivation parse::parse_ll1(parsetable &parsetable, machine &mac, std::
         step++;
 
 
-        if (cur_token_class != EOI && !parsetable.is_nonterm(cur_symbol)) {
+        if (!parsetable.is_nonterm(cur_symbol)) {
             if (cur_symbol == cur_token_class) {
                 stack.pop_back();
                 substitute = true;
+                cur_symbol_idx++;
                 substitute_str = cur_token.get_str();
                 // std::cout << cur_symbol << ' ' << substitute_str << std::endl;
                 cur_token = lex.next_token(input_stream);
@@ -132,6 +132,13 @@ leftmost_derivation parse::parse_ll1(parsetable &parsetable, machine &mac, std::
                     prev_is_production = true;
                     // std::cerr << "Error near: \"" << cur_token.get_str() << "\"" << std::endl;
                     cur_token = lex.next_token(input_stream);
+                } else if (cur_token_class == EOI) {
+                    errors.push_back(error(cur_token.get_line(),
+                                           cur_token.get_col(),
+                                           get_message(cur_symbol, cur_token.get_str(), REACHED_EOF)));
+                    prev_production = get_message(cur_symbol, cur_token.get_str(), REACHED_EOF);
+                    prev_is_production = true;
+                    stack.pop_back();
                 } else {
                     stack.pop_back();
                     errors.push_back(error(cur_token.get_line(),
@@ -160,8 +167,8 @@ leftmost_derivation parse::parse_ll1(parsetable &parsetable, machine &mac, std::
                 }
                 break;
             case parsetable::entry::SYNC:
-                prev_production = production_to_string(cur_symbol, entry.productions);
-                prev_is_production = "SYNC";
+                prev_production = "SYNC";
+                prev_is_production = true;
                 stack.pop_back();
                 break;
             case parsetable::entry::ERROR:

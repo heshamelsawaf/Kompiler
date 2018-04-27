@@ -440,9 +440,30 @@ bool cfg::to_ll1() {
     return factored || removed_recursion;
 }
 
+void print_range(std::unordered_set<std::string> set) {
+    std::cout << "{";
+    for (std::string key : set) {
+        std::cout << (key == EPS ? "ε" : key) << " ";
+    }
+    std::cout << "}" << std::endl;
+}
+
+
 void cfg::build() {
     build_first(this);
     build_follow(this);
+    // for (std::string sym_str : get_symbols()) {
+    //     auto sym = get_symbol(sym_str);
+    //     if (!sym->is_terminal()) {
+    //         auto first = sym->get_first();
+    //         auto follow = sym->get_follow();
+    //         std::cout << "Symbol:" << sym_str << "\nFirst: ";
+    //         print_range(first);
+    //         std::cout << "Follow: ";
+    //         print_range(follow);
+    //         std::cout << std::endl;
+    //     }
+    // }
 }
 
 std::ostream &operator<<(std::ostream& stream, const cfg::symbol::production &prod) {

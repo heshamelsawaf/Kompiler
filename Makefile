@@ -4,7 +4,7 @@ LEXOBJS = machine.o lexer.o tokenizer.o lex.o
 LEXGENOBJS = machine.o dfa.o rexplib.o rexparser.o lexgen.o
 PARSERGENOBJS = cfg.o parsergen.o cfgparser.o machine.o lexer.o error.o parsetable.o parsetable.pb.o ll1_parser.o sentential_expression.o leftmost_derivation.o
 PARSEROBJS = cfg.o parser_main.o machine.o lexer.o error.o parsetable.o parsetable.pb.o ll1_parser.o cfgparser.o sentential_expression.o leftmost_derivation.o
-TESTOBJS = cfg.o cfgparser.o test/test_all.o test/test_ll1.o test/test_main.o
+TESTOBJS = cfg.o ll1_parser.o machine.o lexer.o parsetable.o error.o parsetable.pb.o sentential_expression.o leftmost_derivation.o cfgparser.o test/test_all.o test/test_ll1.o test/test_main.o
 CC = g++
 CFLAGS  = -O2 --std=c++11 -Wall
 DFLAGS = -ggdb
@@ -41,7 +41,7 @@ $(PARSER): $(PARSEROBJS)
 
 
 $(TEST): $(TESTOBJS)
-	$(CC) $(CFLAGS) $(DFLAGS) $(TESTOBJS) -o test_main $(LDFLAGS)
+	$(CC) $(CFLAGS) $(DFLAGS) $(TESTOBJS) -o test_main $(LDFLAGS) $(PBFLAGS)
 	echo Target $(TEST) compiled successfully
 
 debug: $(OBJS)
