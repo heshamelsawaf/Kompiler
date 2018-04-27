@@ -1,8 +1,11 @@
-#include "options/OptionPrinter.hpp"
-
 #include <boost/filesystem.hpp>
-
 #include <iostream>
+
+#include "options/OptionPrinter.hpp"
+#include "machine.h"
+#include "parsetable.h"
+#include "leftmost_derivation.h"
+#include "ll1_parser.h"
 
 namespace {
     const size_t ERROR_IN_COMMAND_LINE = 1;
@@ -11,26 +14,52 @@ namespace {
 
 } // namespace
 
+namespace po = boost::program_options;
+po::variables_map vm;
+std::string appName;
+std::string app_description;
+std::string src;
+std::ifstream ttab_ifs;
+std::string ptab_ifs; // TODO: Change serialization to take input stream
+std::ifstream src_ifs;
+std::ofstream lmost_derivation_ofs;
+int retval = 0;
+
+int stack_parse(std::istream &ttab_in, std::string ptab_in, std::istream &src_in, std::ostream &lmost_derivation_out);
+
+void handle_options();
+
+void handle_transition();
+
+void handle_parse_table();
+
+void handle_output();
+
+void handle_src();
+
+
 //-----------------------------------------------------------------------------
 int main(int argc, char **argv) {
     try {
-        std::string appName = boost::filesystem::basename(argv[0]);
-        std::string app_description = "A simple java Compiler";
-        std::string src;
-        int like = 0;
-        std::vector<std::string> sentence;
+
+        appName = boost::filesystem::basename(argv[0]);
+        app_description = "A simple java Compiler";
 
         /** Define and parse the program options
          */
-        namespace po = boost::program_options;
         po::options_description desc("Options");
         desc.add_options()
                 ("help,h", "Print (on the standard output) a description of the command-line options understood"
                            " by Kompiler.")
                 ("verbose,v", "Verbosely list files processed.")
-                ("cfg,c", po::value<std::string>(), "cfg input file")
-                ("transition,t", "just a temp option that does very little")
-                ("parse-table,p", po::value<std::string>(), "give me anything")
+                ("transition,t", po::value<std::string>(), "Input transition-table file to read from.\n"
+                                                           "\n"
+                                                           "\t                    \tIf -t is not specified, the default"
+                                                           " is to read from in.ttab file.")
+                ("parse-table,p", po::value<std::string>(), "Input parse-table file to read from.\n"
+                                                            "\n"
+                                                            "\t                    \tIf -p is not specified, the default"
+                                                            " is to read from in.ptab file.")
                 ("src", po::value<std::string>(&src)->required(), "Input src file to be compiled.")
                 ("output,o", po::value<std::string>(),
                  "Place output in specified file.  This applies to whatever sort of output\n"
@@ -43,7 +72,6 @@ int main(int argc, char **argv) {
         positionalOptions.add("src", 1);
 //        positionalOptions.add("like", 1);
 
-        po::variables_map vm;
 
         try {
             po::store(po::command_line_parser(argc, argv).options(desc)
@@ -66,21 +94,23 @@ int main(int argc, char **argv) {
         }
         catch (boost::program_options::required_option &e) {
             rad::OptionPrinter::formatRequiredOptionError(e);
-            std::cerr << "ERROR: " << e.what() << std::endl << std::endl;
-            rad::OptionPrinter::printStandardAppDesc(appName,
-                                                     app_description,
-                                                     std::cout,
-                                                     desc,
-                                                     &positionalOptions);
+            std::cerr << "ERROR: " << e.what() << std::endl;
+//      rad::OptionPrinter::printStandardAppDesc(appName,
+//                                               app_description,
+//                                               std::cout,
+//                                               desc,
+//                                               &positionalOptions);
+            std::cerr << "Try '" << appName << " --help' for more information.";
             return ERROR_IN_COMMAND_LINE;
         }
         catch (boost::program_options::error &e) {
             std::cerr << "ERROR: " << e.what() << std::endl << std::endl;
-            rad::OptionPrinter::printStandardAppDesc(appName,
-                                                     app_description,
-                                                     std::cout,
-                                                     desc,
-                                                     &positionalOptions);
+//      rad::OptionPrinter::printStandardAppDesc(appName,
+//                                               app_description,
+//                                               std::cout,
+//                                               desc,
+//                                               &positionalOptions);
+            std::cerr << "Try '" << appName << " --help' for more information.";
             return ERROR_IN_COMMAND_LINE;
         }
 
@@ -91,29 +121,12 @@ int main(int argc, char **argv) {
         if (vm.count("verbose")) {
             std::cout << "VERBOSE PRINTING" << std::endl;
         }
-        if (vm.count("verbose") && vm.count("t")) {
-            std::cout << "heeeeyahhhhh" << std::endl;
-        }
 
-
-        if (sentence.size() > 0) {
-            std::cout << "The specified words: ";
-            std::string separator = " ";
-            if (vm.count("verbose")) {
-                separator = "__**__";
-            }
-            for (size_t i = 0; i < sentence.size(); ++i) {
-                std::cout << sentence[i] << separator;
-            }
-            std::cout << std::endl;
-
-        }
-
-        if (vm.count("manual")) {
-            std::cout << "Manually extracted value: "
-                      << vm["manual"].as<std::string>() << std::endl;
-        }
-
+        handle_options();
+        if (lmost_derivation_ofs.is_open())
+            stack_parse(ttab_ifs, ptab_ifs, src_ifs, lmost_derivation_ofs);
+        else
+            stack_parse(ttab_ifs, ptab_ifs, src_ifs, std::cout);
     }
     catch (std::exception &e) {
         std::cerr << "Unhandled Exception reached the top of main: "
@@ -126,88 +139,67 @@ int main(int argc, char **argv) {
 
 } // main
 
+void handle_options() {
+    handle_transition();
+    handle_parse_table();
+    handle_output();
+    handle_src();
+}
 
-//#include "machine.h"
-//#include "ll1_parser.h"
-//#include <cstring>
-//#include <fstream>
-//#include <string>
-//#include <iostream>
-//
-//int stack_parse(std::istream &ttab_in, std::string ptab_in, std::istream &src_in, std::ostream &lmost_derivation_out);
-//
-//int main(int argc, char** argv) {
-//    std::ifstream ttab_ifs;
-//    std::string ptab_ifs; // TODO: Change serialization to take input stream
-//    std::ifstream src_ifs;
-//    std::ofstream lmost_derivation_ofs;
-//    int retval = 0;
-//    std::string usage = "USAGE:\n\n-./parser <transition_table_input_file> <parsetable_input_file> <src_input_file>\
-//<leftmost_derivation_output>\n\n\
-//-./parser <transition_table_input_file> <parsetable_input_file> <src_input_file>\n\toutputs leftmost_derivation to stdout\n\n\
-//-./parser <transition_table_input_file> <parsetable_input_file>\n\treads src from stdin and outputs leftmost_derivation to stdout\n\n\
-//-./parser <parsetable_input_file>\n\treads transition table from ttab.in, src from stdin and outputs leftmost_derivation to stdout\n";
-//    if (argc == 2) {
-//        if (strcmp(argv[1], "--help") == 0) {
-//            std::cout << usage << std::endl;
-//            return 0;
-//        }
-//        ttab_ifs.open("ttab.in");
-//        ptab_ifs = argv[1];
-//        retval = stack_parse(ttab_ifs, ptab_ifs, std::cin, std::cout);
-//    } else if (argc == 3) {
-//        ttab_ifs.open(argv[1]);
-//        ptab_ifs = argv[2];
-//        retval = stack_parse(ttab_ifs, ptab_ifs, std::cin, std::cout);
-//    } else if (argc == 4) {
-//        ttab_ifs.open(argv[1]);
-//        ptab_ifs = argv[2];
-//        src_ifs.open(argv[3]);
-//        retval = stack_parse(ttab_ifs, ptab_ifs, src_ifs, std::cout);
-//    } else if (argc == 5) {
-//        ttab_ifs.open(argv[1]);
-//        ptab_ifs = argv[2];
-//        src_ifs.open(argv[3]);
-//        lmost_derivation_ofs.open(argv[4]);
-//        retval = stack_parse(ttab_ifs, ptab_ifs, src_ifs, lmost_derivation_ofs);
-//    } else {
-//        std::string err_msg = "Invalid number of arguments!\n" + usage;
-//        perror(err_msg.c_str());
-//        errno = EINVAL;
-//        exit(-1);
-//    }
-//    return retval;
-//}
-//
-//void read_ttab(std::istream &in, machine &m) {
-//    in >> m;
-//}
-//
-//int stack_parse(std::istream &ttab_in, std::string ptab_in, std::istream &src_in, std::ostream &lmost_derivation_out) {
-//    try {
-//        if (!ttab_in | !src_in | !lmost_derivation_out) {
-//            perror("Unable to read file");
-//            return -1;
-//        }
-//        machine m("");
-//        read_ttab(ttab_in, m);
-//
-//        parsetable ptab;
-//
-//        ptab.deserialize(ptab_in);
-//
-//        leftmost_derivation derivation = parse::parse_ll1(ptab, m, src_in);
-//
-//        lmost_derivation_out << derivation << std::endl;
-//
-//        return 0;
-//    } catch (const std::exception& ex) {
-//        std::cout << ex.what() << std::endl;
-//        return -1;
-//    } catch (const std::string& ex) {
-//        std::cout << ex << std::endl;
-//        return -1;
-//    } catch (...) {
-//        return -1;
-//    }
-//}
+void handle_transition() {
+    if (vm.count("transition")) {
+        ttab_ifs.open(vm["transition"].as<std::string>());
+    } else {
+        ttab_ifs.open("in.ttab");
+    }
+}
+
+void handle_parse_table() {
+    if (vm.count("parse-table")) {
+        ptab_ifs = (vm["parse-table"].as<std::string>());
+    } else {
+        ptab_ifs = ("in.ptab");
+    }
+}
+
+void handle_output() {
+    if (vm.count("output"))
+        lmost_derivation_ofs.open(vm["output"].as<std::string>());
+}
+
+void handle_src() {
+    src_ifs.open(src);
+}
+
+void read_ttab(std::istream &in, machine &m) {
+    in >> m;
+}
+
+int stack_parse(std::istream &ttab_in, std::string ptab_in, std::istream &src_in, std::ostream &lmost_derivation_out) {
+    try {
+        if (!ttab_in | !src_in | !lmost_derivation_out) {
+            perror("Unable to read file");
+            return -1;
+        }
+        machine m("");
+        read_ttab(ttab_in, m);
+
+        parsetable ptab;
+
+        ptab.deserialize(ptab_in);
+
+        leftmost_derivation derivation = parse::parse_ll1(ptab, m, src_in);
+
+        lmost_derivation_out << derivation << std::endl;
+
+        return 0;
+    } catch (const std::exception &ex) {
+        std::cout << ex.what() << std::endl;
+        return -1;
+    } catch (const std::string &ex) {
+        std::cout << ex << std::endl;
+        return -1;
+    } catch (...) {
+        return -1;
+    }
+}
