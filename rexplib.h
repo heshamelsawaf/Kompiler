@@ -5,6 +5,8 @@
 #ifndef KOMPILER_REXP_LIB_H
 #define KOMPILER_REXP_LIB_H
 
+#define EPS_CHAR 0x1
+
 #include "machine.h"
 
 namespace machine_ops {

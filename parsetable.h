@@ -34,6 +34,8 @@ public:
 
     bool is_nonterm(std::string symbol);
 
+    bool has_sync(std::string symbol);
+
     bool serialize(std::string file_name);
 
     bool deserialize(std::string file_name);

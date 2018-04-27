@@ -12,7 +12,7 @@ using namespace std;
 TEST(FIRST, ALL1) {
     ifstream grammar_ifs;
 
-    grammar_ifs.open("lan.cfg");
+    grammar_ifs.open("test.cfg");
 
     auto s = [&grammar_ifs] {
         std::ostringstream ss;
@@ -33,13 +33,14 @@ TEST(FIRST, ALL1) {
     std::cout << "=======================\nAfter:\n\n" << _cfg << std::endl;
     _cfg.build();
     
-    ifstream ttab("m.out");
+    ifstream ttab("test.out");
     machine m("");
     ttab >> m;
-
+    
     parsetable ptab(_cfg);
-    std::cout << ptab << std::endl;
-    std::ifstream input_stream("in.c");
+    // std::cout << ptab << std::endl;
+
+    std::ifstream input_stream("test.c");
     leftmost_derivation d = parse::parse_ll1(ptab, m, input_stream);
     std::cout << d << std::endl;
 

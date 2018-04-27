@@ -33,11 +33,19 @@ std::string get_message(std::string cur_symbol, std::string cur_token, error_typ
         return "Error near: \"" + cur_token + "\"";
         break;
     case REACHED_EOF:
-        return "Error: Expected \"" + cur_symbol + "\"";
+        return "Error: Expected \"" + cur_symbol + "\" , but end of file was found.";
         break;
     default:
         return "";
         break;
+    }
+}
+
+void panic(parsetable &parsetable, std::vector<std::string> &stack,
+           lexer &lex, lexer::token &cur_token,
+           std::string cur_symbol, error_type err_type) {
+    while (cur_symbol != EOI || !parsetable.has_sync(cur_symbol)) {
+        stack.pop_back();
     }
 }
 
@@ -106,7 +114,8 @@ leftmost_derivation parse::parse_ll1(parsetable &parsetable, machine &mac, std::
         }
 
         for (auto it = stack.end() - 1; it > stack.begin() ; it--) {
-            derivations[step].push_back(*it);
+            if (*it != EOI)
+                derivations[step].push_back(*it);
         }
         if (cur_symbol == EOI && cur_token_class == EOI) {
             break;
@@ -138,14 +147,14 @@ leftmost_derivation parse::parse_ll1(parsetable &parsetable, machine &mac, std::
                                            get_message(cur_symbol, cur_token.get_str(), REACHED_EOF)));
                     prev_production = get_message(cur_symbol, cur_token.get_str(), REACHED_EOF);
                     prev_is_production = true;
-                    stack.pop_back();
+                    stack.push_back(EOI);
                 } else {
-                    stack.pop_back();
                     errors.push_back(error(cur_token.get_line(),
                                         cur_token.get_col(),
                                         get_message(cur_symbol, cur_token.get_str(), MISSING_SYMBOL)));
                     prev_production = get_message(cur_symbol, cur_token.get_str(), MISSING_SYMBOL);
                     prev_is_production = true;
+                    cur_token = lex.next_token(input_stream);
                 }
             }
         } else {
@@ -185,7 +194,7 @@ leftmost_derivation parse::parse_ll1(parsetable &parsetable, machine &mac, std::
                                            get_message(cur_symbol, cur_token.get_str(), REACHED_EOF)));
                     prev_production = get_message(cur_symbol, cur_token.get_str(), REACHED_EOF);
                     prev_is_production = true;
-                    stack.pop_back();
+                    stack.push_back(EOI);
                     // std::cerr << "Error: Expected \"" << cur_symbol
                     //      << "\"\nAutomatically Inserted: " << cur_symbol << std::endl;
                 }
