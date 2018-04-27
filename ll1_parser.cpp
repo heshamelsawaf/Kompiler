@@ -21,7 +21,7 @@ std::string production_to_string(std::string lhs, std::vector<std::string> rhs) 
 std::string get_message(std::string cur_symbol, std::string cur_token, error_type error) {
     switch (error) {
     case MISSING_SYMBOL:
-        return "Error: Expected \"" + cur_symbol + "\", Found: \"" + cur_token + "\"";
+        return "Error: Missing \"" + cur_symbol + "\", Inserted.";
         break;
     case INVALID_TOKEN:
         return "Error: Invalid token or identifier \"" + cur_token + "\"";
@@ -52,6 +52,8 @@ void panic(parsetable &parsetable, std::vector<std::string> &stack,
     prev_is_production = true;
     if (err_type == REACHED_EOF) {
         stack.push_back(EOI);
+    } else if (err_type == MISSING_SYMBOL) {
+        stack.pop_back();
     } else {
         cur_token = lex.next_token(input_stream);
     }
@@ -70,6 +72,7 @@ leftmost_derivation parse::parse_ll1(parsetable &parsetable, machine &mac, std::
     std::vector<error> errors;
 
     bool substitute = false;
+    bool inserted_missing_sym = false;
     std::string substitute_str = "";
     bool prev_is_production = false;
     std::string prev_production = "";
@@ -111,8 +114,13 @@ leftmost_derivation parse::parse_ll1(parsetable &parsetable, machine &mac, std::
 
         if (substitute) {
             substitute = false;
-            productions[step] = "Substitute: "
-            + derivations[step][cur_symbol_idx - 1] + " = " + substitute_str;
+            if (inserted_missing_sym) {
+                inserted_missing_sym = false;
+                productions[step] = "Inserted Missing Symbol: " + substitute_str;
+            } else {
+                productions[step] = "Substitute: "
+                + derivations[step][cur_symbol_idx - 1] + " = " + substitute_str;
+            }
             derivations[step][cur_symbol_idx - 1] = substitute_str;
         }
 
@@ -141,6 +149,10 @@ leftmost_derivation parse::parse_ll1(parsetable &parsetable, machine &mac, std::
                     err_type = REACHED_EOF;
                 } else {
                     err_type = MISSING_SYMBOL;
+                    substitute = true;
+                    substitute_str = "'" + cur_symbol + "'";
+                    inserted_missing_sym = true;
+                    cur_symbol_idx++;
                 }
                 panic(parsetable, stack, lex, cur_token, prev_production,
                           cur_symbol, err_type, input_stream, prev_is_production, errors);
