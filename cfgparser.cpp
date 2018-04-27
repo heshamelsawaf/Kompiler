@@ -31,27 +31,28 @@ static inline std::string trim_copy(std::string s) {
     return s;
 }
 
-static inline std::string to_default(std::string s) {
-    if (!s.compare("0x23"))
-        return "#";
-    else if (!s.compare("0x7C"))
-        return "|";
-    else
-        return s;
-}
-
-void find_and_replace(std::string &source, std::string const &find, std::string const &replace) {
+static inline void find_and_replace(std::string &source, std::string const &find, std::string const &replace) {
     for (std::string::size_type i = 0; (i = source.find(find, i)) != std::string::npos;) {
         source.replace(i, find.length(), replace);
         i += replace.length();
     }
 }
 
+void cfgparser::replace_escapes(std::string &s, bool encode) {
+    if (encode) {
+        find_and_replace(s, "\\#", "0x23"), escapes["0x23"] = "\\#";
+        find_and_replace(s, "\\|", "0x7C"), escapes["0x7C"] = "\\|";
+    } else {
+        for (auto &&entry : escapes)
+            find_and_replace(s, entry.first, entry.second);
+    }
+}
+
+
 cfg cfgparser::rules2cfg(std::string rules) {
     int productions_cnt = 0;
     cfg _cfg("JAVA");
-    find_and_replace(rules, "\\#", "0x23");
-    find_and_replace(rules, "\\|", "0x7C");
+    replace_escapes(rules, true);
     boost::tokenizer<boost::escaped_list_separator<char>>
             tok(rules, boost::escaped_list_separator<char>("", "#", "\""));
     for (auto i : tok) {
@@ -118,10 +119,19 @@ void cfgparser::add_production_to_cfg(cfg &_cfg, std::string _lhs, std::vector<s
     _cfg.add_symbol(_lhs);
 
     for (std::string &s: _rhs) {
-        if (is_terminal(s))
-            _cfg.add_symbol(s = s.substr(1, s.length() - 2), true);
+        if (is_terminal(s)) {
+            s = s.substr(1, s.length() - 2);
+            replace_escapes(s, false);
+
+            if (!s.compare("\\L"))
+                s = EPS;
+            else if (s.at(0) == '\\')
+                s = s.substr(1, s.length() - 1);
+
+            _cfg.add_symbol(s, true);
+        }
         else
-            _cfg.add_symbol(s = (s == "\\L" ? EPS : s.at(0) == '\\' ? s.substr(1, s.length() - 1) : to_default(s)));
+            _cfg.add_symbol(s);
     }
 
     _cfg.add_production(_lhs, _rhs);
