@@ -31,11 +31,29 @@ static inline std::string trim_copy(std::string s) {
     return s;
 }
 
-cfg cfgparser::rules2cfg(const std::string rules) {
+static inline std::string to_default(std::string s) {
+    if (!s.compare("0x23"))
+        return "#";
+    else if (!s.compare("0x7C"))
+        return "|";
+    else
+        return s;
+}
+
+void find_and_replace(std::string &source, std::string const &find, std::string const &replace) {
+    for (std::string::size_type i = 0; (i = source.find(find, i)) != std::string::npos;) {
+        source.replace(i, find.length(), replace);
+        i += replace.length();
+    }
+}
+
+cfg cfgparser::rules2cfg(std::string rules) {
     int productions_cnt = 0;
     cfg _cfg("JAVA");
+    find_and_replace(rules, "\\#", "0x23");
+    find_and_replace(rules, "\\|", "0x7C");
     boost::tokenizer<boost::escaped_list_separator<char>>
-            tok(rules, boost::escaped_list_separator<char>("\\", "#", "\""));
+            tok(rules, boost::escaped_list_separator<char>("", "#", "\""));
     for (auto i : tok) {
         std::vector<std::string> lhs_and_rhs = split(i, "::=");
         if (lhs_and_rhs.empty())
@@ -48,7 +66,7 @@ cfg cfgparser::rules2cfg(const std::string rules) {
             _rhs += lhs_and_rhs[j];
 
         boost::tokenizer<boost::escaped_list_separator<char>>
-                rhs_tok(_rhs, boost::escaped_list_separator<char>("\\", "|", "\""));
+                rhs_tok(_rhs, boost::escaped_list_separator<char>("", "|", "\""));
         for (auto j : rhs_tok) {
             j = trim_copy(j);
             if (j.empty())
@@ -56,7 +74,7 @@ cfg cfgparser::rules2cfg(const std::string rules) {
 
             std::vector<std::string> symbols;
             boost::tokenizer<boost::escaped_list_separator<char>>
-                    prod_tok(j, boost::escaped_list_separator<char>("\\", " ", "\""));
+                    prod_tok(j, boost::escaped_list_separator<char>("", " ", "\""));
             for (auto k : prod_tok) {
                 if (k.empty())
                     perror("Error!3");
@@ -103,7 +121,7 @@ void cfgparser::add_production_to_cfg(cfg &_cfg, std::string _lhs, std::vector<s
         if (is_terminal(s))
             _cfg.add_symbol(s = s.substr(1, s.length() - 2), true);
         else
-            _cfg.add_symbol(s);
+            _cfg.add_symbol(s = (s == "\\L" ? EPS : s.at(0) == '\\' ? s.substr(1, s.length() - 1) : to_default(s)));
     }
 
     _cfg.add_production(_lhs, _rhs);

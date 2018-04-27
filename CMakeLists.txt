@@ -40,7 +40,7 @@ set(COMMAND_OPTIONS options/CustomOptionDescription.cpp options/CustomOptionDesc
 add_executable(Kompiler dfa.cpp dfa.h machine.cpp machine.h main.cpp rexplib.h rexplib.cpp lexer.cpp lexer.h
         trantable.h rexparser.h rexparser.cpp)
 
-add_executable(Parser ${CFG} parser_main.cpp ${CFG_PARSER} ${MACHINE} ${LEXER} ${ERROR} parsetable.pb.cc parsetable.pb.h ${PARSE_TABLE} ${LL1_PARSER}
+add_executable(Parser ${CFG} cfggen.cpp ${CFG_PARSER} ${MACHINE} ${LEXER} ${ERROR} parsetable.pb.cc parsetable.pb.h ${PARSE_TABLE} ${LL1_PARSER}
         ${SENTENTIAL_EXPRESSION} ${LEFTMOST_DERIVATION} ${COMMAND_OPTIONS})
 
 
