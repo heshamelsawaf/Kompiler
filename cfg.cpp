@@ -176,7 +176,7 @@ std::string add_aux_sym(cfg *grmr, std::string _sym_str) {
     std::string new_sym_str = _sym_str;
 
     do {
-        new_sym_str += "`";
+        new_sym_str += "'";
     } while (grmr->get_symbol(new_sym_str) != nullptr);
 
     grmr->add_symbol(new_sym_str, false);
@@ -249,7 +249,6 @@ int left_factor(cfg *grmr, std::string _sym_str, std::vector<std::string> &symbo
                     eps_added = true;
                     rhs.push_back(grmr->get_symbol(EPS));
                 }
-
                 grmr->add_production(new_sym_str, rhs);
             }
             // Add new production refering to symbol.
@@ -285,10 +284,10 @@ bool left_factor(cfg *grmr) {
 
     for (int i = 0 ; i < len ; i++) {
         if (!grmr->get_symbol(symbols[i])->is_terminal()) {
-
+            
             int new_syms_cnt = left_factor(grmr, symbols[i], symbols);
             len += new_syms_cnt;
-
+            
             if (new_syms_cnt > 0)
                 modified = true;
         }
@@ -435,6 +434,7 @@ bool remove_left_recursion(cfg *grmr) {
 bool cfg::to_ll1() {
 
     bool factored = left_factor(this);
+    // return factored;
     bool removed_recursion = remove_left_recursion(this);
 
     return factored || removed_recursion;
@@ -573,7 +573,7 @@ cfg::symbol::production &cfg::symbol::operator[](std::size_t idx) {
 }
 
 cfg::cfg(std::string _grammar) : grammar(std::move(_grammar)) {
-
+    add_symbol(EPS, true);
 }
 
 cfg::symbol *cfg::add_symbol(std::string _key, bool _terminal){

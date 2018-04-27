@@ -10,6 +10,9 @@ using namespace std;
 
 TEST(FIRST, ALL1) {
     ifstream grammar_ifs;
+
+    grammar_ifs.open("lan2.cfg");
+
     grammar_ifs.open("lan2.cfg");
 
     auto s = [&grammar_ifs] {
@@ -24,10 +27,14 @@ TEST(FIRST, ALL1) {
     s.erase(std::remove(s.begin(), s.end(), '\n'), s.end());
 
     cfgparser _cfgparser;
+
     cfg _cfg = _cfgparser.rules2cfg(s);
-    std::cout << _cfg << "\n-----------------------------------\n";
+    std::cout << "Before:\n\n" << _cfg << std::endl;
     _cfg.to_ll1();
-    std::cout << _cfg << std::endl;
+    std::cout << "=======================\nAfter:\n\n" << _cfg << std::endl;
+
+
+    grammar_ifs.close();
 
     grammar_ifs.close();
 
