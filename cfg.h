@@ -25,7 +25,7 @@ public:
             /* A production is represented by an ordered
              *  list of symbols */
             std::vector<symbol *> symbols;
-            
+
             /* Each production has a first set, which is a set
              * of terminals that can be matched from the non-terminal
              * at a given input */
@@ -44,7 +44,7 @@ public:
             production(std::string _lhs, std::vector<symbol *> symbols);
             /* Appends symbol to production */
             void add_symbol(symbol *sym);
-            
+
             /* Return list representation of production. */
             std::vector<symbol *> get_symbols(void);
 
@@ -52,7 +52,7 @@ public:
 
             /* Add a symbol to the first set of this production */
             /* TODO: add_first can be implemented internally, hiding
-             *       implementaiton details, to disallow inconsistency 
+             *       implementaiton details, to disallow inconsistency
              *       caused by manipulation outside cfg class */
             bool add_first(std::string _key);
 
@@ -128,7 +128,7 @@ public:
 
 
     std::vector<std::string> get_symbols();
-    
+
     /* Tries to convert the cfg to LL(1)
     *  returns true if the cfg was converted successfully
     *  returns false if the cfg was already LL(1) */

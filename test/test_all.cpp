@@ -5,13 +5,14 @@
 #include <vector>
 #include "../cfgparser.h"
 #include "../cfg.h"
-#include "../parsetable.h"
+#include "../ll1_parser.h"
 
 using namespace std;
 
 TEST(FIRST, ALL1) {
     ifstream grammar_ifs;
-    grammar_ifs.open("lan2.cfg");
+
+    grammar_ifs.open("lan.cfg");
 
     auto s = [&grammar_ifs] {
         std::ostringstream ss;
@@ -25,12 +26,23 @@ TEST(FIRST, ALL1) {
     s.erase(std::remove(s.begin(), s.end(), '\n'), s.end());
 
     cfgparser _cfgparser;
-    cfg _cfg = _cfgparser.rules2cfg(s);
-    std::cout << _cfg << "\n-----------------------------------\n";
-    
-    _cfg.to_ll1();
 
-    std::cout << _cfg << std::endl;
+    cfg _cfg = _cfgparser.rules2cfg(s);
+    std::cout << "Before:\n\n" << _cfg << std::endl;
+    _cfg.to_ll1();
+    std::cout << "=======================\nAfter:\n\n" << _cfg << std::endl;
+    _cfg.build();
+    
+    ifstream ttab("m.out");
+    machine m("");
+    ttab >> m;
+
+    parsetable ptab(_cfg);
+    std::cout << ptab << std::endl;
+    std::ifstream input_stream("in.c");
+    leftmost_derivation d = parse::parse_ll1(ptab, m, input_stream);
+    std::cout << d << std::endl;
+
 
     grammar_ifs.close();
 

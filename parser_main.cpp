@@ -1,10 +1,8 @@
-#include "test/OptionPrinter.hpp"
+#include "options/OptionPrinter.hpp"
 
-#include <boost/program_options.hpp>
 #include <boost/filesystem.hpp>
 
 #include <iostream>
-#include <string>
 
 namespace {
     const size_t ERROR_IN_COMMAND_LINE = 1;
@@ -17,7 +15,8 @@ namespace {
 int main(int argc, char **argv) {
     try {
         std::string appName = boost::filesystem::basename(argv[0]);
-        int add = 0;
+        std::string app_description = "A simple java Compiler";
+        std::string src;
         int like = 0;
         std::vector<std::string> sentence;
 
@@ -26,34 +25,36 @@ int main(int argc, char **argv) {
         namespace po = boost::program_options;
         po::options_description desc("Options");
         desc.add_options()
-                ("help,h", "Print help messages")
-                ("verbose,v", "print words with verbosity")
-                ("word,w", po::value<std::vector<std::string> >(&sentence),
-                 "words for the sentence, specify multiple times")
-                (",t", "just a temp option that does very little")
-                ("necessary,n", po::value<std::string>()->required(), "give me anything")
-                ("manual,m", po::value<std::string>(), "extract value manually")
-                ("add", po::value<int>(&add)->required(), "additional options")
-                ("like", po::value<int>(&like)->required(), "this");
+                ("help,h", "Print (on the standard output) a description of the command-line options understood"
+                           " by Kompiler.")
+                ("verbose,v", "Verbosely list files processed.")
+                ("cfg,c", po::value<std::string>(), "cfg input file")
+                ("transition,t", "just a temp option that does very little")
+                ("parse-table,p", po::value<std::string>(), "give me anything")
+                ("src", po::value<std::string>(&src)->required(), "Input src file to be compiled.")
+                ("output,o", po::value<std::string>(),
+                 "Place output in specified file.  This applies to whatever sort of output\n"
+                 "\t                    \tis being produced.\n"
+                 "\n"
+                 "\t                    \tIf -o is not specified, the default is to print on the standard output.")
+                ("version", "Display the version number and copyrights of the invoked Kompiler.");
 
         po::positional_options_description positionalOptions;
-        positionalOptions.add("add", 1);
-        positionalOptions.add("like", 1);
+        positionalOptions.add("src", 1);
+//        positionalOptions.add("like", 1);
 
         po::variables_map vm;
 
         try {
             po::store(po::command_line_parser(argc, argv).options(desc)
                               .positional(positionalOptions).run(),
-                      vm); // throws on error
+                      vm);
 
             /** --help option
              */
             if (vm.count("help")) {
-                std::cout << "This is just a template app that should be modified"
-                          << " and added to in order to create a useful command line"
-                          << " application" << std::endl << std::endl;
                 rad::OptionPrinter::printStandardAppDesc(appName,
+                                                         app_description,
                                                          std::cout,
                                                          desc,
                                                          &positionalOptions);
@@ -67,6 +68,7 @@ int main(int argc, char **argv) {
             rad::OptionPrinter::formatRequiredOptionError(e);
             std::cerr << "ERROR: " << e.what() << std::endl << std::endl;
             rad::OptionPrinter::printStandardAppDesc(appName,
+                                                     app_description,
                                                      std::cout,
                                                      desc,
                                                      &positionalOptions);
@@ -75,6 +77,7 @@ int main(int argc, char **argv) {
         catch (boost::program_options::error &e) {
             std::cerr << "ERROR: " << e.what() << std::endl << std::endl;
             rad::OptionPrinter::printStandardAppDesc(appName,
+                                                     app_description,
                                                      std::cout,
                                                      desc,
                                                      &positionalOptions);
@@ -82,8 +85,8 @@ int main(int argc, char **argv) {
         }
 
         // can do this without fear because it is required to be present
-        std::cout << "Necessary = "
-                  << vm["necessary"].as<std::string>() << std::endl;
+//        std::cout << "Necessary = "
+//                  << vm["necessary"].as<std::string>() << std::endl;
 
         if (vm.count("verbose")) {
             std::cout << "VERBOSE PRINTING" << std::endl;
@@ -92,8 +95,6 @@ int main(int argc, char **argv) {
             std::cout << "heeeeyahhhhh" << std::endl;
         }
 
-        std::cout << "Required Positional, add: " << add
-                  << " like: " << like << std::endl;
 
         if (sentence.size() > 0) {
             std::cout << "The specified words: ";
