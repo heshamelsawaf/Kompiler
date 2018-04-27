@@ -32,7 +32,7 @@ TEST(FIRST, ALL1) {
     _cfg.to_ll1();
     std::cout << "=======================\nAfter:\n\n" << _cfg << std::endl;
     _cfg.build();
-
+    
     ifstream ttab("m.out");
     machine m("");
     ttab >> m;

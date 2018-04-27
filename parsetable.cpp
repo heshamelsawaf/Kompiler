@@ -48,7 +48,7 @@ parsetable::parsetable(cfg grammar) {
             }
         }
         for (std::string follow : grammar.get_symbol(sym)->get_follow()) {
-            if (table[sym][follow].state == parsetable::entry::States::SYNC) {
+            if (table[sym][follow].state == parsetable::entry::States::PROD && has_eps_prod) {
                 throw std::invalid_argument(
                         "Grammar is not LL(1). Entry [" + sym + "," + follow + "] has duplicate values.");
             }
@@ -70,7 +70,7 @@ std::string parsetable::get_starting_symbol_key() const {
 }
 
 parsetable::entry parsetable::get_entry(std::string nonterm, std::string next_input) {
-    if (!parsetable::table.count(nonterm)) {
+    if (!is_nonterm(nonterm)) {
         throw std::invalid_argument("received invalid nonterminal symbol: '" + nonterm + "'");
     }
     if (!parsetable::table[nonterm].count(next_input)) {
