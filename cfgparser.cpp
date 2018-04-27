@@ -59,8 +59,11 @@ cfg cfgparser::rules2cfg(std::string rules) {
         std::vector<std::string> lhs_and_rhs = split(i, "::=");
         if (lhs_and_rhs.empty())
             continue;
-        if (lhs_and_rhs.size() < 2) //error
-            perror("Error!1");
+        if (lhs_and_rhs.size() < 2) {
+            std::cerr << "Error in production '" << i << "'\n";
+            std::cerr << "Make sure you follow the grammar input file specification.";
+            exit(EXIT_FAILURE);
+        }
         std::string _lhs = trim_copy(lhs_and_rhs[0]);
         std::string _rhs;
         for (size_t j = 1; j < lhs_and_rhs.size(); j++)
@@ -70,15 +73,21 @@ cfg cfgparser::rules2cfg(std::string rules) {
                 rhs_tok(_rhs, boost::escaped_list_separator<char>("", "|", "\""));
         for (auto j : rhs_tok) {
             j = trim_copy(j);
-            if (j.empty())
-                perror("Error!2");
+            if (j.empty()) {
+                std::cerr << "Error in token '" << j << "' in production '" << i << "'\n";
+                std::cerr << "Make sure you follow the grammar input file specification.";
+                exit(EXIT_FAILURE);
+            }
 
             std::vector<std::string> symbols;
             boost::tokenizer<boost::escaped_list_separator<char>>
                     prod_tok(j, boost::escaped_list_separator<char>("", " ", "\""));
             for (auto k : prod_tok) {
-                if (k.empty())
-                    perror("Error!3");
+                if (k.empty()) {
+                    std::cerr << "Error in symbol '" << k << "' in token '" << j << "' in production '" << i << "'\n";
+                    std::cerr << "Make sure you follow the grammar input file specification.";
+                    exit(EXIT_FAILURE);
+                }
 
                 symbols.push_back(k);
             }
