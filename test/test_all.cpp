@@ -38,7 +38,7 @@ TEST(FIRST, ALL1) {
     ttab >> m;
 
     parsetable ptab(_cfg);
-
+    std::cout << ptab << std::endl;
     std::ifstream input_stream("in.c");
     leftmost_derivation d = parse::parse_ll1(ptab, m, input_stream);
     std::cout << d << std::endl;
