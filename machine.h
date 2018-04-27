@@ -10,7 +10,8 @@
 #include <vector>
 #include <string>
 #include <set>
-#define EPS_CHAR 0x01
+
+#define EPS_C 0x01
 
 typedef int sid_t;
 
@@ -43,7 +44,7 @@ class machine {
 
         std::string get_token_class() const;
 
-        bool add_new_transition(sid_t to_id, char on_input = EPS_CHAR);
+        bool add_new_transition(sid_t to_id, char on_input = EPS_C);
 
         void set_key(std::string key);
 
@@ -75,7 +76,7 @@ public:
     sid_t add_new_state(std::string token_class = "", bool is_starting = false,
                         bool is_accepting = false);
 
-    bool add_new_transition(sid_t from_id, sid_t to_id, char on_input = EPS_CHAR);
+    bool add_new_transition(sid_t from_id, sid_t to_id, char on_input = EPS_C);
 
     bool set_starting_state(sid_t _starting_id);
 

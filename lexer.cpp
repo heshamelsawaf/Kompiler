@@ -1,8 +1,6 @@
 #include "lexer.h"
-#include "machine.h"
 #include "rexparser.h"
 #include "dfa.h"
-#include <sstream>
 
 lexer::lexer(machine &mac) : ttab(mac) {
     line = 1;
@@ -15,7 +13,7 @@ lexer::token lexer::next_token(std::istream &ifs) {
     std::string token_class = ERROR_CLASS;
     
     if (!ifs || ifs.eof())
-        return lexer::token("", EOF, line, col);
+        return lexer::token("", EOF_MARK, line, col);
     std::string str;
     char c = ifs.peek();
 
@@ -30,7 +28,7 @@ lexer::token lexer::next_token(std::istream &ifs) {
     }
 
     if (ifs.eof())
-        return lexer::token("", EOF, line, col);
+        return lexer::token("", EOF_MARK, line, col);
 
     // Recognize when starting state is also a final state
     if (ttab.is_accepting())
