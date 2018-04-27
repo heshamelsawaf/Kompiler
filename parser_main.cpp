@@ -148,10 +148,13 @@ void handle_options() {
 }
 
 void handle_transition() {
+    std::string ttab_fname = "in.ttab";
     if (vm.count("transition")) {
-        ttab_ifs.open(vm["transition"].as<std::string>());
-    } else {
-        ttab_ifs.open("in.ttab");
+        ttab_fname = vm["transition"].as<std::string>();
+    }
+    ttab_ifs.open(ttab_fname);
+    if (!ttab_ifs) {
+        std::cerr << "Unable to read file \"" + ttab_fname + "\"" << std::endl;
     }
 }
 
@@ -164,12 +167,19 @@ void handle_parse_table() {
 }
 
 void handle_output() {
-    if (vm.count("output"))
+    if (vm.count("output")) {
         lmost_derivation_ofs.open(vm["output"].as<std::string>());
+        if (!lmost_derivation_ofs) {
+                std::cerr << "Unable to read file \"" + vm["output"].as<std::string>() + "\"" << std::endl;
+        }
+    }
 }
 
 void handle_src() {
     src_ifs.open(src);
+    if (!src_ifs) {
+        std::cerr << "Unable to read file \"" + src + "\"" << std::endl;
+    }
 }
 
 void read_ttab(std::istream &in, machine &m) {
@@ -179,7 +189,6 @@ void read_ttab(std::istream &in, machine &m) {
 int stack_parse(std::istream &ttab_in, std::string ptab_in, std::istream &src_in, std::ostream &lmost_derivation_out) {
     try {
         if (!ttab_in | !src_in | !lmost_derivation_out) {
-            perror("Unable to read file");
             return -1;
         }
         machine m("");
@@ -191,7 +200,9 @@ int stack_parse(std::istream &ttab_in, std::string ptab_in, std::istream &src_in
 
         leftmost_derivation derivation = parse::parse_ll1(ptab, m, src_in);
 
-        lmost_derivation_out << derivation << std::endl;
+        if (vm.count("verbose")) {
+            lmost_derivation_out << derivation << std::endl;
+        }
 
         return 0;
     } catch (const std::exception &ex) {
