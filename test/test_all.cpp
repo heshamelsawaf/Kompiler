@@ -106,7 +106,7 @@ TEST(FIRST, ALL3) {
     cfg::symbol *rp   = g.add_symbol(")", true);
     cfg::symbol *a    = g.add_symbol("a", true);
     cfg::symbol *b    = g.add_symbol("b", true);
-    cfg::symbol *Em    = g.add_symbol("Em", true);
+    cfg::symbol *Em   = g.add_symbol("Em", true);
     cfg::symbol *eps  = g.add_symbol(EPS, true);
 
     g.set_starting_symbol(E);
@@ -176,6 +176,76 @@ TEST(FIRST, ALL3) {
     cout << t << endl;
     cout << "\n-----------------------------\n";
     
+}
+
+TEST(ALL, ALL4) {
+    cfg g("java");
+
+    cfg::symbol *R = g.add_symbol("R", false);
+    cfg::symbol *S = g.add_symbol("S", false);
+    cfg::symbol *U = g.add_symbol("U", false);
+    cfg::symbol *T = g.add_symbol("T", false);
+    cfg::symbol *V = g.add_symbol("V", false);
+
+    cfg::symbol *s    = g.add_symbol("s", true);
+    cfg::symbol *b    = g.add_symbol("b", true);
+    cfg::symbol *u    = g.add_symbol("u", true);
+    cfg::symbol *t    = g.add_symbol("t", true);
+    cfg::symbol *v    = g.add_symbol("v", true);
+    cfg::symbol *eps  = g.add_symbol(EPS, true);
+
+    g.set_starting_symbol(S);
+
+    cfg::symbol::production pR1("R", vector<cfg::symbol*>() = {s, U, R, b});
+    cfg::symbol::production pR2("R", vector<cfg::symbol*>() = {eps});
+    R->add_production(pR1);
+    R->add_production(pR2);
+
+    cfg::symbol::production pS("S", vector<cfg::symbol*>() = {R, T});
+    S->add_production(pS);
+
+    cfg::symbol::production pU1("U", vector<cfg::symbol*>() = {u, U});
+    cfg::symbol::production pU2("U", vector<cfg::symbol*>() = {eps});
+    U->add_production(pU1);
+    U->add_production(pU2);
+
+    cfg::symbol::production pT1("T", vector<cfg::symbol*>() = {V, t, T});
+    cfg::symbol::production pT2("T", vector<cfg::symbol*>() = {eps});
+    T->add_production(pT1);
+    T->add_production(pT2);
+
+    cfg::symbol::production pV1("V", vector<cfg::symbol*>() = {v, V});
+    cfg::symbol::production pV2("V", vector<cfg::symbol*>() = {eps});
+    V->add_production(pV1);
+    V->add_production(pV2);
+
+    g.build();
+
+    cout << g << endl;
+    cout << "\n-----------------------------\n";
+    for (string k : g.get_symbols()) {
+        cfg::symbol *s = g.get_symbol(k);
+        if (s->is_terminal())
+            continue;
+        
+        cout << "FIRST(" << k << ") = { ";
+        for (string f : s->get_first())
+            cout << (f == EPS ? "Ɛ" : f) << " ";
+        cout << "}" << endl;
+    }
+    cout << "\n-----------------------------\n";
+    for (string k : g.get_symbols()) {
+        cfg::symbol *s = g.get_symbol(k);
+
+        if (s->is_terminal())
+            continue;
+        
+        cout << "FOLLOW(" << k << ") = { ";
+        for (string f : s->get_follow())
+            cout << (f == EPS ? "Ɛ" : f) << " ";
+        cout << "}" << endl;
+    }
+    cout << "\n-----------------------------\n";
 }
 
 TEST(FIRST, FIRST1) {

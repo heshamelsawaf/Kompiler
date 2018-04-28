@@ -29,36 +29,29 @@ bool build_first_util(cfg *grmr) {
 
             /* For production S -> X1 X2 X3... Xk, if eps is in
              * FIRST(X1..k), then eps is in FIRST(S) */
-//            while ((*t)->contains_first(EPS)){
-//                t++;
-//
-//            }
+            while (t != eol) {
+                if (!(*t)->contains_first(EPS))
+                    break;
 
-            while (t != eol && (*t)->contains_first(EPS)) {
+                for (std::string f : (*t)->get_first())
+                    if (f != EPS)
+                        updated |= prod.add_first(f);
                 t++;
-                if (t == eol)
-                    updated |= prod.add_first(EPS);
-                else {
-                    if ((*t)->is_terminal())
-                        updated |= prod.add_first((*t)->get_key());
-                    else
-                        for (std::string a : (*t)->get_first())
-                            updated |= prod.add_first(a);
-                }
             }
 
-//            /* If reached end of production, then eps is in
-//             * FIRST(S), else if it reached Xi, then FIRST(Xi)
-//             * is in FIRST(S) */
-//            if (t == eol)
-//                updated |= prod.add_first(EPS);
-//            else {
-//                if ((*t)->is_terminal())
-//                    updated |= prod.add_first((*t)->get_key());
-//                else
-//                    for (std::string a : (*t)->get_first())
-//                        updated |= prod.add_first(a);
-//            }
+            /* If reached end of production, then eps is in
+             * FIRST(S), else if it reached Xi, then FIRST(Xi) 
+             * is in FIRST(S) */
+            if (t == eol)
+                updated |= prod.add_first(EPS);
+            else {
+                if ((*t)->is_terminal())
+                    updated |= prod.add_first((*t)->get_key());
+                else
+                    for (std::string a : (*t)->get_first())
+                        updated |= prod.add_first(a);
+            }
+
         }
     }
 
