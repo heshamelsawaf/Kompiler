@@ -30,7 +30,7 @@ std::string get_message(std::string cur_symbol, std::string cur_token, error_typ
         return "Error production near: \"" + cur_token + "\"";
         break;
     case EXCESS_SYMBOL:
-        return "Error near: \"" + cur_token + "\"";
+        return "Error excess symbol near: \"" + cur_token + "\", Expected EOF";
         break;
     case REACHED_EOF:
         return "Error: Expected \"" + cur_symbol + "\" , but end of file was found.";
@@ -61,13 +61,15 @@ void panic(parsetable &parsetable, std::vector<std::string> &stack,
             std::string cur_token_class = cur_token.get_class() == EOF_MARK ? EOI : cur_token.get_class();
             entry = parsetable.get_entry(cur_symbol, cur_token_class);
         } while (entry.state = parsetable::entry::ERROR);
+    } else if (err_type == EXCESS_SYMBOL) {
+        cur_token = lexer::token("", EOF_MARK);
     } else {
         cur_token = lex.next_token(input_stream);
     }
 }
 
 leftmost_derivation parse::parse_ll1(parsetable &parsetable, machine &mac, std::istream &input_stream) {
-    
+    std::cout << parsetable;
     std::vector<std::string> stack;
     lexer lex(mac);
     stack.push_back(EOI);
