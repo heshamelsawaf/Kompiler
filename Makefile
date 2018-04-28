@@ -2,14 +2,15 @@ GOOGLE_TEST_LIB = gtest
 OBJS = dfa.o machine.o rexplib.o rexparser.o lexer.o tokenizer.o cfg.o main.o parsetable.o test/test_all.o test/test_ll1.o parsetable.pb.o
 LEXOBJS = machine.o lexer.o tokenizer.o lex.o
 LEXGENOBJS = machine.o dfa.o rexplib.o rexparser.o lexgen.o
-PARSERGENOBJS = cfg.o parsergen.o cfgparser.o machine.o lexer.o error.o parsetable.o parsetable.pb.o ll1_parser.o sentential_expression.o leftmost_derivation.o
-PARSEROBJS = cfg.o parser_main.o machine.o lexer.o error.o parsetable.o parsetable.pb.o ll1_parser.o cfgparser.o sentential_expression.o leftmost_derivation.o
-TESTOBJS = cfg.o cfgparser.o test/test_all.o test/test_ll1.o test/test_main.o
+PARSERGENOBJS = cfg.o cfgparser.o parsergen.o parsetable.o parsetable.pb.o
+PARSEROBJS = CustomOptionDescription.o OptionPrinter.o cfg.o parser_main.o machine.o lexer.o error.o parsetable.o parsetable.pb.o ll1_parser.o cfgparser.o sentential_expression.o leftmost_derivation.o
+TESTOBJS = cfg.o ll1_parser.o machine.o lexer.o parsetable.o error.o parsetable.pb.o sentential_expression.o leftmost_derivation.o cfgparser.o test/test_all.o test/test_ll1.o test/test_main.o
 CC = g++
 CFLAGS  = -O2 --std=c++11 -Wall
 DFLAGS = -ggdb
 LDFLAGS = -l $(GOOGLE_TEST_LIB) -l pthread
 PBFLAGS = -lprotoc -lprotobuf -lpthread
+BOOSTFLAGS = -l boost_system -l boost_program_options -l boost_filesystem -l boost_regex
 TARGET = Kompiler
 LEXANALYZER = lex
 LEXGEN = lexgen
@@ -36,12 +37,12 @@ $(PARSERGEN): $(PARSERGENOBJS)
 	echo Target $(PARSERGEN) compiled successfully
 
 $(PARSER): $(PARSEROBJS)
-	$(CC) $(CFLAGS) $(DFLAGS) $(PARSEROBJS) -o $(PARSER) $(PBFLAGS)
+	$(CC) $(CFLAGS) $(DFLAGS) $(PARSEROBJS) -o $(PARSER) $(PBFLAGS) $(BOOSTFLAGS)
 	echo Target $(PARSER) compiled successfully
 
 
 $(TEST): $(TESTOBJS)
-	$(CC) $(CFLAGS) $(DFLAGS) $(TESTOBJS) -o test_main $(LDFLAGS)
+	$(CC) $(CFLAGS) $(DFLAGS) $(TESTOBJS) -o test_main $(LDFLAGS) $(PBFLAGS)
 	echo Target $(TEST) compiled successfully
 
 debug: $(OBJS)
@@ -104,6 +105,12 @@ leftmost_derivation.o: leftmost_derivation.cpp leftmost_derivation.h error.h sen
 
 parser_main.o: parser_main.cpp ll1_parser.h machine.h 
 	$(CC) $(DFLAGS) $(CFLAGS) -c parser_main.cpp
+
+OptionPrinter.o: options/OptionPrinter.cpp options/OptionPrinter.hpp
+	$(CC) $(DFLAGS) $(CFLAGS) -c options/OptionPrinter.cpp
+
+CustomOptionDescription.o: options/CustomOptionDescription.cpp options/CustomOptionDescription.hpp
+	$(CC) $(DFLAGS) $(CFLAGS) -c options/CustomOptionDescription.cpp
 
 test/test_main.o: test/test_main.cpp
 	$(CC) $(CFLAGS) $(LDFLAGS) -c test/test_main.cpp
