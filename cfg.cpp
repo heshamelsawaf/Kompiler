@@ -22,31 +22,43 @@ bool build_first_util(cfg *grmr) {
             std::vector<cfg::symbol *>::iterator t = symbols.begin();
             std::vector<cfg::symbol *>::iterator eol = symbols.end();
 
-            if ((*t)->is_terminal())
+            if (!(*t)->is_terminal())
                 for (std::string a : (*t)->get_first())
                     if (a != EPS)
                         updated |= prod.add_first(a);
 
             /* For production S -> X1 X2 X3... Xk, if eps is in
              * FIRST(X1..k), then eps is in FIRST(S) */
-            while (t != eol) {
-                if (!(*t)->contains_first(EPS))
-                    break;
+//            while ((*t)->contains_first(EPS)){
+//                t++;
+//
+//            }
+
+            while (t != eol && (*t)->contains_first(EPS)) {
                 t++;
+                if (t == eol)
+                    updated |= prod.add_first(EPS);
+                else {
+                    if ((*t)->is_terminal())
+                        updated |= prod.add_first((*t)->get_key());
+                    else
+                        for (std::string a : (*t)->get_first())
+                            updated |= prod.add_first(a);
+                }
             }
 
-            /* If reached end of production, then eps is in
-             * FIRST(S), else if it reached Xi, then FIRST(Xi) 
-             * is in FIRST(S) */
-            if (t == eol)
-                updated |= prod.add_first(EPS);
-            else {
-                if ((*t)->is_terminal())
-                    updated |= prod.add_first((*t)->get_key());
-                else
-                    for (std::string a : (*t)->get_first())
-                        updated |= prod.add_first(a);
-            }
+//            /* If reached end of production, then eps is in
+//             * FIRST(S), else if it reached Xi, then FIRST(Xi)
+//             * is in FIRST(S) */
+//            if (t == eol)
+//                updated |= prod.add_first(EPS);
+//            else {
+//                if ((*t)->is_terminal())
+//                    updated |= prod.add_first((*t)->get_key());
+//                else
+//                    for (std::string a : (*t)->get_first())
+//                        updated |= prod.add_first(a);
+//            }
         }
     }
 
@@ -452,18 +464,18 @@ void print_range(std::unordered_set<std::string> set) {
 void cfg::build() {
     build_first(this);
     build_follow(this);
-    // for (std::string sym_str : get_symbols()) {
-    //     auto sym = get_symbol(sym_str);
-    //     if (!sym->is_terminal()) {
-    //         auto first = sym->get_first();
-    //         auto follow = sym->get_follow();
-    //         std::cout << "Symbol:" << sym_str << "\nFirst: ";
-    //         print_range(first);
-    //         std::cout << "Follow: ";
-    //         print_range(follow);
-    //         std::cout << std::endl;
-    //     }
-    // }
+     for (std::string sym_str : get_symbols()) {
+         auto sym = get_symbol(sym_str);
+         if (!sym->is_terminal()) {
+             auto first = sym->get_first();
+             auto follow = sym->get_follow();
+             std::cout << "Symbol:" << sym_str << "\nFirst: ";
+             print_range(first);
+             std::cout << "Follow: ";
+             print_range(follow);
+             std::cout << std::endl;
+         }
+     }
 }
 
 std::ostream &operator<<(std::ostream& stream, const cfg::symbol::production &prod) {
