@@ -54,6 +54,13 @@ void panic(parsetable &parsetable, std::vector<std::string> &stack,
         stack.push_back(EOI);
     } else if (err_type == MISSING_SYMBOL) {
         stack.pop_back();
+    } else if (err_type == ERROR_PRODUCTION) {
+        parsetable::entry entry;
+        do {
+            cur_token = lex.next_token(input_stream);
+            std::string cur_token_class = cur_token.get_class() == EOF_MARK ? EOI : cur_token.get_class();
+            entry = parsetable.get_entry(cur_symbol, cur_token_class);
+        } while (entry.state = parsetable::entry::ERROR);
     } else {
         cur_token = lex.next_token(input_stream);
     }
