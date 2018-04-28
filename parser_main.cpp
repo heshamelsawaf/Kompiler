@@ -201,6 +201,9 @@ int stack_parse(std::istream &ttab_in, std::string ptab_in, std::istream &src_in
         leftmost_derivation derivation = parse::parse_ll1(ptab, m, src_in);
 
         if (vm.count("verbose")) {
+            std::cout << derivation << std::endl; 
+        }
+        if(vm.count("output")) {
             lmost_derivation_out << derivation << std::endl;
         }
 
